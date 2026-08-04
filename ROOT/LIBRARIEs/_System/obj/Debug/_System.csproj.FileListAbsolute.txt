@@ -70,3 +70,12 @@ U:\KviNA\ROOT\LIBRARIEs\_System\obj\Debug\_System.csproj.CoreCompileInputs.cache
 U:\KviNA\ROOT\LIBRARIEs\_System\obj\Debug\_System.csproj.Up2Date
 U:\KviNA\ROOT\LIBRARIEs\_System\obj\Debug\sstm.dll
 U:\KviNA\ROOT\LIBRARIEs\_System\obj\Debug\sstm.pdb
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_System\bin\Debug\sstm.dll
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_System\bin\Debug\sstm.pdb
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_System\bin\Debug\_Application.dll
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_System\bin\Debug\_Application.pdb
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_System\obj\Debug\_System.csproj.AssemblyReference.cache
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_System\obj\Debug\_System.csproj.CoreCompileInputs.cache
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_System\obj\Debug\_System.csproj.Up2Date
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_System\obj\Debug\sstm.dll
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_System\obj\Debug\sstm.pdb

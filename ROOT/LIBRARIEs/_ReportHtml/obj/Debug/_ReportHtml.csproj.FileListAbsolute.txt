@@ -70,3 +70,12 @@ U:\KviNA\ROOT\LIBRARIEs\_ReportHtml\obj\Debug\_ReportHtml.csproj.CoreCompileInpu
 U:\KviNA\ROOT\LIBRARIEs\_ReportHtml\obj\Debug\_ReportH.F728063A.Up2Date
 U:\KviNA\ROOT\LIBRARIEs\_ReportHtml\obj\Debug\rrth.dll
 U:\KviNA\ROOT\LIBRARIEs\_ReportHtml\obj\Debug\rrth.pdb
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ReportHtml\bin\Debug\rrth.dll
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ReportHtml\bin\Debug\rrth.pdb
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ReportHtml\bin\Debug\_Application.dll
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ReportHtml\bin\Debug\_Application.pdb
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ReportHtml\obj\Debug\_ReportHtml.csproj.AssemblyReference.cache
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ReportHtml\obj\Debug\_ReportHtml.csproj.CoreCompileInputs.cache
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ReportHtml\obj\Debug\_ReportH.F728063A.Up2Date
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ReportHtml\obj\Debug\rrth.dll
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ReportHtml\obj\Debug\rrth.pdb

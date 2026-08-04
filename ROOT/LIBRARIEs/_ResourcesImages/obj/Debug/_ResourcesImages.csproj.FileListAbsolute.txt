@@ -54,3 +54,11 @@ U:\KviNA\ROOT\LIBRARIEs\_ResourcesImages\obj\Debug\_ResourcesImages.csproj.Gener
 U:\KviNA\ROOT\LIBRARIEs\_ResourcesImages\obj\Debug\_ResourcesImages.csproj.CoreCompileInputs.cache
 U:\KviNA\ROOT\LIBRARIEs\_ResourcesImages\obj\Debug\rsim.dll
 U:\KviNA\ROOT\LIBRARIEs\_ResourcesImages\obj\Debug\rsim.pdb
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesImages\bin\Debug\rsim.dll
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesImages\bin\Debug\rsim.pdb
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesImages\obj\Debug\_ResourcesImages.csproj.AssemblyReference.cache
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesImages\obj\Debug\nlResourcesImages.Properties.Resources.resources
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesImages\obj\Debug\_ResourcesImages.csproj.GenerateResource.cache
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesImages\obj\Debug\_ResourcesImages.csproj.CoreCompileInputs.cache
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesImages\obj\Debug\rsim.dll
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesImages\obj\Debug\rsim.pdb

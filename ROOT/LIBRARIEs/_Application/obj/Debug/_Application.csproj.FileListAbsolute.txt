@@ -10,3 +10,9 @@ U:\KviNA\ROOT\LIBRARIEs\_Application\obj\Debug\_Application.csproj.AssemblyRefer
 U:\KviNA\ROOT\LIBRARIEs\_Application\obj\Debug\_Application.csproj.CoreCompileInputs.cache
 U:\KviNA\ROOT\LIBRARIEs\_Application\obj\Debug\_Application.dll
 U:\KviNA\ROOT\LIBRARIEs\_Application\obj\Debug\_Application.pdb
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Application\bin\Debug\_Application.dll
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Application\bin\Debug\_Application.pdb
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Application\obj\Debug\_Application.csproj.AssemblyReference.cache
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Application\obj\Debug\_Application.csproj.CoreCompileInputs.cache
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Application\obj\Debug\_Application.dll
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Application\obj\Debug\_Application.pdb
