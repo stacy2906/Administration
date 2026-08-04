@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{0BB296E6-207C-4A69-9445-E1BD0272BBE8}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>nlAdministartion</RootNamespace>
+    <AssemblyName>admn</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\..\RELEASE\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\ROOT\LIBRARIEs\_Application\_Application.csproj">
+      <Project>{93291328-5d81-4f43-9f61-05a26f81e783}</Project>
+      <Name>_Application</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\ROOT\LIBRARIEs\_DataSourceMsSql\_DataSourceMsSql.csproj">
+      <Project>{f1afb19f-8a8c-49b6-b349-70ed519762f6}</Project>
+      <Name>_DataSourceMsSql</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\ROOT\LIBRARIEs\_DataSourceSqlite\_DataSourceSqlite.csproj">
+      <Project>{1D0174D8-F2D1-454E-9CED-6BEB68AA1CE3}</Project>
+      <Name>_DataSourceSqlite</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\ROOT\LIBRARIEs\_Data\_Data.csproj">
+      <Project>{6cf7db47-54bf-4cfd-a888-f0c8dfb47fc1}</Project>
+      <Name>_Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\ROOT\LIBRARIEs\_Elements\_Elements.csproj">
+      <Project>{eba5a464-7b67-41b3-ae0d-cc986c21f6dc}</Project>
+      <Name>_Elements</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\ROOT\LIBRARIEs\_ReportHtml\_ReportHtml.csproj">
+      <Project>{dbb8097e-e99a-489e-9e3b-37c0d250a315}</Project>
+      <Name>_ReportHtml</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\ROOT\LIBRARIEs\_ResourcesImages\_ResourcesImages.csproj">
+      <Project>{a3c7d841-9c9c-4fa2-926d-d168751ebecf}</Project>
+      <Name>_ResourcesImages</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\ROOT\LIBRARIEs\_ResourcesSounds\_ResourcesSounds.csproj">
+      <Project>{ca4affae-a77f-4de8-8d31-c50b89037357}</Project>
+      <Name>_ResourcesSounds</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\ROOT\LIBRARIEs\_System\_System.csproj">
+      <Project>{676768da-fd81-4ee3-a1df-8bcd6a61775e}</Project>
+      <Name>_System</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="admAbout.cs" />
+    <Compile Include="admApplication.cs" />
+    <Compile Include="admEventsHandler.cs" />
+    <Compile Include="CONTROLs\admInputApp.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\admInputChgTyp.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\admInputCpu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\admInputCur.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\admInputDbs.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\admInputDbsTunTyp.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\admInputSrv.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\admInputUsr.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\admInputUsrRol.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DATA\DataSource\admDataSource.cs" />
+    <Compile Include="DATA\DataSource\admDataSourceProtocols.cs" />
+    <Compile Include="DATA\Essences\admEssenceApp.cs" />
+    <Compile Include="DATA\Essences\admEssenceChgRcv.cs" />
+    <Compile Include="DATA\Essences\admEssenceChgSnd.cs" />
+    <Compile Include="DATA\Essences\admEssenceChgTyp.cs" />
+    <Compile Include="DATA\Essences\admEssenceCpu.cs" />
+    <Compile Include="DATA\Essences\admEssenceCur.cs" />
+    <Compile Include="DATA\Essences\admEssenceCurRat.cs" />
+    <Compile Include="DATA\Essences\admEssenceDbs.cs" />
+    <Compile Include="DATA\Essences\admEssenceDbsTun.cs" />
+    <Compile Include="DATA\Essences\admEssenceDbsTunTyp.cs" />
+    <Compile Include="DATA\Essences\admEssenceGdr.cs" />
+    <Compile Include="DATA\Essences\admEssenceLgl.cs" />
+    <Compile Include="DATA\Essences\admEssencePcl.cs" />
+    <Compile Include="DATA\Essences\admEssencePclRrd.cs" />
+    <Compile Include="DATA\Essences\admEssencePclRrdTyp.cs" />
+    <Compile Include="DATA\Essences\admEssencePclTyp.cs" />
+    <Compile Include="DATA\Essences\admEssenceRht.cs" />
+    <Compile Include="DATA\Essences\admEssenceRhtUsr.cs" />
+    <Compile Include="DATA\Essences\admEssenceRhtUsrRol.cs" />
+    <Compile Include="DATA\Essences\admEssenceRrdAdj.cs" />
+    <Compile Include="DATA\Essences\admEssenceRrdLck.cs" />
+    <Compile Include="DATA\Essences\admEssenceRrdObj.cs" />
+    <Compile Include="DATA\Essences\admEssenceSrv.cs" />
+    <Compile Include="DATA\Essences\admEssenceUsr.cs" />
+    <Compile Include="DATA\Essences\admEssenceUsrRol.cs" />
+    <Compile Include="DATA\Models\admModelTableApp.cs" />
+    <Compile Include="DATA\Models\admModelTableChgRcv.cs" />
+    <Compile Include="DATA\Models\admModelTableChgSnd.cs" />
+    <Compile Include="DATA\Models\admModelTableChgTyp.cs" />
+    <Compile Include="DATA\Models\admModelTableCpu.cs" />
+    <Compile Include="DATA\Models\admModelTableCur.cs" />
+    <Compile Include="DATA\Models\admModelTableCurRat.cs" />
+    <Compile Include="DATA\Models\admModelTableDbs.cs" />
+    <Compile Include="DATA\Models\admModelTableDbsTun.cs" />
+    <Compile Include="DATA\Models\admModelTableDbsTunTyp.cs" />
+    <Compile Include="DATA\Models\admModelTableGdr.cs" />
+    <Compile Include="DATA\Models\admModelTableLgl.cs" />
+    <Compile Include="DATA\Models\admModelTablePcl.cs" />
+    <Compile Include="DATA\Models\admModelTablePclRrd.cs" />
+    <Compile Include="DATA\Models\admModelTablePclRrdTyp.cs" />
+    <Compile Include="DATA\Models\admModelTablePclTyp.cs" />
+    <Compile Include="DATA\Models\admModelTableRht.cs" />
+    <Compile Include="DATA\Models\admModelTableRhtUsr.cs" />
+    <Compile Include="DATA\Models\admModelTableRhtUsrRol.cs" />
+    <Compile Include="DATA\Models\admModelTableRrdAdj.cs" />
+    <Compile Include="DATA\Models\admModelTableRrdLck.cs" />
+    <Compile Include="DATA\Models\admModelTableRrdObj.cs" />
+    <Compile Include="DATA\Models\admModelTableSrv.cs" />
+    <Compile Include="DATA\Models\admModelTableUsr.cs" />
+    <Compile Include="DATA\Models\admModelTableUsrRol.cs" />
+    <Compile Include="FORMs\Filter\admFormFilterChgTyp.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Filter\admFormFilterDbs.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Filter\admFormFilterDbsTun.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Filter\admFormFilterDbsTunTyp.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Filter\admFormFilterSrv.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Filter\admFormFilterUsr.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Filter\admFormFilterUsrRol.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Grid\admFormGridChgTyp.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Grid\admFormGridDbs.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Grid\admFormGridDbsTun.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Grid\admFormGridDbsTunTyp.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Grid\admFormGridSrv.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Grid\admFormGridUsr.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Grid\admFormGridUsrRol.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Record\admFormRecordChgTyp.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Record\admFormRecordDbs.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Record\admFormRecordDbsTun.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Record\admFormRecordDbsTunTyp.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Record\admFormRecordSrv.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Record\admFormRecordUsr.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Record\admFormRecordUsrRol.cs">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DATA\Models\_CommandModelBuild" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="FORMs\Link\" />
+    <Folder Include="FORMs\Tree\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

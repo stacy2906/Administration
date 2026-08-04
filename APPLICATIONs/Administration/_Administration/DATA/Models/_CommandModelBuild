@@ -1,0 +1,101 @@
+			admModelTableApp vModelApp= new admModelTableApp();
+			vModelApp.__mModelTableBuilding();
+			__fModelTableS.Add(vModelApp);
+
+			admModelTableChgRcv vModelChgRcv= new admModelTableChgRcv();
+			vModelChgRcv.__mModelTableBuilding();
+			__fModelTableS.Add(vModelChgRcv);
+
+			admModelTableChgSnd vModelChgSnd= new admModelTableChgSnd();
+			vModelChgSnd.__mModelTableBuilding();
+			__fModelTableS.Add(vModelChgSnd);
+
+			admModelTableChgTyp vModelChgTyp= new admModelTableChgTyp();
+			vModelChgTyp.__mModelTableBuilding();
+			__fModelTableS.Add(vModelChgTyp);
+
+			admModelTableCpu vModelCpu= new admModelTableCpu();
+			vModelCpu.__mModelTableBuilding();
+			__fModelTableS.Add(vModelCpu);
+
+			admModelTableCur vModelCur= new admModelTableCur();
+			vModelCur.__mModelTableBuilding();
+			__fModelTableS.Add(vModelCur);
+
+			admModelTableCurRat vModelCurRat= new admModelTableCurRat();
+			vModelCurRat.__mModelTableBuilding();
+			__fModelTableS.Add(vModelCurRat);
+
+			admModelTableDbs vModelDbs= new admModelTableDbs();
+			vModelDbs.__mModelTableBuilding();
+			__fModelTableS.Add(vModelDbs);
+
+			admModelTableDbsTun vModelDbsTun= new admModelTableDbsTun();
+			vModelDbsTun.__mModelTableBuilding();
+			__fModelTableS.Add(vModelDbsTun);
+
+			admModelTableDbsTunTyp vModelDbsTunTyp= new admModelTableDbsTunTyp();
+			vModelDbsTunTyp.__mModelTableBuilding();
+			__fModelTableS.Add(vModelDbsTunTyp);
+
+			admModelTableGdr vModelGdr= new admModelTableGdr();
+			vModelGdr.__mModelTableBuilding();
+			__fModelTableS.Add(vModelGdr);
+
+			admModelTableLgl vModelLgl= new admModelTableLgl();
+			vModelLgl.__mModelTableBuilding();
+			__fModelTableS.Add(vModelLgl);
+
+			admModelTablePcl vModelPcl= new admModelTablePcl();
+			vModelPcl.__mModelTableBuilding();
+			__fModelTableS.Add(vModelPcl);
+
+			admModelTablePclRrd vModelPclRrd= new admModelTablePclRrd();
+			vModelPclRrd.__mModelTableBuilding();
+			__fModelTableS.Add(vModelPclRrd);
+
+			admModelTablePclRrdTyp vModelPclRrdTyp= new admModelTablePclRrdTyp();
+			vModelPclRrdTyp.__mModelTableBuilding();
+			__fModelTableS.Add(vModelPclRrdTyp);
+
+			admModelTablePclTyp vModelPclTyp= new admModelTablePclTyp();
+			vModelPclTyp.__mModelTableBuilding();
+			__fModelTableS.Add(vModelPclTyp);
+
+			admModelTableRht vModelRht= new admModelTableRht();
+			vModelRht.__mModelTableBuilding();
+			__fModelTableS.Add(vModelRht);
+
+			admModelTableRhtUsr vModelRhtUsr= new admModelTableRhtUsr();
+			vModelRhtUsr.__mModelTableBuilding();
+			__fModelTableS.Add(vModelRhtUsr);
+
+			admModelTableRhtUsrRol vModelRhtUsrRol= new admModelTableRhtUsrRol();
+			vModelRhtUsrRol.__mModelTableBuilding();
+			__fModelTableS.Add(vModelRhtUsrRol);
+
+			admModelTableRrdAdj vModelRrdAdj= new admModelTableRrdAdj();
+			vModelRrdAdj.__mModelTableBuilding();
+			__fModelTableS.Add(vModelRrdAdj);
+
+			admModelTableRrdLck vModelRrdLck= new admModelTableRrdLck();
+			vModelRrdLck.__mModelTableBuilding();
+			__fModelTableS.Add(vModelRrdLck);
+
+			admModelTableRrdObj vModelRrdObj= new admModelTableRrdObj();
+			vModelRrdObj.__mModelTableBuilding();
+			__fModelTableS.Add(vModelRrdObj);
+
+			admModelTableSrv vModelSrv= new admModelTableSrv();
+			vModelSrv.__mModelTableBuilding();
+			__fModelTableS.Add(vModelSrv);
+
+			admModelTableUsr vModelUsr= new admModelTableUsr();
+			vModelUsr.__mModelTableBuilding();
+			__fModelTableS.Add(vModelUsr);
+
+			admModelTableUsrRol vModelUsrRol= new admModelTableUsrRol();
+			vModelUsrRol.__mModelTableBuilding();
+			__fModelTableS.Add(vModelUsrRol);
+
+
