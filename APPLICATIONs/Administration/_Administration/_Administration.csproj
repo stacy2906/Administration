@@ -78,6 +78,14 @@
       <Project>{676768da-fd81-4ee3-a1df-8bcd6a61775e}</Project>
       <Name>_System</Name>
     </ProjectReference>
+    <ProjectReference Include="U:\KviNA\%28ADDITIVE%29\csManual\_csManual\_csManual.csproj">
+      <Project>{3a67c117-88f9-49cc-9b5f-e9899af5274f}</Project>
+      <Name>_csManual</Name>
+    </ProjectReference>
+    <ProjectReference Include="U:\KviNA\%28ADDITIVE%29\CsProtocols\_CsProtocols\_CsProtocols.csproj">
+      <Project>{87dc61fa-3f16-4ab7-9878-04839608321b}</Project>
+      <Name>_CsProtocols</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="admAbout.cs" />

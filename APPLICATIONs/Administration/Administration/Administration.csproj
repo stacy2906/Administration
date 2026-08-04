@@ -96,6 +96,14 @@
       <Project>{676768da-fd81-4ee3-a1df-8bcd6a61775e}</Project>
       <Name>_System</Name>
     </ProjectReference>
+    <ProjectReference Include="U:\KviNA\%28ADDITIVE%29\csManual\csManual\csManual.csproj">
+      <Project>{79676c56-def3-4b8f-8700-45fa23e5eef4}</Project>
+      <Name>csManual</Name>
+    </ProjectReference>
+    <ProjectReference Include="U:\KviNA\%28ADDITIVE%29\CsProtocols\CsProtocols\CsProtocols.csproj">
+      <Project>{8d05b162-a7ab-4490-9a99-61f9532ada33}</Project>
+      <Name>CsProtocols</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

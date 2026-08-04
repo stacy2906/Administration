@@ -444,6 +444,10 @@ namespace nlElements
         /// </summary>
         private FILLTYPES fFillType = FILLTYPES.None;
         /// <summary>
+        /// Тип выбираемого пути (Файл или Директория)
+        /// </summary>
+        private PATHTYPES fPathType = PATHTYPES.Directory;
+        /// <summary>
         /// Список отображаемых данных
         /// </summary>
         private List<appUnitItem> fItemS = new List<appUnitItem>();
@@ -524,6 +528,17 @@ namespace nlElements
                     fItemS.Add(vItem);
                     __mDataRefresh();
                 }
+            }
+        }
+        /// <summary>
+        /// Тип выбираемого пути (Файл или Директория)
+        /// </summary>
+        public virtual PATHTYPES __fPathType_
+        {
+            get { return fPathType; }
+            set
+            {
+                fPathType = value;
             }
         }
         /// <summary>

@@ -157,7 +157,23 @@ namespace nlElements
             fTextWithOutTranslate = String.Format(pString, pParameters);
             _cLabelCaption.Text = elmApplication.__oTunes.__mTranslate(pString, pParameters);
         }
+        /// <summary>
+        /// Загрузка элементов/пути из файла
+        /// </summary>
+        /// <param name="pFileName">Имя файла настройки</param>
+        public virtual void __mItemsLoadFromFile(string pFileName)
+        {
+            // Реализация метода или вызов соответствующих внутренних процедур
+        }
 
+        /// <summary>
+        /// Сохранение элементов/пути в файл
+        /// </summary>
+        /// <param name="pFileName">Имя файла настройки</param>
+        public virtual void __mItemsSaveToFile(string pFileName)
+        {
+            // Реализация метода или вызов соответствующих внутренних процедур
+        }
         #endregion Процедуры
 
         #endregion МЕТОДЫ
@@ -187,7 +203,11 @@ namespace nlElements
         #endregion Атрибуты 
 
         #region - Закрытые
-
+       
+        /// <summary>
+        /// Тип выбираемого пути 
+        /// </summary>
+        private PATHTYPES fPathType = PATHTYPES.Directory;
         /// <summary>
         /// Строка заголовка без перевода
         /// </summary>
@@ -212,6 +232,10 @@ namespace nlElements
         /// Запрет загрузки данных из файла
         /// </summary>
         private bool fNotLoad = false;
+        /// <summary>
+        /// Количество символов (ограничение)
+        /// </summary>
+        private int fSymbolsCount = 0;
 
         #endregion Закрытые
 
@@ -246,7 +270,6 @@ namespace nlElements
         #region = СВОЙСТВА
 
         #region - Скрытые
-
         /// <summary>
         /// Путь к файлу текущего класса
         /// </summary>
@@ -270,7 +293,15 @@ namespace nlElements
         }
 
         #endregion Скрытые
-
+       
+        /// <summary>
+        /// Ограничение по количеству символов
+        /// </summary>
+        public virtual int __fSymbolsCount_
+        {
+            get { return fSymbolsCount; }
+            set { fSymbolsCount = value; }
+        }
         /// <summary>
         /// Текст заголовка
         /// </summary>
@@ -334,6 +365,14 @@ namespace nlElements
         {
             get { return fFillType; }
             set { fFillType = value; }
+        }
+        /// <summary>
+        /// Тип выбираемого пути 
+        /// </summary>
+        public virtual PATHTYPES __fPathType_
+        {
+            get { return fPathType; }
+            set { fPathType = value; }
         }
         /// <summary>
         /// Условие фильтра для указанного поля
