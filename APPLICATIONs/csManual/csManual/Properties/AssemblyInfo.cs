@@ -4,23 +4,15 @@ using System.Runtime.InteropServices;
 
 // Общие сведения об этой сборке предоставляются следующим набором
 // набора атрибутов. Измените значения этих атрибутов для изменения сведений,
-// связанные со сборкой.
-[assembly: AssemblyTitle("_CsProtocols")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("_CsProtocols")]
-[assembly: AssemblyCopyright("Copyright ©  2025")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+// связанных со сборкой.
 
 // Установка значения False для параметра ComVisible делает типы в этой сборке невидимыми
 // для компонентов COM. Если необходимо обратиться к типу в этой сборке через
-// COM, задайте атрибуту ComVisible значение TRUE для этого типа.
+// COM, следует установить атрибут ComVisible в TRUE для этого типа.
 [assembly: ComVisible(false)]
 
 // Следующий GUID служит для идентификации библиотеки типов, если этот проект будет видимым для COM
-[assembly: Guid("87dc61fa-3f16-4ab7-9878-04839608321b")]
+[assembly: Guid("79676c56-def3-4b8f-8700-45fa23e5eef4")]
 
 // Сведения о версии сборки состоят из указанных ниже четырех значений:
 //
@@ -29,5 +21,5 @@ using System.Runtime.InteropServices;
 //      Номер сборки
 //      Редакция
 //
-[assembly: AssemblyVersion("2026.8.4.1")]
-[assembly: AssemblyFileVersion("2026.8.4.1")]
+[assembly: AssemblyVersion("2026.8.4.3")]
+[assembly: AssemblyFileVersion("5.0.0.0")]
