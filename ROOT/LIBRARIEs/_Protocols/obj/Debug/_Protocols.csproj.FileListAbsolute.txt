@@ -1,0 +1,2 @@
+D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_Protocols\obj\Debug\_Protocols.csproj.AssemblyReference.cache
+D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_Protocols\obj\Debug\_Protocols.csproj.CoreCompileInputs.cache

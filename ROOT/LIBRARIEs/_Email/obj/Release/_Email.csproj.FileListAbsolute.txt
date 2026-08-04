@@ -1,0 +1,10 @@
+V:\CODING\VCS\Luna_7.1\ROOT\LIBRARIEs\_Email\obj\Release\_Email.csproj.AssemblyReference.cache
+V:\CODING\VCS\Luna_7.1\ROOT\LIBRARIEs\_Email\obj\Release\_Email.csproj.CoreCompileInputs.cache
+D:\CODING\VCS\LuNA_7.3\RELEASE\mail.dll.config
+D:\CODING\VCS\LuNA_7.3\RELEASE\mail.dll
+D:\CODING\VCS\LuNA_7.3\RELEASE\mail.pdb
+D:\CODING\VCS\LuNA_7.3\ROOT\LIBRARIEs\_Email\obj\Release\_Email.csproj.AssemblyReference.cache
+D:\CODING\VCS\LuNA_7.3\ROOT\LIBRARIEs\_Email\obj\Release\_Email.csproj.CoreCompileInputs.cache
+D:\CODING\VCS\LuNA_7.3\ROOT\LIBRARIEs\_Email\obj\Release\_Email.csproj.Up2Date
+D:\CODING\VCS\LuNA_7.3\ROOT\LIBRARIEs\_Email\obj\Release\mail.dll
+D:\CODING\VCS\LuNA_7.3\ROOT\LIBRARIEs\_Email\obj\Release\mail.pdb

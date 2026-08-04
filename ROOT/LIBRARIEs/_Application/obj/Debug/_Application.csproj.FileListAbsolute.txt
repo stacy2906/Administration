@@ -1,0 +1,12 @@
+D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_Application\obj\Debug\_Application.csproj.AssemblyReference.cache
+D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_Application\obj\Debug\_Application.csproj.CoreCompileInputs.cache
+D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_Application\bin\Debug\_Application.dll
+D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_Application\bin\Debug\_Application.pdb
+D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_Application\obj\Debug\_Application.dll
+D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_Application\obj\Debug\_Application.pdb
+U:\KviNA\ROOT\LIBRARIEs\_Application\bin\Debug\_Application.dll
+U:\KviNA\ROOT\LIBRARIEs\_Application\bin\Debug\_Application.pdb
+U:\KviNA\ROOT\LIBRARIEs\_Application\obj\Debug\_Application.csproj.AssemblyReference.cache
+U:\KviNA\ROOT\LIBRARIEs\_Application\obj\Debug\_Application.csproj.CoreCompileInputs.cache
+U:\KviNA\ROOT\LIBRARIEs\_Application\obj\Debug\_Application.dll
+U:\KviNA\ROOT\LIBRARIEs\_Application\obj\Debug\_Application.pdb

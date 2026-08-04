@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{FE00F7B8-9C7B-462A-8E39-28E1CAE64921}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>nlElements</RootNamespace>
+    <AssemblyName>elmt</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Office.Interop.Excel, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>..\..\LIBRARIEsEXTERNAL\Microsoft.Office.Interop.Excel.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Office.Interop.Word, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>..\..\LIBRARIEsEXTERNAL\Microsoft.Office.Interop.Word.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="COMPONENTs\Data\elmComponentCalendar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Data\elmComponentCombo.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Data\elmComponentDate.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Data\elmComponentDateTime.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Data\elmComponentList.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Data\elmComponentMark.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Data\elmComponentMask.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Data\elmComponentNumeric.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Data\elmComponentString.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Data\elmComponentText.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Data\elmComponentTime.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Data\elmTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Decor\elmComponentLabel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Decor\elmComponentPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Decor\elmComponentPicture.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Decor\elmComponentProgress.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Decor\elmComponentSplitter.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Menu\elmComponentMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Menu\elmComponentMenuColor.cs" />
+    <Compile Include="COMPONENTs\Menu\elmComponentMenuContext.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Menu\elmComponentMenuItem.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Pages\elmComponentPage.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Pages\elmComponentPagesBlock.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Pages\elmComponentPagesBlockColor.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Toolbar\elmComponentToolbar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Toolbar\elmComponentToolbarButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Toolbar\elmComponentToolbarButtonMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\View\elmComponentGrid.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\View\elmComponentTree.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\View\elmComponentWeb.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Areas\elmArea.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Areas\elmAreaDialog.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Areas\elmAreaDocument.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Areas\elmAreaDocumentRecord.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Areas\elmAreaFilter.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Areas\elmAreaGrid.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Areas\elmAreaLink.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Areas\elmAreaNotice.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Areas\elmAreaPages.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Areas\elmAreaQuote.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Areas\elmAreaRecord.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Areas\elmAreaReport.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Areas\elmAreaReportPreview.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Areas\elmAreaSearch.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Areas\elmAreaTable.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Areas\elmAreaTree.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Areas\elmAreaTunes.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Blocks\elmBlockFormMain.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Blocks\elmBlockInputs.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Inputs\elmInput.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Inputs\elmInputBool.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Inputs\elmInputCombo.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Inputs\elmInputDate.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Inputs\elmInputDatePeriod.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Inputs\elmInputDateTime.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Inputs\elmInputDateTimePeriod.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Inputs\elmInputFormCode.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Inputs\elmInputFormName.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Inputs\elmInputFormTree.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Inputs\elmInputInteger.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Inputs\elmInputIp.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Inputs\elmInputList.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Inputs\elmInputNumeric.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Inputs\elmInputPath.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Inputs\elmInputPathDirectory.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Inputs\elmInputPathFile.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Inputs\elmInputPhone.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Inputs\elmInputQuote.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Inputs\elmInputString.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Inputs\elmInputTime.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Panels\elmPanelMenuTree.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CONTROLs\Panels\elmPanelStatus.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="elmApplication.cs" />
+    <Compile Include="elmErrorsHandler.cs" />
+    <Compile Include="elmInterface.cs" />
+    <Compile Include="elmMessages.cs" />
+    <Compile Include="elmPathes.cs" />
+    <Compile Include="FORMs\Data\elmFormDocument.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Data\elmFormDocumentRecord.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Data\elmFormFilter.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Data\elmFormGrid.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Data\elmFormLink.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Data\elmFormPages.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Data\elmFormRecord.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Data\elmFormReport.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Data\elmFormTree.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\elmForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Service\elmFormAbout.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Service\elmFormBrowse.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Service\elmFormDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Service\elmFormLogin.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Service\elmFormQuote.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Service\elmFormReportPreview.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Service\elmFormSearch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Service\elmFormTable.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\Service\elmFormTunes.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Types\elmTypeBehavior.cs" />
+    <Compile Include="Types\elmTypeColor.cs" />
+    <Compile Include="Types\elmTypeFont.cs" />
+    <Compile Include="Types\elmTypeSelection.cs" />
+    <Compile Include="Units\elmUnitGridColumn.cs" />
+    <Compile Include="Units\elmUnitListViewColumn.cs" />
+    <Compile Include="Units\elmUnitTreeNode.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\_Application\_Application.csproj">
+      <Project>{CC78B6C2-2804-4FD1-9CA1-2196FD50C239}</Project>
+      <Name>_Application</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\_Data\_Data.csproj">
+      <Project>{b60f57d4-4f53-428c-86fe-a0d47338e371}</Project>
+      <Name>_Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\_ReportHtml\_ReportHtml.csproj">
+      <Project>{7baab592-6de5-47c7-bd0f-017d2b907f90}</Project>
+      <Name>_ReportHtml</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\_ResourcesImages\_ResourcesImages.csproj">
+      <Project>{2223949b-940d-412d-b28c-c095aeea10df}</Project>
+      <Name>_ResourcesImages</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\_ResourcesSounds\_ResourcesSounds.csproj">
+      <Project>{bd51aa26-f13d-4343-aab6-24444567e284}</Project>
+      <Name>_ResourcesSounds</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

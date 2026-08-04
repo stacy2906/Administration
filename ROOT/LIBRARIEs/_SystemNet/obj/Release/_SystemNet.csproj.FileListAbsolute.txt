@@ -1,0 +1,12 @@
+V:\CODING\VCS\LuNA_4.2\ROOT\LIBRARIEs\_SystemNet\bin\Release\ssnt.dll
+V:\CODING\VCS\LuNA_4.2\ROOT\LIBRARIEs\_SystemNet\bin\Release\ssnt.pdb
+V:\CODING\VCS\LuNA_4.2\ROOT\LIBRARIEs\_SystemNet\obj\Release\_SystemNet.csproj.AssemblyReference.cache
+V:\CODING\VCS\LuNA_4.2\ROOT\LIBRARIEs\_SystemNet\obj\Release\_SystemNet.csproj.CoreCompileInputs.cache
+V:\CODING\VCS\LuNA_4.2\ROOT\LIBRARIEs\_SystemNet\obj\Release\ssnt.dll
+V:\CODING\VCS\LuNA_4.2\ROOT\LIBRARIEs\_SystemNet\obj\Release\ssnt.pdb
+V:\CODING\VCS\LuNA_5\RELEASE\ssnt.dll
+V:\CODING\VCS\LuNA_5\RELEASE\ssnt.pdb
+V:\CODING\VCS\LuNA_5\ROOT\LIBRARIEs\_SystemNet\obj\Release\_SystemNet.csproj.AssemblyReference.cache
+V:\CODING\VCS\LuNA_5\ROOT\LIBRARIEs\_SystemNet\obj\Release\_SystemNet.csproj.CoreCompileInputs.cache
+V:\CODING\VCS\LuNA_5\ROOT\LIBRARIEs\_SystemNet\obj\Release\ssnt.dll
+V:\CODING\VCS\LuNA_5\ROOT\LIBRARIEs\_SystemNet\obj\Release\ssnt.pdb

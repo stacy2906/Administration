@@ -1,0 +1,12 @@
+V:\CODING\VCS\LuNA_4.2\RELEASE\ssdv.dll
+V:\CODING\VCS\LuNA_4.2\RELEASE\ssdv.pdb
+V:\CODING\VCS\LuNA_4.2\ROOT\LIBRARIEs\_SystemDevices\obj\Release\_SystemDevices.csproj.AssemblyReference.cache
+V:\CODING\VCS\LuNA_4.2\ROOT\LIBRARIEs\_SystemDevices\obj\Release\_SystemDevices.csproj.CoreCompileInputs.cache
+V:\CODING\VCS\LuNA_4.2\ROOT\LIBRARIEs\_SystemDevices\obj\Release\ssdv.dll
+V:\CODING\VCS\LuNA_4.2\ROOT\LIBRARIEs\_SystemDevices\obj\Release\ssdv.pdb
+V:\CODING\VCS\LuNA_5\RELEASE\ssdv.dll
+V:\CODING\VCS\LuNA_5\RELEASE\ssdv.pdb
+V:\CODING\VCS\LuNA_5\ROOT\LIBRARIEs\_SystemDevices\obj\Release\_SystemDevices.csproj.AssemblyReference.cache
+V:\CODING\VCS\LuNA_5\ROOT\LIBRARIEs\_SystemDevices\obj\Release\_SystemDevices.csproj.CoreCompileInputs.cache
+V:\CODING\VCS\LuNA_5\ROOT\LIBRARIEs\_SystemDevices\obj\Release\ssdv.dll
+V:\CODING\VCS\LuNA_5\ROOT\LIBRARIEs\_SystemDevices\obj\Release\ssdv.pdb

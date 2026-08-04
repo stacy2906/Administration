@@ -1,0 +1,6 @@
+D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_DataSourceMySql\bin\Debug\_DataSourceMySql.dll
+D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_DataSourceMySql\bin\Debug\_DataSourceMySql.pdb
+D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_DataSourceMySql\obj\Debug\_DataSourceMySql.csproj.AssemblyReference.cache
+D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_DataSourceMySql\obj\Debug\_DataSourceMySql.csproj.CoreCompileInputs.cache
+D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_DataSourceMySql\obj\Debug\_DataSourceMySql.dll
+D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_DataSourceMySql\obj\Debug\_DataSourceMySql.pdb

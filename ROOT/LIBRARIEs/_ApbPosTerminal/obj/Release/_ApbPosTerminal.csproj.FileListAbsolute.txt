@@ -1,0 +1,12 @@
+V:\CODING\VCS\LuNA_4.2\RELEASE\abpt.dll
+V:\CODING\VCS\LuNA_4.2\RELEASE\abpt.pdb
+V:\CODING\VCS\LuNA_4.2\ROOT\LIBRARIEs\_ApbPosTerminal\obj\Release\_ApbPosTerminal.csproj.AssemblyReference.cache
+V:\CODING\VCS\LuNA_4.2\ROOT\LIBRARIEs\_ApbPosTerminal\obj\Release\_ApbPosTerminal.csproj.CoreCompileInputs.cache
+V:\CODING\VCS\LuNA_4.2\ROOT\LIBRARIEs\_ApbPosTerminal\obj\Release\abpt.dll
+V:\CODING\VCS\LuNA_4.2\ROOT\LIBRARIEs\_ApbPosTerminal\obj\Release\abpt.pdb
+V:\CODING\VCS\LuNA_5\RELEASE\abpt.dll
+V:\CODING\VCS\LuNA_5\RELEASE\abpt.pdb
+V:\CODING\VCS\LuNA_5\ROOT\LIBRARIEs\_ApbPosTerminal\obj\Release\_ApbPosTerminal.csproj.AssemblyReference.cache
+V:\CODING\VCS\LuNA_5\ROOT\LIBRARIEs\_ApbPosTerminal\obj\Release\_ApbPosTerminal.csproj.CoreCompileInputs.cache
+V:\CODING\VCS\LuNA_5\ROOT\LIBRARIEs\_ApbPosTerminal\obj\Release\abpt.dll
+V:\CODING\VCS\LuNA_5\ROOT\LIBRARIEs\_ApbPosTerminal\obj\Release\abpt.pdb

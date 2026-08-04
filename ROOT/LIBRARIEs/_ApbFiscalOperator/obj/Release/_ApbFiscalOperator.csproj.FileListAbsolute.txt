@@ -1,0 +1,12 @@
+V:\CODING\VCS\LuNA_4.2\RELEASE\abfo.dll
+V:\CODING\VCS\LuNA_4.2\RELEASE\abfo.pdb
+V:\CODING\VCS\LuNA_4.2\ROOT\LIBRARIEs\_ApbFiscalOperator\obj\Release\_ApbFiscalOperator.csproj.AssemblyReference.cache
+V:\CODING\VCS\LuNA_4.2\ROOT\LIBRARIEs\_ApbFiscalOperator\obj\Release\_ApbFiscalOperator.csproj.CoreCompileInputs.cache
+V:\CODING\VCS\LuNA_4.2\ROOT\LIBRARIEs\_ApbFiscalOperator\obj\Release\abfo.dll
+V:\CODING\VCS\LuNA_4.2\ROOT\LIBRARIEs\_ApbFiscalOperator\obj\Release\abfo.pdb
+V:\CODING\VCS\LuNA_5\RELEASE\abfo.dll
+V:\CODING\VCS\LuNA_5\RELEASE\abfo.pdb
+V:\CODING\VCS\LuNA_5\ROOT\LIBRARIEs\_ApbFiscalOperator\obj\Release\_ApbFiscalOperator.csproj.AssemblyReference.cache
+V:\CODING\VCS\LuNA_5\ROOT\LIBRARIEs\_ApbFiscalOperator\obj\Release\_ApbFiscalOperator.csproj.CoreCompileInputs.cache
+V:\CODING\VCS\LuNA_5\ROOT\LIBRARIEs\_ApbFiscalOperator\obj\Release\abfo.dll
+V:\CODING\VCS\LuNA_5\ROOT\LIBRARIEs\_ApbFiscalOperator\obj\Release\abfo.pdb

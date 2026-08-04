@@ -1,0 +1,506 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{2223949B-940D-412D-B28C-C095AEEA10DF}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>nlResourcesImages</RootNamespace>
+    <AssemblyName>rsim</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\..\RELEASE\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="rsiIcon.cs" />
+    <Compile Include="rsiOperations.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Application\_Application_Google_m16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Application\_Application_Messendger_b32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Application\_Application_MSExcel_g16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Application\_Application_MSWord_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Arrows\_Arrow_Refresh_g16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Arrows\_Arrow_Refresh_g32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Bank\_Bank_Card_e16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Bank\_Bank_Card_e32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Bank\_Bank_Card_w16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Bank\_Bank_Card_w32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Bank\_Bank_Terminal_e16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Basket\_Basket_e16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Basket\_Basket_e32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Bells\_Bell_y32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Book\_Book_Addresses_o16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Book\_Book_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Book\_Book_b32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Book\_Book_Manual_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Book\_Book_ManualAdd_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Book\_Book_ManualDelete_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Book\_Book_ManualEdit_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Book\_BookAdd_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Book\_BookDelete_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Book\_BookEdit_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Box\_Box_y16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Box\_Box_y32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Calculator\_Calculator_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Cart\_Cart_Bag_o16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Cart\_Cart_Bag_o32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Cart\_Cart_e16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Cart\_Cart_e32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Cart\_CartAdd_e16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Cart\_CartAdd_e32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Cart\_CartDelete_e16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Cart\_CartDelete_e32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Computer\_Computer_Database_e16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Computer\_Computer_Database_e32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Computer\_Computer_Diskette_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Computer\_Computer_Diskette_b32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Computer\_Computer_e16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Computer\_Computer_e32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Computer\_Computer_Form_List_e16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Computer\_Computer_Form_List_e32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Computer\_Computer_Printer_e16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Computer\_Computer_Printer_e32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Computer\_Computers_e16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Computer\_Computers_e32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Computer\_Computers_Network_e16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Computer\_Computers_Network_e32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Database\_Database_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Database\_Database_e16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Database\_Database_k16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Database\_Database_k32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Database\_Database_y16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Database\_DatabaseAdd_e16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Database\_DatabaseAdd_e32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Database\_DatabaseDelete_e16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Database\_DatabaseDelete_e32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Database\_DatabaseEdit_e16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Database\_DatabaseEdit_e32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Database\_DatabaseGear_e16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Database\_DatabaseGear_e32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Emoution\_Emotion_Clap_y.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Emoution\_Emotion_Glass_y.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Emoution\_Emotion_Glassdark_y.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Emoution\_Emotion_Smile_y.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Emoution\_Emotion_Sorrow_y.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Emoution\_Emotion_Tear_y.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Folders\_Folder_Tree_a16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Folders\_Folder_Tree_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Folders\_Folder_Tree_e16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Folders\_Folder_Tree_g16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Folders\_Folder_Tree_r16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Font\_Font_b32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Font\_Font_BackColor_d32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Font\_Font_Bold_w32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Font\_Font_Color_d32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Font\_Font_Italic_w32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Font\_Font_SizeDecrease_w32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Font\_Font_SizeIncrease_w32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Font\_Font_StrikeThroungh_w32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Font\_Font_Underline_w32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Forms\_Form_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Forms\_Form_Cascade_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Forms\_Form_Cascade_b32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Gears\_Gear_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Gears\_Gears_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Gears\_Gears_b32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Grid\_Grid_Fields_b32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Image\_Image_Picture_m32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Mail\_Mail_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Mail\_Mail_b32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Money\_Money_Coins_y16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Money\_Money_Coins_y32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Pages\_Page_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Pages\_Page_b32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Pages\_Page_y32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Pages\_PageAdd_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Pages\_PageCopy_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Pages\_PageCopy_b32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Pages\_PageDelete_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Pages\_PageEdit_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Pages\_PageGear_y32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Pages\_PagePrinter_y32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Pages\_PageSave_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Person\_Person_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Person\_Person_Police_k16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Person\_PersonsGroup_m16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Phone\_Phone_e16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Phone\_Phone_e32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Script\_Script_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Script\_Script_y16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Signs\_Sign_Cross_r32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Signs\_Sign_Question_b32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Signs\_Sign_RoundHelp_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Signs\_Sign_RoundInformation_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Signs\_Sign_Tick_g32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Signs\_Sign_TickButton_g16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Tablet\_Tablet_Page_o32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Text\_Text_AlignCenter_w32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Text\_Text_AlignJustity_w32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Text\_Text_AlignLeft_w32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Text\_Text_AlignRight_w32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Text\_Text_ChangesRedo_b32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Text\_Text_ChangesUndo_b32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Text\_Text_ListBullets_w32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Text\_Text_ListNumbers_w32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Text\_Text_Scissors_b32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Text\_Text_w32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Till\_Till_e16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\World\_World_g16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Logotype.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Database\_Table_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Database\_TableExcel_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Database\_TableExport_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Database\_TableImport_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Forms\_FormCascade_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Forms\_FormCascade_b32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Brike\_Brick_b16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Brike\_Bricks_16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Database\_Database_g16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Database\_Database_r16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Money\_Money_CoinsAdd_y16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Money\_Money_CoinsDelete_y16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Till\_Barcode_w16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Bank\_Currency_g16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Building\_Shop_r16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Transport\_Lorry_y16.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
