@@ -92,7 +92,7 @@
       <Project>{3a67c117-88f9-49cc-9b5f-e9899af5274f}</Project>
       <Name>_csManual</Name>
     </ProjectReference>
-    <ProjectReference Include="C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_DataSourceMsExcel\_DataSourceMsExcel.csproj">
+    <ProjectReference Include="..\..\..\ROOT\LIBRARIEs\_DataSourceMsExcel\_DataSourceMsExcel.csproj">
       <Project>{2809e570-eaa6-4d36-a620-837d778bc64b}</Project>
       <Name>_DataSourceMsExcel</Name>
     </ProjectReference>
