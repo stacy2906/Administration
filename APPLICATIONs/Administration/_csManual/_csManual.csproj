@@ -43,8 +43,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="cmlApplication.cs" />
+    <Compile Include="cmlHtmlBuilder.cs" />
     <Compile Include="cmlEngine.cs" />
-    <Compile Include="cmlManual.cs" />
+    <Compile Include="cmlModels.cs" />
+    <Compile Include="cmlSourceParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
