@@ -218,26 +218,37 @@ function filterClasses(){
   var q = document.getElementById('search').value.toLowerCase().trim();
   var groups = document.querySelectorAll('.nsgroup');
   var anyVisible = false;
-  groups.forEach(function(g){
+  for (var gi = 0; gi < groups.length; gi++){
+    var g = groups[gi];
     var items = g.querySelectorAll('.class-item');
     var groupHasVisible = false;
-    items.forEach(function(it){
+    for (var ii = 0; ii < items.length; ii++){
+      var it = items[ii];
       var match = q === '' || it.getAttribute('data-search').indexOf(q) !== -1;
       it.style.display = match ? '' : 'none';
       if (match) groupHasVisible = true;
-    });
+    }
     g.style.display = groupHasVisible ? '' : 'none';
     if (groupHasVisible) anyVisible = true;
-  });
+  }
   document.getElementById('noResults').style.display = anyVisible ? 'none' : '';
 }
 (function(){
   var notes = document.getElementById('notes');
-  var saved = localStorage.getItem('cmlManualNotes');
-  if (saved) notes.value = saved;
-  notes.addEventListener('input', function(){
-    localStorage.setItem('cmlManualNotes', notes.value);
-  });
+  if (!notes) return;
+  /// В окне предварительного просмотра (локальный файл, встроенный IE) 'localStorage' может быть недоступен -
+  /// доступ выполняется через try/catch, чтобы отсутствие хранилища не приводило к ошибке скрипта
+  var storage = null;
+  try { storage = window.localStorage; } catch (eStorage) { storage = null; }
+  if (storage){
+    try {
+      var saved = storage.getItem('cmlManualNotes');
+      if (saved) notes.value = saved;
+    } catch (eRead) { }
+    notes.addEventListener('input', function(){
+      try { storage.setItem('cmlManualNotes', notes.value); } catch (eWrite) { }
+    });
+  }
 })();
 </script>");
 

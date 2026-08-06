@@ -1,0 +1,74 @@
+﻿<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><title>_csManual - Документация</title><style>
+:root{
+  --bg:#0f1115; --panel:#161923; --panel2:#1c2030; --border:#2a2f42;
+  --text:#e6e8ef; --muted:#9aa1b5; --accent:#6ea8fe; --accent2:#8b7bff;
+  --ok:#57c785; --warn:#e8b84c; --code:#0b0d13;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Segoe UI,Calibri,Arial,sans-serif;font-size:14px;line-height:1.55}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+header.top{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:14px;z-index:10}
+header.top .title{font-weight:600;font-size:16px}
+header.top .sub{color:var(--muted);font-size:12px}
+header.top .spacer{flex:1}
+.container{max-width:1100px;margin:0 auto;padding:24px 20px 60px}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;border:1px solid var(--border)}
+.badge.public{color:var(--ok);border-color:var(--ok)}
+.badge.private{color:var(--muted)}
+.badge.protected{color:var(--warn);border-color:var(--warn)}
+.badge.internal{color:var(--accent);border-color:var(--accent)}
+.badge.kind{color:var(--accent2);border-color:var(--accent2);margin-left:6px}
+h1{font-size:22px;margin:0 0 4px}
+h2{font-size:17px;border-bottom:1px solid var(--border);padding-bottom:6px;margin-top:36px}
+h3.member{font-size:14px;background:var(--panel2);border:1px solid var(--border);border-left:3px solid var(--accent);padding:8px 12px;border-radius:4px;margin:14px 0 6px;font-family:Consolas,monospace}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:16px}
+.namespace{color:var(--muted);font-family:Consolas,monospace;font-size:13px}
+.summary{margin:6px 0}
+.meta-row{display:flex;gap:18px;flex-wrap:wrap;color:var(--muted);font-size:12px;margin:8px 0 0}
+.meta-row b{color:var(--text)}
+table{border-collapse:collapse;width:100%;margin:6px 0}
+table th,table td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+table th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.03em}
+code, .code{font-family:Consolas,monospace;background:var(--code);border:1px solid var(--border);border-radius:4px;padding:1px 6px}
+pre.example{background:var(--code);border:1px solid var(--border);border-radius:6px;padding:12px;overflow:auto;font-family:Consolas,monospace}
+.sig{font-family:Consolas,monospace;color:var(--text)}
+.type-list{list-style:none;padding:0;margin:0}
+.type-list li{padding:6px 0;border-bottom:1px solid var(--border)}
+.type-list li:last-child{border-bottom:none}
+.type-list .path{color:var(--muted);font-size:11px}
+.nsgroup{margin-bottom:22px}
+.nsgroup > .nsname{font-family:Consolas,monospace;color:var(--accent2);font-size:13px;margin-bottom:6px;display:block}
+input#search{width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--panel2);color:var(--text);font-size:14px;margin-bottom:6px}
+.stat{color:var(--muted);font-size:12px;margin-bottom:18px}
+textarea#notes{width:100%;min-height:110px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px;font-family:Segoe UI,Arial,sans-serif;font-size:13px}
+.notes-hint{color:var(--muted);font-size:11px;margin-top:4px}
+.empty{color:var(--muted);font-style:italic}
+footer{color:var(--muted);font-size:11px;text-align:center;padding:30px 0 10px}
+</style></head><body><header class="top"><div class="title">_csManual &mdash; Документация проекта</div></header><div class="container"><div class="panel"><h2 style="margin-top:0;border:none">Описание проекта</h2><textarea id="notes" placeholder="Введите произвольное описание проекта, заметки для команды и т.п. Текст сохраняется локально в браузере."></textarea><div class="notes-hint">Текст сохраняется автоматически в этом браузере (localStorage) и не пересоздаётся при повторной генерации документации.</div></div><div class="stat">Всего типов: <b style="color:var(--text)">10</b> &middot; пространств имён: <b style="color:var(--text)">1</b> &middot; <span style="color:var(--warn)">незадокументированных членов: 1</span> (см. Protocols.txt)</div><input id="search" type="text" placeholder="Поиск по названию класса, пространству имён или описанию..." oninput="filterClasses()"><div class="nsgroup" data-ns="nlcsmanual"><span class="nsname">nlcsManual (10)</span><ul class="type-list"><li class="class-item" data-search="cmlapplication nlcsmanual "><span class="badge kind">Class</span> <a href="nlcsManual.cmlApplication.html">cmlApplication</a><div class="path">cmlApplication.cs</div></li><li class="class-item" data-search="cmlengine nlcsmanual файл cmlengine.cs"><span class="badge kind">Class</span> <a href="nlcsManual.cmlEngine.html">cmlEngine</a> &mdash; Файл cmlEngine.cs<div class="path">cmlEngine.cs</div></li><li class="class-item" data-search="cmlhtmlbuilder nlcsmanual файл cmlhtmlbuilder.cs"><span class="badge kind">Class</span> <a href="nlcsManual.cmlHtmlBuilder.html">cmlHtmlBuilder</a> &mdash; Файл cmlHtmlBuilder.cs<div class="path">cmlHtmlBuilder.cs</div></li><li class="class-item" data-search="cmlsourceparser nlcsmanual файл cmlsourceparser.cs"><span class="badge kind">Class</span> <a href="nlcsManual.cmlSourceParser.html">cmlSourceParser</a> &mdash; Файл cmlSourceParser.cs<div class="path">cmlSourceParser.cs</div></li><li class="class-item" data-search="cmlunitmember nlcsmanual класс-единица описания члена типа (метода, свойства, поля, конструктора или события)"><span class="badge kind">Class</span> <a href="nlcsManual.cmlUnitMember.html">cmlUnitMember</a> &mdash; Класс-единица описания члена типа (метода, свойства, поля, конструктора или события)<div class="path">cmlModels.cs</div></li><li class="class-item" data-search="cmlunitparam nlcsmanual файл cmlmodels.cs"><span class="badge kind">Class</span> <a href="nlcsManual.cmlUnitParam.html">cmlUnitParam</a> &mdash; Файл cmlModels.cs<div class="path">cmlModels.cs</div></li><li class="class-item" data-search="cmlunitparseresult nlcsmanual класс-единица результата разбора одного файла *.cs, включая обнаруженные несоответствия документирования"><span class="badge kind">Class</span> <a href="nlcsManual.cmlUnitParseResult.html">cmlUnitParseResult</a> &mdash; Класс-единица результата разбора одного файла *.cs, включая обнаруженные несоответствия документирования<div class="path">cmlModels.cs</div></li><li class="class-item" data-search="cmlunittype nlcsmanual класс-единица описания документируемого типа (класса, интерфейса, структуры или перечисления)"><span class="badge kind">Class</span> <a href="nlcsManual.cmlUnitType.html">cmlUnitType</a> &mdash; Класс-единица описания документируемого типа (класса, интерфейса, структуры или перечисления)<div class="path">cmlModels.cs</div></li><li class="class-item" data-search="memberkinds nlcsmanual перечисление видов членов типа, документируемых движком"><span class="badge kind">Enum</span> <a href="nlcsManual.MEMBERKINDS.html">MEMBERKINDS</a> &mdash; Перечисление видов членов типа, документируемых движком<div class="path">cmlModels.cs</div></li><li class="class-item" data-search="typekinds nlcsmanual перечисление видов документируемых типов"><span class="badge kind">Enum</span> <a href="nlcsManual.TYPEKINDS.html">TYPEKINDS</a> &mdash; Перечисление видов документируемых типов<div class="path">cmlModels.cs</div></li></ul></div><p id="noResults" class="empty" style="display:none">Ничего не найдено.</p><footer>Сгенерировано движком документирования 'cmlEngine' &middot; 2026-08-06 14:11</footer></div><script>
+function filterClasses(){
+  var q = document.getElementById('search').value.toLowerCase().trim();
+  var groups = document.querySelectorAll('.nsgroup');
+  var anyVisible = false;
+  groups.forEach(function(g){
+    var items = g.querySelectorAll('.class-item');
+    var groupHasVisible = false;
+    items.forEach(function(it){
+      var match = q === '' || it.getAttribute('data-search').indexOf(q) !== -1;
+      it.style.display = match ? '' : 'none';
+      if (match) groupHasVisible = true;
+    });
+    g.style.display = groupHasVisible ? '' : 'none';
+    if (groupHasVisible) anyVisible = true;
+  });
+  document.getElementById('noResults').style.display = anyVisible ? 'none' : '';
+}
+(function(){
+  var notes = document.getElementById('notes');
+  var saved = localStorage.getItem('cmlManualNotes');
+  if (saved) notes.value = saved;
+  notes.addEventListener('input', function(){
+    localStorage.setItem('cmlManualNotes', notes.value);
+  });
+})();
+</script></body></html>

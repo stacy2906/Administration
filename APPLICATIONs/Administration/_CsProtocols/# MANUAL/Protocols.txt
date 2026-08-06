@@ -1,0 +1,6 @@
+﻿CONTROLs\AREAs\cspAreaGrid.cs : Строка 125: публичный член 'cspAreaGrid.__mCellStyle' не имеет описания <summary>
+CONTROLs\AREAs\cspAreaGrid.cs : Строка 130: публичный член 'cspAreaGrid.__mCurrentCell' не имеет описания <summary>
+CONTROLs\AREAs\cspAreaGrid.cs : Строка 183: публичный член 'cspAreaGrid.__mSelect' не имеет описания <summary>
+CONTROLs\AREAs\cspAreaGrid.cs : Строка 187: публичный член 'cspAreaGrid.__mValue' не имеет описания <summary>
+CONTROLs\AREAs\cspAreaGrid.cs : Строка 293: публичный член 'cspAreaGrid.__fCurrentRow_' не имеет описания <summary>
+CONTROLs\AREAs\cspAreaGrid.cs : Строка 297: публичный член 'cspAreaGrid.__fRowsCount_' не имеет описания <summary>

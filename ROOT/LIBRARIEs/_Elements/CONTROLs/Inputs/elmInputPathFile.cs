@@ -1,12 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace nlElements
 {
+    /// <summary>
+    /// Файл elmInputPathFile.cs
+    /// </summary>
+    /// <remarks>Класс-поле ввода пути к файлу</remarks>
     internal class elmInputPathFile : elmInputPath
     {
+        #region = ДИЗАЙНЕРЫ
+
+        /// <summary>
+        /// Конструктор без параметров
+        /// </summary>
+        public elmInputPathFile()
+        {
+            __fPathType_ = PATHTYPES.File;
+        }
+
+        #endregion ДИЗАЙНЕРЫ
     }
 }

@@ -82,7 +82,15 @@ namespace nlElements
         /// <summary>
         /// Поле ввода - кнопка
         /// </summary>
-        DataGridViewButtonColumn
+        DataGridViewButtonColumn,
+        /// <summary>
+        /// Поле ввода картинки
+        /// </summary>
+        DataGridViewImageColumn,
+        /// <summary>
+        /// Поле ввода - список
+        /// </summary>
+        DataGridViewComboBoxColumn
     }
     /// <summary>
     /// Вид отображения датывремени

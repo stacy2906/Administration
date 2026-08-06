@@ -2,7 +2,6 @@
 using nlcsManual;
 using nlElements;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
 
@@ -122,16 +121,28 @@ namespace naCsManual
                 int vResult = vDocumating.__mDo(vPathProject);
                 Cursor.Current = Cursors.Default;
 
-                /// 1.T Документирование выполнено успешно - отображение результата и открытие 'index.html'
+                /// 1.T Документирование выполнено успешно - отображение результата в форме предварительного просмотра
                 if (vResult == 0)
                 {
                     string vPathIndex = Path.Combine(Path.Combine(vPathProject, "# MANUAL"), "index.html");
 
-                    cmlApplication.__oMessages.__mShow(MESSAGESTYPES.Info, "Документация сформирована",
-                        "Файл: " + vPathIndex, "_cButtonRun_Click(object, EventArgs)");
-
                     if (File.Exists(vPathIndex) == true)
-                        Process.Start(vPathIndex);
+                    {
+                        /// Отображение статуса выполнения в строке состояния главной формы
+                        __cPanelStatus.__fCaption_ = "Документация сформирована: " + vPathIndex;
+
+                        /// Отображение сформированной документации внутри приложения (вместо внешнего браузера)
+                        /// '__fUrl_' указывает, ГДЕ расположен отчет; форма загружает и показывает его содержимое
+                        elmFormReportPreview vFormReportPreview = new elmFormReportPreview();
+                        vFormReportPreview.__fCaption_ = "Просмотр отчета - " + vPathIndex;
+                        vFormReportPreview.__cAreaReportPreview.__fUrl_ = vPathIndex;
+                        vFormReportPreview.ShowDialog();
+                    }
+                    else
+                    {
+                        cmlApplication.__oMessages.__mShow(MESSAGESTYPES.Info, "Документация сформирована",
+                            "Файл: " + vPathIndex, "_cButtonRun_Click(object, EventArgs)");
+                    }
                 }
                 /// 1.E Путь указан верно, но документирование не выполнено (например путь проекта не найден
                 /// внутри 'cmlEngine.__mDo') - сообщение об ошибке уже показано самим движком, повторно не дублируется

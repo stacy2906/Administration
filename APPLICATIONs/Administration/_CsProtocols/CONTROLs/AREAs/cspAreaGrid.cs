@@ -140,10 +140,36 @@ namespace nlCsProtocols
         /// <param name="pVisible">Видимость колонки</param>
         /// <param name="pType">Вид колонки</param>
         /// <returns>[true] - Колонка добавлена, иначе - [false]</returns>
-        public bool __mColumnAdd(string pCaption, string pPrompt, string pFieldName, bool pReadOnly, bool pVisible, nlElements.DATAGRIDCOLUMNTYPE pType)
+        public bool __mColumnAdd(string pCaption, string pPrompt, string pFieldName, bool pReadOnly, bool pVisible, string pType)
         {
-            return _cGrid.__mColumnAdd(pCaption, pPrompt, pFieldName, pReadOnly, pVisible, pType);
+            // Преобразуем строку в перечисление DATAGRIDCOLUMNTYPE
+            DATAGRIDCOLUMNTYPE vColumnType;
+
+            switch (pType)
+            {
+                case "DataGridViewTextBoxColumn":
+                    vColumnType = DATAGRIDCOLUMNTYPE.DataGridViewTextBoxColumn;
+                    break;
+                case "DataGridViewCheckBoxColumn":
+                    vColumnType = DATAGRIDCOLUMNTYPE.DataGridViewCheckBoxColumn;
+                    break;
+                case "DataGridViewButtonColumn":
+                    vColumnType = DATAGRIDCOLUMNTYPE.DataGridViewButtonColumn;
+                    break;
+                case "DataGridViewComboBoxColumn":
+                    vColumnType = DATAGRIDCOLUMNTYPE.DataGridViewComboBoxColumn;
+                    break;
+                case "DataGridViewImageColumn":
+                    vColumnType = DATAGRIDCOLUMNTYPE.DataGridViewImageColumn;
+                    break;
+                default:
+                    vColumnType = DATAGRIDCOLUMNTYPE.DataGridViewTextBoxColumn;
+                    break;
+            }
+
+            return _cGrid.__mColumnAdd(pCaption, pPrompt, pFieldName, pReadOnly, pVisible, vColumnType);
         }
+        
         /// <summary>
         /// Добавление колонок в сетку
         /// </summary>

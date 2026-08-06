@@ -31,6 +31,7 @@ namespace nlElements
             __fCaption_ = "Просмотр отчета";
             ShowInTaskbar = true;
 
+
             #endregion Настройка компонентов
 
             ResumeLayout();

@@ -1,0 +1,3 @@
+﻿admAbout.cs : Строка 5: тип 'admAbout' не имеет описания <summary>
+admApplication.cs : Строка 6: тип 'admApplication' не имеет описания <summary>
+DATA\DataSource\admDataSource.cs : Строка 6: тип 'admDataSourceUna' не имеет описания <summary>
