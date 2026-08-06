@@ -93,18 +93,17 @@ namespace naCsManual
         /// <summary>
         /// Выполняется при выборе кнопки 'Помощь'
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void _cButtonHelp_Click(object sender, EventArgs e)
         {
             __mHelp();
 
             return;
         }
+
         /// <summary>
         /// Выполняется при выборе кнопки 'Выполнить'
         /// </summary>
-        /// <param name="sender"></param>
+        /// <summary>
         /// <param name="e"></param>
         private void _cButtonRun_Click(object sender, EventArgs e)
         {
