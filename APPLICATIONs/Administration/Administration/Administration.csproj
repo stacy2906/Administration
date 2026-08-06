@@ -100,6 +100,10 @@
       <Project>{676768da-fd81-4ee3-a1df-8bcd6a61775e}</Project>
       <Name>_System</Name>
     </ProjectReference>
+    <ProjectReference Include="..\_csManual\_csManual.csproj">
+      <Project>{3a67c117-88f9-49cc-9b5f-e9899af5274f}</Project>
+      <Name>_csManual</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

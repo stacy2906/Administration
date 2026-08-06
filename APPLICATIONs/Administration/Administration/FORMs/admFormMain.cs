@@ -1,4 +1,4 @@
-
+using naCsManual;
 using nlAdministration;
 using nlApplication;
 using nlElements;
@@ -141,13 +141,10 @@ namespace naAdministration
                         //vFormGridChgTyp.ShowDialog();
                         break;
                     case "admDocumentation":
-                        //admFormGridChgTyp vFormGridChgTyp = new admFormGridChgTyp();
-                        //vFormGridChgTyp.__cAreaGrid.__fButtonSelectVisible_ = false;
-                        //vFormGridChgTyp.__cAreaGrid.__fButtonRefreshVisible_ = admApplication.__oData.__mDataSourceGet().__fUserAdministrator;
-                        //vFormGridChgTyp.__cAreaGrid.__fButtonEditEnabled_ = admApplication.__oData.__mDataSourceGet().__fUserAdministrator;
-                        //vFormGridChgTyp.__cAreaGrid.__fButtonEditCopyVisible_ = false;
-                        //vFormGridChgTyp.__cAreaGrid.__fButtonEditCreateVisible_ = false;
-                        //vFormGridChgTyp.ShowDialog();
+                        using (cmlFormMain vFormManual = new cmlFormMain())
+                        {
+                            vFormManual.ShowDialog(this);
+                        }
                         break;
                         //case "admProtocolsLoad":
                         //    //admFormGridChgTyp vFormGridChgTyp = new admFormGridChgTyp();
@@ -346,7 +343,7 @@ namespace naAdministration
             }
             elmUnitTreeNode vNodeDocuments = _cMenuTree.__mNodeNew("Документирование", "", 1, 3);
             {
-                elmUnitTreeNode vNodeDocumentsDocumentation = _cMenuTree.__mNodeSupply(vNodeProtocols, "Документировать проект", "admDocumentation", 5, 3);
+                elmUnitTreeNode vNodeDocumentsDocumentation = _cMenuTree.__mNodeSupply(vNodeDocuments, "Документировать проект", "admDocumentation", 5, 3);
             }
 
             //         elmUnitTreeNode vNodeReports = _cMenuTree.__mNodeNew("Отчеты", "", 1, 3);

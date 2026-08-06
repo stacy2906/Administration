@@ -449,10 +449,10 @@ namespace nlApplication
             {
                 if (vFile.Length == 0)
                 {
-                    //                   vAmount++;
+                    
                     continue;
                 }
-                if (vFile.Trim().ToUpper() == pFilePath.Trim().ToUpper()) /// Файл был открыть чуть ранее
+                if (vFile.Trim().ToUpper() == pFilePath.Trim().ToUpper()) 
                 {
                     //vAmount++;
                     continue;

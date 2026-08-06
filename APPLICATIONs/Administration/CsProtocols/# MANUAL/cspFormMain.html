@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8">
+<title>Класс cspFormMain</title>
+<style>
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 30px; background-color: #f4f6f9; color: #333; }
+.container { max-width: 900px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.back-btn { display: inline-block; margin-bottom: 15px; color: #0066FF; text-decoration: none; font-weight: bold; }
+h1 { color: #1a252f; border-bottom: 2px solid #0066FF; padding-bottom: 8px; }
+h2 { color: #2c3e50; margin-top: 25px; }
+.summary-box { background: #eef5ff; border-left: 4px solid #0066FF; padding: 12px 15px; margin: 15px 0; border-radius: 0 4px 4px 0; }
+ul { list-style: none; padding-left: 0; }
+li { background: #f8f9fa; margin: 6px 0; padding: 10px 14px; border-radius: 4px; border: 1px solid #e9ecef; font-family: Consolas, monospace; }
+</style></head><body>
+<div class="container">
+<a href="index.html" class="back-btn">← Вернуться к списку классов (Index)</a>
+<h1>Класс: cspFormMain</h1>
+<div class="summary-box"><strong>Описание:</strong> Класс главной формы приложения 'CsProtocols'</div>
+<h2>Поля и Свойства</h2>
+<ul>
+<li><font color="#0066FF"><b>protected</b></font> <font color="#0066FF"><b><i>string</i></b></font> _fClassNameFull = "" </li>
+</ul>
+<h2>Методы</h2>
+<ul>
+<li><font color="#0066FF"><b>protected</b></font> <font color="#0066FF"><b><i>override</i></b></font> <font color="#0066FF"><b><i>void</i></b></font> _mObjectAssembly() </li>
+<li><font color="#0066FF"><b>protected</b></font> <font color="#0066FF"><b><i>override</i></b></font> <font color="#0066FF"><b><i>void</i></b></font> _mObjectPresentation() </li>
+<li><font color="#0066FF"><b>protected</b></font> elmBlockFormMain _cBlockFormMain = new elmBlockFormMain(); </li>
+<li><font color="#0066FF"><b>protected</b></font> elmComponentSplitter _cSplitter = new elmComponentSplitter(); </li>
+<li><font color="#0066FF"><b>protected</b></font> elmComponentMenuItem _cMenuFile = new elmComponentMenuItem(); </li>
+<li><font color="#0066FF"><b>protected</b></font> elmComponentMenuItem _cMenuFileOpen = new elmComponentMenuItem(); </li>
+<li><font color="#0066FF"><b>protected</b></font> elmComponentMenuItem _cMenuFileClose = new elmComponentMenuItem(); </li>
+<li><font color="#0066FF"><b>protected</b></font> cspAreaGrid _cAreaProtocols = new cspAreaGrid(); </li>
+<li><font color="#0066FF"><b>protected</b></font> cspAreaGrid _cAreaProtocolsRecords = new cspAreaGrid(); </li>
+<li><font color="#0066FF"><b>protected</b></font> DataTable _oDataTaleApplications = new DataTable(); </li>
+<li><font color="#0066FF"><b>protected</b></font> DataTable _oDataTableProtocols = new DataTable(); </li>
+<li><font color="#0066FF"><b>protected</b></font> DataTable _oDataTableProtocolsRecord = new DataTable(); </li>
+<li><font color="#0066FF"><b>protected</b></font> DataTable _fTableChanges = new DataTable("ChangesValue"); </li>
+<li><font color="#0066FF"><b>protected</b></font> ArrayList _fTriggerErrorsDescriptions = new ArrayList(); </li>
+</ul>
+</div></body></html>

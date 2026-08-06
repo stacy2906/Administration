@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="cmlApplication.cs" />
     <Compile Include="cmlEngine.cs" />
+    <Compile Include="cmlManual.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

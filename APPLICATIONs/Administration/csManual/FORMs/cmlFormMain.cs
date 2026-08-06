@@ -2,6 +2,7 @@
 using nlcsManual;
 using nlElements;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
 
@@ -11,7 +12,7 @@ namespace naCsManual
     /// Файл cmlFormMain.cs
     /// </summary>
     /// <remarks>Класс - Главная форма приложения 'CsManual'</remarks>
-    internal class cmlFormMain : elmForm
+    public class cmlFormMain : elmForm
     {
         #region = МЕТОДЫ
 
@@ -76,6 +77,7 @@ namespace naCsManual
 
             return;
         }
+
         /// <summary>
         /// Презентация объекта
         /// </summary>
@@ -84,6 +86,12 @@ namespace naCsManual
             base._mObjectPresentation();
             _cFolderScan.__mItemsLoadFromFile("scan");
             _cFolderScan.__fSymbolsCount_ = -1;
+
+          
+            if (string.IsNullOrEmpty(_cFolderScan.__fValue_?.ToString()))
+            {
+                _cFolderScan.__fValue_ = Application.StartupPath; // Или укажите ваш рабочий путь
+            }
         }
 
         #endregion Объект
@@ -96,7 +104,6 @@ namespace naCsManual
         private void _cButtonHelp_Click(object sender, EventArgs e)
         {
             __mHelp();
-
             return;
         }
 
@@ -104,25 +111,67 @@ namespace naCsManual
         /// Выполняется при выборе кнопки 'Выполнить'
         /// </summary>
         /// <summary>
+        /// <param name="sender"></param>
         /// <param name="e"></param>
         private void _cButtonRun_Click(object sender, EventArgs e)
         {
-            if (Directory.Exists(_cFolderScan.__fValue_.ToString()) == true)
+            string vProjectPath = "";
+
+            // 1. Пытаемся достать путь из внутреннего поля ввода компонента _cFolderScan
+            foreach (Control vControl in _cFolderScan.Controls)
             {
-                /// Сохранение папок проектов C#
+                if (vControl is TextBox || vControl is ComboBox)
+                {
+                    vProjectPath = vControl.Text.Trim();
+                    if (!string.IsNullOrEmpty(vProjectPath))
+                        break;
+                }
+            }
+
+            // 2. Если пользователь ничего не ввел/не выбрал — открываем диалог выбора папки
+            if (string.IsNullOrEmpty(vProjectPath) || !Directory.Exists(vProjectPath))
+            {
+                using (FolderBrowserDialog vFolderDialog = new FolderBrowserDialog())
+                {
+                    vFolderDialog.Description = "Выберите папку с исходным кодом C# (.cs):";
+                    if (vFolderDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        vProjectPath = vFolderDialog.SelectedPath;
+                        _cFolderScan.Text = vProjectPath; // Записываем выбор обратно в элемент
+                    }
+                    else
+                    {
+                        // Пользователь отменил выбор
+                        return;
+                    }
+                }
+            }
+
+            // 3. Запуск генерации документации
+            if (!string.IsNullOrEmpty(vProjectPath) && Directory.Exists(vProjectPath))
+            {
+                // Сохраняем путь в историю
                 _cFolderScan.__mItemsSaveToFile("scan");
 
-                //cmlManual vDocumating = new cmlManual();
-                //vDocumating.__mManualing(_cFolderScan.__fValue_.ToString().Trim());
-                //vDocumating.__mManualing2(_cFolderScan.__fValue_.ToString().Trim());
-
+                // Запускаем ваш движок
                 cmlEngine vDocumating = new cmlEngine();
-                vDocumating.__mDo(_cFolderScan.__fValue_.ToString().Trim());
+                vDocumating.__mDo(vProjectPath);
+
+                // Открываем сгенерированный index.html
+                string vIndexPath = Path.Combine(vProjectPath, "# MANUAL", "index.html");
+                if (File.Exists(vIndexPath))
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = vIndexPath,
+                        UseShellExecute = true
+                    });
+                }
             }
             else
             {
                 appUnitError vError = new appUnitError();
-                vError.__mMessageBuild("Путь к проекту указан не верно");
+                vError.__mMessageBuild("Указанная папка не существует.");
                 vError.__fErrorType_ = ERRORSTYPES.User;
                 vError.__fProcedure_ = _fClassNameFull + "_cButtonRun_Click(object, EventArgs)";
                 cmlApplication.__oErrorsHandler.__mShow(vError);
@@ -130,131 +179,7 @@ namespace naCsManual
 
             return;
         }
-
         #endregion Поведение
-
-        #region - Процедуры
-
-        /// <summary> 
-        /// Опреление цвета ключевых слов
-        /// </summary>
-        /// <param name="pKeyWord">Ключевое слово</param>
-        /// <returns>Ключевое слово окруженное HTML тегами</returns>
-        private string mKeyWord(string pKeyWord)
-        {
-            string vReturn = "";
-
-            switch (pKeyWord.ToLower())
-            {
-                /// Области видимости
-                case "public":
-                    vReturn = "<Font Color=\"#0066FF\"><B>public</B></Font>";
-                    break;
-                case "private":
-                    vReturn = "<Font Color=\"#0066FF\"><B>private</B></Font>";
-                    break;
-                case "internal":
-                    vReturn = "<Font Color=\"#0066FF\"><B>internal</B></Font>";
-                    break;
-                case "protected":
-                    vReturn = "<Font Color=\"#0066FF\"><B>protected</B></Font>";
-                    break;
-                /// Порядок использования
-                case "abstract":
-                    vReturn = "<Font Color=\"#7766FF\"><B>static</B></Font>";
-                    break;
-                case "event":
-                    vReturn = "<Font Color=\"#0066FF\"><B><I>event</I></B></Font>";
-                    break;
-                case "static":
-                    vReturn = "<Font Color=\"#7766FF\"><B>static</B></Font>";
-                    break;
-                /// Наследственность
-                case "virtual":
-                    vReturn = "<Font Color=\"#4455FF\"><B>virtual</B></Font>";
-                    break;
-                case "override":
-                    vReturn = "<Font Color=\"#4455FF\"><B>override</B></Font>";
-                    break;
-                /// Типы данных        
-                case "arraylist":
-                    vReturn = "<Font Color=\"#0066FF\"><B><I>ArrayList</I></B></Font>";
-                    break;
-                case "bool":
-                    vReturn = "<Font Color=\"#0066FF\"><B><I>bool</I></B></Font>";
-                    break;
-                case "class":
-                    vReturn = "<Font Color=\"#0066FF\"><B><I>class</I></B></Font>";
-                    break;
-                case "datetime":
-                    vReturn = "<Font Color=\"#0066FF\"><B><I>datetime</I></B></Font>";
-                    break;
-                case "dialogresult":
-                    vReturn = "<Font Color=\"#0066FF\"><B><I>DialogResult</I></B></Font>";
-                    break;
-                case "enum":
-                    vReturn = "<Font Color=\"#0066FF\"><B><I>enum</I></B></Font>";
-                    break;
-                case "eventhandler":
-                    vReturn = "<Font Color=\"#0066FF\"><B><I>EventHandler</I></B></Font>";
-                    break;
-                case "int":
-                    vReturn = "<Font Color=\"#0066FF\"><B><I>int</I></B></Font>";
-                    break;
-                case "object":
-                    vReturn = "<Font Color=\"#0066FF\"><B><I>object</I></B></Font>";
-                    break;
-                case "string":
-                    vReturn = "<Font Color=\"#0066FF\"><B><I>string</I></B></Font>";
-                    break;
-                case "void":
-                    vReturn = "<Font Color=\"#0066FF\"><B><I>void</I></B></Font>";
-                    break;
-                case "xmlnode":
-                    vReturn = "<Font Color=\"#0066FF\"><B><I>XmlNode</I></B></Font>";
-                    break;
-                /// 
-                case "params":
-                    vReturn = "<Font Color=\"#0022FF\"><B><I>params</I></B></Font>";
-                    break;
-
-                default:
-
-                    vReturn = pKeyWord;
-                    break;
-            }
-
-            return vReturn;
-        }
-        /// <summary>
-        /// Форматирование строки в HTML формате
-        /// </summary>
-        /// <param name="pLine">Содержание строки</param>
-        /// <remarks>Строка окруженная HTML тэгами</remarks>
-        private string mLineColoring(string pLine)
-        {
-            string vReturn = ""; // Возвращаемое значение
-            /// Перебор слов в строке и обработка их методом ' mKeyWord(string)'
-
-            foreach (string vWord in appTypeString.__mWordsList(pLine.Trim(), ' '))
-            {
-                vReturn = vReturn + mKeyWord(vWord) + " ";
-            }
-
-            return vReturn;
-        }
-        /// <summary>
-        /// Протоколоирование недоработок документируемого кода 
-        /// </summary>
-        /// <param name="pMessage">Протоколированое сообщение</param>
-        private void mProtocol(string pFileName, int pFileNumber, string pFileContent, string pErrorCharacter = "")
-        {
-            string vMessage = pFileName + " " + pFileNumber.ToString() + " " + pFileContent + " " + pErrorCharacter;
-            appApplication.__oProtocols.__mCreate(PROTOCOLSTYPES.ApplicationError, "");
-            appApplication.__oProtocols.__mRecord(PROTOCOLRECORDSTYPES.Message, vMessage);
-        }
-
-        #endregion Процедуры
 
         #endregion МЕТОДЫ
 
@@ -262,38 +187,17 @@ namespace naCsManual
 
         #region - Компоненты
 
-        /// <summary>
-        /// Панель управления
-        /// </summary>
         protected elmComponentToolbar _cToolbar = new elmComponentToolbar();
-        /// <summary>
-        /// Кнопка 'Выполнить'
-        /// </summary>
         protected elmComponentToolbarButton _cButtonRun = new elmComponentToolbarButton();
-        /// <summary>
-        /// Кнопка 'Помощь'
-        /// </summary>
         protected elmComponentToolbarButton _cButtonHelp = new elmComponentToolbarButton();
-        /// <summary>
-        /// Блок главного окна
-        /// </summary>
         protected elmBlockFormMain _cBlockFormMain = new elmBlockFormMain();
-        /// <summary>
-        /// Панель для размещения компонентов
-        /// </summary>
         protected elmBlockInputs _cBlockInput = new elmBlockInputs();
-        /// <summary>
-        /// Путь и имя папки для сканирования документов CS
-        /// </summary>
         protected elmInputPath _cFolderScan = new elmInputPath();
 
         #endregion Компоненты
 
         #region - Служебные
 
-        /// <summary>
-        /// Полное имя класса
-        /// </summary>
         protected string _fClassNameFull = "";
 
         #endregion Служебные

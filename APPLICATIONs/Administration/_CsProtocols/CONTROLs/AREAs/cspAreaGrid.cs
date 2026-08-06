@@ -140,7 +140,7 @@ namespace nlCsProtocols
         /// <param name="pVisible">Видимость колонки</param>
         /// <param name="pType">Вид колонки</param>
         /// <returns>[true] - Колонка добавлена, иначе - [false]</returns>
-        public bool __mColumnAdd(string pCaption, string pPrompt, string pFieldName, bool pReadOnly, bool pVisible, string pType)
+        public bool __mColumnAdd(string pCaption, string pPrompt, string pFieldName, bool pReadOnly, bool pVisible, nlElements.DATAGRIDCOLUMNTYPE pType)
         {
             return _cGrid.__mColumnAdd(pCaption, pPrompt, pFieldName, pReadOnly, pVisible, pType);
         }
