@@ -1,4 +1,5 @@
 using naCsManual;
+using naCsProtocols;
 using nlAdministration;
 using nlApplication;
 using nlElements;
@@ -123,13 +124,8 @@ namespace naAdministration
                         //vFormGridChgTyp.ShowDialog();
                         break;
                     case "admProtocolsList":
-                        //admFormGridChgTyp vFormGridChgTyp = new admFormGridChgTyp();
-                        //vFormGridChgTyp.__cAreaGrid.__fButtonSelectVisible_ = false;
-                        //vFormGridChgTyp.__cAreaGrid.__fButtonRefreshVisible_ = admApplication.__oData.__mDataSourceGet().__fUserAdministrator;
-                        //vFormGridChgTyp.__cAreaGrid.__fButtonEditEnabled_ = admApplication.__oData.__mDataSourceGet().__fUserAdministrator;
-                        //vFormGridChgTyp.__cAreaGrid.__fButtonEditCopyVisible_ = false;
-                        //vFormGridChgTyp.__cAreaGrid.__fButtonEditCreateVisible_ = false;
-                        //vFormGridChgTyp.ShowDialog();
+                        cspFormMain vForm = new cspFormMain();
+                        vForm.ShowDialog();
                         break;
                     case "admProtocolsCombine":
                         //admFormGridChgTyp vFormGridChgTyp = new admFormGridChgTyp();

@@ -1,6 +1,18 @@
-﻿CONTROLs\AREAs\cspAreaGrid.cs : Строка 125: публичный член 'cspAreaGrid.__mCellStyle' не имеет описания <summary>
-CONTROLs\AREAs\cspAreaGrid.cs : Строка 130: публичный член 'cspAreaGrid.__mCurrentCell' не имеет описания <summary>
-CONTROLs\AREAs\cspAreaGrid.cs : Строка 183: публичный член 'cspAreaGrid.__mSelect' не имеет описания <summary>
-CONTROLs\AREAs\cspAreaGrid.cs : Строка 187: публичный член 'cspAreaGrid.__mValue' не имеет описания <summary>
-CONTROLs\AREAs\cspAreaGrid.cs : Строка 293: публичный член 'cspAreaGrid.__fCurrentRow_' не имеет описания <summary>
-CONTROLs\AREAs\cspAreaGrid.cs : Строка 297: публичный член 'cspAreaGrid.__fRowsCount_' не имеет описания <summary>
+﻿CONTROLs\AREAs\cspAreaGrid.cs : Строка 9: тип 'cspAreaGrid' не имеет описания <summary>
+CONTROLs\AREAs\cspAreaGrid.cs : Строка 69: публичный член 'cspAreaGrid._mObjectPresentation' не имеет описания <summary>
+CONTROLs\AREAs\cspAreaGrid.cs : Строка 78: публичный член 'cspAreaGrid.__mCellStyle' не имеет описания <summary>
+CONTROLs\AREAs\cspAreaGrid.cs : Строка 87: публичный член 'cspAreaGrid.__mCellStyle' не имеет описания <summary>
+CONTROLs\AREAs\cspAreaGrid.cs : Строка 96: публичный член 'cspAreaGrid.__mCurrentCell' не имеет описания <summary>
+CONTROLs\AREAs\cspAreaGrid.cs : Строка 108: публичный член 'cspAreaGrid.__mColumnAdd' не имеет описания <summary>
+CONTROLs\AREAs\cspAreaGrid.cs : Строка 115: публичный член 'cspAreaGrid.__mColumnAdd' не имеет описания <summary>
+CONTROLs\AREAs\cspAreaGrid.cs : Строка 127: публичный член 'cspAreaGrid.__mGridBuild' не имеет описания <summary>
+CONTROLs\AREAs\cspAreaGrid.cs : Строка 134: публичный член 'cspAreaGrid.__mGridRefresh' не имеет описания <summary>
+CONTROLs\AREAs\cspAreaGrid.cs : Строка 140: публичный член 'cspAreaGrid.__mSelect' не имеет описания <summary>
+CONTROLs\AREAs\cspAreaGrid.cs : Строка 152: публичный член 'cspAreaGrid.__mValue' не имеет описания <summary>
+CONTROLs\AREAs\cspAreaGrid.cs : Строка 197: публичный член 'cspAreaGrid.__fHeaderImage_' не имеет описания <summary>
+CONTROLs\AREAs\cspAreaGrid.cs : Строка 202: публичный член 'cspAreaGrid.__fHeaderCaption_' не имеет описания <summary>
+CONTROLs\AREAs\cspAreaGrid.cs : Строка 213: публичный член 'cspAreaGrid.__fHeaderVisible_' не имеет описания <summary>
+CONTROLs\AREAs\cspAreaGrid.cs : Строка 219: публичный член 'cspAreaGrid.__fDataSource_' не имеет описания <summary>
+CONTROLs\AREAs\cspAreaGrid.cs : Строка 231: публичный член 'cspAreaGrid.__fCurrentRow_' не имеет описания <summary>
+CONTROLs\AREAs\cspAreaGrid.cs : Строка 236: публичный член 'cspAreaGrid.__fRowsCount_' не имеет описания <summary>
+CONTROLs\AREAs\cspAreaGrid.cs : Строка 241: публичный член 'cspAreaGrid.__fGrid_' не имеет описания <summary>

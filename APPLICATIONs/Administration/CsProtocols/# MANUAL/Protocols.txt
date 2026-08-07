@@ -1,1 +1,0 @@
-﻿cspBegin.cs : Строка 7: тип 'cspBegin' не имеет описания <summary>
