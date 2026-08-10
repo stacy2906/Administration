@@ -5,108 +5,108 @@ using System.Data;
 
 namespace nlAdministration
 {
-	/// <summary>
-	/// Файл admEventsHandler.cs
-	/// </summary>
-	/// <remarks>Класс - Обработчик основных событий пакета программ "Administration"</remarks>
-	public class admEventsHandler : appEventsHandler
-	{
-		#region = МЕТОДЫ
+    /// <summary>
+    /// Файл admEventsHandler.cs
+    /// </summary>
+    /// <remarks>Класс - Обработчик основных событий пакета программ "Administration"</remarks>
+    public class admEventsHandler : appEventsHandler
+    {
+        #region = МЕТОДЫ
 
-		#region - Процедуры
+        #region - Процедуры
 
-		/// <summary>
-		/// Начало выполнения приложения
-		/// </summary>
-		/// <returns>[true] - Приложение готово к выполнению, иначе - [false]</returns>
-		public override bool __mBegin()
-		{
-			bool vReturn = true; // Возвращаемое значение
+        /// <summary>
+        /// Начало выполнения приложения
+        /// </summary>
+        /// <returns>[true] - Приложение готово к выполнению, иначе - [false]</returns>
+        public override bool __mBegin()
+        {
+            bool vReturn = true; // Возвращаемое значение
 
-			#region Создание настроек приложения
+            #region Создание настроек приложения
 
-			admApplication.__oTunes.__mNew(admApplication.__oTunes.__mTranslate("Интерфейс")
-						, "Language"
-						, "Russian"
-						, admApplication.__oTunes.__mTranslate("Язык интнрфейса")
-						, "Russian, English, Polish, Romain"
-						, ""
-						, "elmInputComboList"
-						, true
-						, true
-						, true);
-			admApplication.__oTunes.__mNew(admApplication.__oTunes.__mTranslate("Интерфейс")
-						, "AskForQuit"
-						, "true"
-						, admApplication.__oTunes.__mTranslate("Спрашивать о закрытии приложения")
-						, ""
-						, ""
-						, "elmInputBool"
-						, true
-						, true
-						, true);
-			admApplication.__oTunes.__mNew(admApplication.__oTunes.__mTranslate("Данные")
-						, "Server"
-						, ""
-						, admApplication.__oTunes.__mTranslate("Название сервера")
-						, ""
-						, ""
-						, "elmInputString"
-						, true
-						, true
-						, true);
-			admApplication.__oTunes.__mNew(admApplication.__oTunes.__mTranslate("Данные")
-						, "ServerDatabase"
-						, ""
-						, admApplication.__oTunes.__mTranslate("Название базы данных")
-						, ""
-						, ""
-						, "elmInputString"
-						, true
-						, true
-						, true);
-			admApplication.__oTunes.__mNew(admApplication.__oTunes.__mTranslate("Данные")
-						, "ServerLogin"
-						, ""
-						, admApplication.__oTunes.__mTranslate("Логин сервера")
-						, ""
-						, ""
-						, "elmInputString"
-						, true
-						, true
-						, true);
-			admApplication.__oTunes.__mNew(admApplication.__oTunes.__mTranslate("Данные")
-						, "ServerPassword"
-						, ""
-						, admApplication.__oTunes.__mTranslate("Пароль логина")
-						, ""
-						, ""
-						, "elmInputString"
-						, true
-						, true
-						, true);
-			admApplication.__oTunes.__mNew(admApplication.__oTunes.__mTranslate("Данные")
-						, "DatabaseProtocols"
-						, ""
-						, admApplication.__oTunes.__mTranslate("Путь к базе данных 'Protocols'")
-						, ""
-						, ""
-						, "elmInputPath"
-						, true
-						, true
-						, true);
+            admApplication.__oTunes.__mNew(admApplication.__oTunes.__mTranslate("Интерфейс")
+                        , "Language"
+                        , "Russian"
+                        , admApplication.__oTunes.__mTranslate("Язык интнрфейса")
+                        , "Russian, English, Polish, Romain"
+                        , ""
+                        , "elmInputComboList"
+                        , true
+                        , true
+                        , true);
+            admApplication.__oTunes.__mNew(admApplication.__oTunes.__mTranslate("Интерфейс")
+                        , "AskForQuit"
+                        , "true"
+                        , admApplication.__oTunes.__mTranslate("Спрашивать о закрытии приложения")
+                        , ""
+                        , ""
+                        , "elmInputBool"
+                        , true
+                        , true
+                        , true);
+            admApplication.__oTunes.__mNew(admApplication.__oTunes.__mTranslate("Данные")
+                        , "Server"
+                        , ""
+                        , admApplication.__oTunes.__mTranslate("Название сервера")
+                        , ""
+                        , ""
+                        , "elmInputString"
+                        , true
+                        , true
+                        , true);
+            admApplication.__oTunes.__mNew(admApplication.__oTunes.__mTranslate("Данные")
+                        , "ServerDatabase"
+                        , ""
+                        , admApplication.__oTunes.__mTranslate("Название базы данных")
+                        , ""
+                        , ""
+                        , "elmInputString"
+                        , true
+                        , true
+                        , true);
+            admApplication.__oTunes.__mNew(admApplication.__oTunes.__mTranslate("Данные")
+                        , "ServerLogin"
+                        , ""
+                        , admApplication.__oTunes.__mTranslate("Логин сервера")
+                        , ""
+                        , ""
+                        , "elmInputString"
+                        , true
+                        , true
+                        , true);
+            admApplication.__oTunes.__mNew(admApplication.__oTunes.__mTranslate("Данные")
+                        , "ServerPassword"
+                        , ""
+                        , admApplication.__oTunes.__mTranslate("Пароль логина")
+                        , ""
+                        , ""
+                        , "elmInputString"
+                        , true
+                        , true
+                        , true);
+            admApplication.__oTunes.__mNew(admApplication.__oTunes.__mTranslate("Данные")
+                        , "DatabaseProtocols"
+                        , ""
+                        , admApplication.__oTunes.__mTranslate("Путь к базе данных 'Protocols'")
+                        , ""
+                        , ""
+                        , "elmInputPath"
+                        , true
+                        , true
+                        , true);
             #endregion Создание настроек приложения
 
             vReturn = vReturn & base.__mBegin();
 
-			if (vReturn == false)
-				return false;
+            if (vReturn == false)
+                return false;
 
             /// Подключение источника данных для работы с протоколами
             /// Создание источника данных 'Protocols':
             admDataSourceProtocols vDataSourceProtocols = new admDataSourceProtocols();
-			/// Указание базы данных
-			vDataSourceProtocols.__fDatabasePath = "..\\..\\..\\..\\..\\DATABASEs\\";
+            /// Указание базы данных
+            vDataSourceProtocols.__fDatabasePath = "..\\..\\..\\..\\..\\DATABASEs\\";
 
             /// Указание названия базы данных
             vDataSourceProtocols.__fDatabaseName = "Protocols.db";
@@ -143,29 +143,29 @@ namespace nlAdministration
                 //admApplication.__oData.__fDataSourceCurrentAlias = vDataSourceAdministration.__fAlias;
 
                 //vDataSourceAdministration.__mModelBuild();
-			}
-			/// Регистрация пользователя в источнике данных UNA
-			{
-				///// Вызов формы регистрации пользователя
-				//elmFormLogin vFormLogin = new elmFormLogin();
-				//vFormLogin.__fDataSourceAlias = vDataSourceAdministration.__fAlias;
-				//vFormLogin.ShowDialog();
-				///// Если регистрация пользователя прошла, удаляем его зависшие блокировки
-				//if (vFormLogin.__fRegistered == true)
-				//{
-				//	/// - Снятие зависших блокировок для зашедшего пользователя
-				//	admApplication.__oData.__mDataSourceGet().__mLockClear();
-				//}
-				//else
-				//	vReturn = false;
-			}
+            }
+            /// Регистрация пользователя в источнике данных UNA
+            {
+                ///// Вызов формы регистрации пользователя
+                //elmFormLogin vFormLogin = new elmFormLogin();
+                //vFormLogin.__fDataSourceAlias = vDataSourceAdministration.__fAlias;
+                //vFormLogin.ShowDialog();
+                ///// Если регистрация пользователя прошла, удаляем его зависшие блокировки
+                //if (vFormLogin.__fRegistered == true)
+                //{
+                //	/// - Снятие зависших блокировок для зашедшего пользователя
+                //	admApplication.__oData.__mDataSourceGet().__mLockClear();
+                //}
+                //else
+                //	vReturn = false;
+            }
 
-			return vReturn;
-		}
+            return vReturn;
+        }
 
-		#endregion Процедуры
+        #endregion Процедуры
 
-		#endregion МЕТОДЫ
-	}
+        #endregion МЕТОДЫ
+    }
 }
 

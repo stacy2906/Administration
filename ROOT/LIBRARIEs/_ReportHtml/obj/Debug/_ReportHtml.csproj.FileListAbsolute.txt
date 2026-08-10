@@ -79,3 +79,13 @@ C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ReportHtml\obj\Debu
 C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ReportHtml\obj\Debug\_ReportH.F728063A.Up2Date
 C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ReportHtml\obj\Debug\rrth.dll
 C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ReportHtml\obj\Debug\rrth.pdb
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ReportHtml\bin\Debug\rrth.dll
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ReportHtml\bin\Debug\rrth.pdb
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ReportHtml\bin\Debug\System.Data.SQLite.dll
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ReportHtml\bin\Debug\_Application.dll
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ReportHtml\bin\Debug\_Application.pdb
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ReportHtml\obj\Debug\_ReportHtml.csproj.AssemblyReference.cache
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ReportHtml\obj\Debug\_ReportHtml.csproj.CoreCompileInputs.cache
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ReportHtml\obj\Debug\_ReportH.F728063A.Up2Date
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ReportHtml\obj\Debug\rrth.dll
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ReportHtml\obj\Debug\rrth.pdb

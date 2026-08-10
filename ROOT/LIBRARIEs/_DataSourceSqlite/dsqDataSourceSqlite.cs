@@ -1,10 +1,11 @@
-﻿using nlData;
+﻿using nlApplication;
+using nlData;
+using System;
 using System.Collections;
 using System.Data;
-using System.IO;
-using System;
 using System.Data.SQLite;
-using nlApplication;
+using System.IO;
+using System.Windows.Forms;
 
 namespace nlDataSourceSqlite
 {
@@ -108,6 +109,7 @@ namespace nlDataSourceSqlite
                     vSqliteCommand.Transaction = _fTransaction;
                     vTransactionUsed = true;
                 } /// Открыта транзакция
+                MessageBox.Show($"Поток: {System.Threading.Thread.CurrentThread.ManagedThreadId}");
                 SQLiteDataReader vSqlDataReader = vSqliteCommand.ExecuteReader();
                 vDataTable = new DataTable();
                 vDataTable.Load(vSqlDataReader);
@@ -751,7 +753,11 @@ namespace nlDataSourceSqlite
         protected override bool __mConnectionOn()
         {
             bool vReturn = true; // Возвращаемое значение
-
+            string fullPath = Path.Combine(__fDatabasePath, __fDatabaseName);
+            if (!File.Exists(fullPath))
+            {
+                MessageBox.Show($"Файл БД не найден: {fullPath}");
+            }
             if (__fConnectionLine.Length == 0)
             {
                 try // Подключение с идентификацией пользователя
@@ -760,6 +766,7 @@ namespace nlDataSourceSqlite
                     if (__fConnectionLine.Length > 0)
                     {
                         _fConnection = new SQLiteConnection(__fConnectionLine);
+                        MessageBox.Show($"Строка подключения: {__fConnectionLine}");
                         _fConnection.Open();
                     }
                     else

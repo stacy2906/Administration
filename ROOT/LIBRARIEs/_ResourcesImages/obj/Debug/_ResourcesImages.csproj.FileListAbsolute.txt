@@ -62,3 +62,13 @@ C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesImages\obj
 C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesImages\obj\Debug\_ResourcesImages.csproj.CoreCompileInputs.cache
 C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesImages\obj\Debug\rsim.dll
 C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesImages\obj\Debug\rsim.pdb
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesImages\bin\Debug\rsim.dll
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesImages\bin\Debug\rsim.pdb
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesImages\bin\Debug\System.Data.SQLite.dll
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesImages\obj\Debug\_ResourcesImages.csproj.AssemblyReference.cache
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesImages\obj\Debug\nlResourcesImages.Properties.Resources.resources
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesImages\obj\Debug\_ResourcesImages.csproj.GenerateResource.cache
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesImages\obj\Debug\_ResourcesImages.csproj.CoreCompileInputs.cache
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesImages\obj\Debug\_Resourc.4B8C632F.Up2Date
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesImages\obj\Debug\rsim.dll
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesImages\obj\Debug\rsim.pdb

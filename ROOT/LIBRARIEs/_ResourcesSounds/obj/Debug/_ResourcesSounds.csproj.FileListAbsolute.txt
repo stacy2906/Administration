@@ -46,3 +46,11 @@ C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesSounds\obj
 C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesSounds\obj\Debug\_ResourcesSounds.csproj.CoreCompileInputs.cache
 C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesSounds\obj\Debug\rssd.dll
 C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesSounds\obj\Debug\rssd.pdb
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesSounds\bin\Debug\rssd.dll
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesSounds\bin\Debug\rssd.pdb
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesSounds\bin\Debug\System.Data.SQLite.dll
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesSounds\obj\Debug\_ResourcesSounds.csproj.AssemblyReference.cache
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesSounds\obj\Debug\_ResourcesSounds.csproj.CoreCompileInputs.cache
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesSounds\obj\Debug\_Resourc.51221305.Up2Date
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesSounds\obj\Debug\rssd.dll
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_ResourcesSounds\obj\Debug\rssd.pdb

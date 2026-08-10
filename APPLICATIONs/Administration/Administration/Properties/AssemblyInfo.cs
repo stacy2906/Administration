@@ -21,5 +21,5 @@ using System.Runtime.InteropServices;
 //      ����� ������
 //      ��������
 //
-[assembly: AssemblyVersion("2026.8.4.5")]
+[assembly: AssemblyVersion("2026.8.10.1")]
 [assembly: AssemblyFileVersion("5.0.0.0")]

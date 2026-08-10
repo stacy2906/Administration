@@ -115,3 +115,17 @@ C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Data\obj\Debug\_Dat
 C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Data\obj\Debug\_Data.csproj.Up2Date
 C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Data\obj\Debug\data.dll
 C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Data\obj\Debug\data.pdb
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Data\bin\Debug\data.dll
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Data\bin\Debug\data.pdb
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Data\bin\Debug\rrth.dll
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Data\bin\Debug\sstm.dll
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Data\bin\Debug\System.Data.SQLite.dll
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Data\bin\Debug\_Application.dll
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Data\bin\Debug\_Application.pdb
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Data\bin\Debug\rrth.pdb
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Data\bin\Debug\sstm.pdb
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Data\obj\Debug\_Data.csproj.AssemblyReference.cache
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Data\obj\Debug\_Data.csproj.CoreCompileInputs.cache
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Data\obj\Debug\_Data.csproj.Up2Date
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Data\obj\Debug\data.dll
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Data\obj\Debug\data.pdb

@@ -16,3 +16,11 @@ C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Application\obj\Deb
 C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Application\obj\Debug\_Application.csproj.CoreCompileInputs.cache
 C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Application\obj\Debug\_Application.dll
 C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Application\obj\Debug\_Application.pdb
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Application\bin\Debug\_Application.dll
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Application\bin\Debug\_Application.pdb
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Application\bin\Debug\System.Data.SQLite.dll
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Application\obj\Debug\_Application.csproj.AssemblyReference.cache
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Application\obj\Debug\_Application.csproj.CoreCompileInputs.cache
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Application\obj\Debug\_Applica.6E577EC0.Up2Date
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Application\obj\Debug\_Application.dll
+C:\Users\doy\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Application\obj\Debug\_Application.pdb
