@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using nlDataSourceSqlite;
 
 namespace CsProtocols
@@ -16,9 +14,6 @@ namespace CsProtocols
 
         public ProtocolsDbLoader(string dbPath)
         {
-            // Обязательная регистрация провайдера кодировок для поддержки Windows-1251
-            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-
             _dataSource = new dsqDataSourceSqlite();
             _dataSource.__fDatabasePath = Path.GetDirectoryName(dbPath);
             _dataSource.__fDatabaseName = Path.GetFileName(dbPath);
@@ -73,20 +68,17 @@ namespace CsProtocols
             FindAllProtocolFolders();
 
             if (_foundFolders.Count == 0)
-                throw new Exception("Папки PROTOCOLS не найдены на диске C:!");
+                throw new Exception("Папки PROTOCOLS не найдены!");
 
             int totalPcl = 0;
             int totalRrd = 0;
 
             foreach (string folder in _foundFolders)
             {
-                if (folder.StartsWith("U", StringComparison.OrdinalIgnoreCase) || folder.Contains("U:"))
-                    continue;
-
                 try
                 {
                     var files = Directory.GetFiles(folder, "*.pcl")
-                        .Where(f => !Path.GetFileNameWithoutExtension(f).EndsWith("rr") && !f.StartsWith("U", StringComparison.OrdinalIgnoreCase))
+                        .Where(f => !Path.GetFileNameWithoutExtension(f).EndsWith("rr"))
                         .ToList();
 
                     foreach (var file in files)
@@ -103,66 +95,50 @@ namespace CsProtocols
                 catch { }
             }
 
-            // Вызываем обновление отображения данных в интерфейсе
-            RefreshProtocolsView();
-
             Console.WriteLine($"Загружено Pcl: {totalPcl}, PclRrd: {totalRrd}");
-        }
-
-
-        private void RefreshProtocolsView()
-        {
-            // Здесь можно вызвать обновление формы, если у класса есть доступ к элементам интерфейса
         }
 
         private void FindAllProtocolFolders()
         {
+            // Поиск на диске U:\
             try
             {
-                var found = Directory.GetDirectories(@"C:\", "PROTOCOLS", SearchOption.AllDirectories)
-                    .Where(p => !p.StartsWith("U", StringComparison.OrdinalIgnoreCase) && !p.Contains("U:"));
+                var found = Directory.GetDirectories(@"U:\", "PROTOCOLS", SearchOption.AllDirectories);
                 _foundFolders.AddRange(found);
             }
             catch { }
 
+            // Поиск на диске C:\
+            try
+            {
+                var found = Directory.GetDirectories(@"C:\", "PROTOCOLS", SearchOption.AllDirectories);
+                _foundFolders.AddRange(found);
+            }
+            catch { }
+
+            // Добавляем явные пути (диск C и U)
             string[] knownPaths = {
                 @"C:\KviNA\APPLICATIONS\Administration\Administration\bin\Debug\PROTOCOLS",
                 @"C:\KviNA\ADDITIVE\CsProtocols\CsProtocols\bin\Debug\PROTOCOLS",
-                @"C:\KviNA\ADDITIVE\csManual\csManual\bin\Debug\PROTOCOLS"
+                @"C:\KviNA\ADDITIVE\csManual\csManual\bin\Debug\PROTOCOLS",
+                @"U:\KviNA\APPLICATIONS\Administration\Administration\bin\Debug\PROTOCOLS",
+                @"U:\KviNA\ADDITIVE\CsProtocols\CsProtocols\bin\Debug\PROTOCOLS",
+                @"U:\KviNA\ADDITIVE\csManual\csManual\bin\Debug\PROTOCOLS"
             };
 
             foreach (string path in knownPaths)
             {
-                if (Directory.Exists(path) && !path.StartsWith("U", StringComparison.OrdinalIgnoreCase) && !_foundFolders.Contains(path))
+                if (Directory.Exists(path) && !_foundFolders.Contains(path))
                     _foundFolders.Add(path);
             }
 
-            _foundFolders = _foundFolders
-                .Where(p => !p.StartsWith("U", StringComparison.OrdinalIgnoreCase) && !p.Contains("U:"))
-                .Distinct()
-                .ToList();
+            _foundFolders = _foundFolders.Distinct().ToList();
         }
 
-        private string[] ReadFileSafe(string filePath)
-        {
-            // Регистрируем провайдер кодировок (если еще не зарегистрирован)
-            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-
-            // Читаем файл строго в Windows-1251 для корректного отображения русского текста
-            Encoding win1251 = Encoding.GetEncoding(1251);
-            string text = File.ReadAllText(filePath, win1251);
-
-            text = text.Replace("\uFEFF", "").Replace("ï»¿", "");
-
-            return text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
-        }
         private int InsertPclFile(string filePath)
         {
-            if (filePath.StartsWith("U", StringComparison.OrdinalIgnoreCase) || filePath.Contains("U:"))
-                return 0;
-
             int count = 0;
-            var lines = ReadFileSafe(filePath);
+            var lines = File.ReadAllLines(filePath);
             bool isHeader = true;
 
             foreach (string line in lines)
@@ -188,11 +164,6 @@ namespace CsProtocols
                     string prc = parts[10].Trim();
                     string fil = parts.Length > 11 ? parts[11].Trim() : "";
 
-                    if (!int.TryParse(pclTyp, out _))
-                    {
-                        continue;
-                    }
-
                     int appClu = InsertApp(appName);
 
                     if (!PclExists(guid))
@@ -209,11 +180,8 @@ namespace CsProtocols
 
         private int InsertRrdFile(string filePath)
         {
-            if (filePath.StartsWith("U", StringComparison.OrdinalIgnoreCase) || filePath.Contains("U:"))
-                return 0;
-
             int count = 0;
-            var lines = ReadFileSafe(filePath);
+            var lines = File.ReadAllLines(filePath);
             bool isHeader = true;
 
             foreach (string line in lines)
@@ -226,50 +194,17 @@ namespace CsProtocols
                 }
                 isHeader = false;
 
+                var parts = line.Split(',');
+                if (parts.Length < 5) continue;
+
                 try
                 {
-                    int idx1 = line.IndexOf(',');
-                    if (idx1 == -1) continue;
-                    int idx2 = line.IndexOf(',', idx1 + 1);
-                    if (idx2 == -1) continue;
-                    int idx3 = line.IndexOf(',', idx2 + 1);
-                    if (idx3 == -1) continue;
-                    int idx4 = line.IndexOf(',', idx3 + 1);
-                    if (idx4 == -1) continue;
-
-                    string chg = line.Substring(0, idx1).Trim();
-                    string guid = line.Substring(idx1 + 1, idx2 - idx1 - 1).Trim();
-                    string inkPcl = line.Substring(idx2 + 1, idx3 - idx2 - 1).Trim();
-                    string rrdTyp = line.Substring(idx3 + 1, idx4 - idx3 - 1).Trim();
-
-                    if (!long.TryParse(inkPcl, out _) || !int.TryParse(rrdTyp, out _))
-                    {
-                        continue;
-                    }
-
-                    int lastComma = line.LastIndexOf(',');
-                    string err = "";
-                    string tck = "-1";
-
-                    if (lastComma > idx4)
-                    {
-                        string potentialTck = line.Substring(lastComma + 1).Trim();
-                        potentialTck = new string(potentialTck.Where(char.IsDigit).ToArray());
-
-                        if (int.TryParse(potentialTck, out int parsedTck))
-                        {
-                            tck = parsedTck.ToString();
-                            err = line.Substring(idx4 + 1, lastComma - idx4 - 1).Trim();
-                        }
-                        else
-                        {
-                            err = line.Substring(idx4 + 1).Trim();
-                        }
-                    }
-                    else
-                    {
-                        err = line.Substring(idx4 + 1).Trim();
-                    }
+                    string chg = parts[0].Trim();
+                    string guid = parts[1].Trim();
+                    string inkPcl = parts[2].Trim();
+                    string rrdTyp = parts[3].Trim();
+                    string err = parts[4].Trim();
+                    string tck = parts.Length > 5 ? parts[5].Trim() : "-1";
 
                     if (!RrdExists(inkPcl, guid))
                     {
@@ -287,8 +222,7 @@ namespace CsProtocols
         {
             if (string.IsNullOrEmpty(appName)) return -1;
 
-            string safeAppName = EscapeSql(appName);
-            string checkQuery = $"SELECT CLU FROM App WHERE dsiApp = '{safeAppName}'";
+            string checkQuery = $"SELECT CLU FROM App WHERE dsiApp = '{appName}'";
             var result = _dataSource.__mSqlValue(checkQuery);
             if (result != null && result != DBNull.Value)
                 return Convert.ToInt32(result);
@@ -296,7 +230,7 @@ namespace CsProtocols
             string chg = DateTime.Now.Ticks.ToString();
             string guid = Guid.NewGuid().ToString();
             string insertQuery = $"INSERT INTO App (CHG, GID, ELD, cgzApp, dsiApp, Pfx) " +
-                                 $"VALUES ('{chg}', '{guid}', 0, 0, '{safeAppName}', '')";
+                                 $"VALUES ('{chg}', '{guid}', 0, 0, '{appName}', '')";
             _dataSource.__mSqlCommand(insertQuery);
 
             result = _dataSource.__mSqlValue(checkQuery);
@@ -313,13 +247,8 @@ namespace CsProtocols
         private void InsertPclRecord(string chg, string guid, int appClu, string pclTyp, string user, string prc, string fil)
         {
             string newGuid = Guid.NewGuid().ToString();
-            string safeUser = EscapeSql(user);
-            string safePrc = EscapeSql(prc);
-            string safeFil = EscapeSql(fil);
-            string safePclTyp = string.IsNullOrEmpty(pclTyp) ? "0" : pclTyp;
-
             string query = $"INSERT INTO Pcl (CHG, GID, ELD, InkApp, InkPclTyp, InkUsr, Prc, Fil) " +
-                           $"VALUES ('{chg}', '{newGuid}', 0, {appClu}, {safePclTyp}, '{safeUser}', '{safePrc}', '{safeFil}')";
+                           $"VALUES ('{chg}', '{newGuid}', 0, {appClu}, {pclTyp}, '{user}', '{prc}', '{fil}')";
             _dataSource.__mSqlCommand(query);
         }
 
@@ -333,34 +262,9 @@ namespace CsProtocols
         private void InsertRrdRecord(string chg, string guid, string inkPcl, string rrdTyp, string err, string tck)
         {
             string newGuid = Guid.NewGuid().ToString();
-
-            string safeInkPcl = string.IsNullOrEmpty(inkPcl) ? "0" : inkPcl;
-            string safeRrdTyp = string.IsNullOrEmpty(rrdTyp) ? "0" : rrdTyp;
-            string safeTck = string.IsNullOrEmpty(tck) ? "-1" : tck;
-            string safeErr = EscapeSql(err);
-
             string query = $"INSERT INTO PclRrd (CHG, GID, ELD, InkPcl, InkPclRrdTyp, Err, Tck) " +
-                           $"VALUES ('{chg}', '{newGuid}', 0, {safeInkPcl}, {safeRrdTyp}, '{safeErr}', {safeTck})";
+                           $"VALUES ('{chg}', '{newGuid}', 0, {inkPcl}, {rrdTyp}, '{err}', {tck})";
             _dataSource.__mSqlCommand(query);
-        }
-
-        private string EscapeSql(string input)
-        {
-            if (string.IsNullOrEmpty(input)) return "";
-
-            // Вырезаем любые упоминания диска U из текста ошибок на всякий случай
-            string cleaned = Regex.Replace(input, @"[Uu]:[/\\][^\s""',]*", "[путь удален]");
-
-            return cleaned
-                .Replace("'", "''")
-                .Replace("\"", "''")
-                .Replace("‘", "''")
-                .Replace("’", "''")
-                .Replace("“", "''")
-                .Replace("”", "''")
-                .Replace("«", "''")
-                .Replace("»", "''")
-                .Replace("„", "''");
         }
     }
 }
