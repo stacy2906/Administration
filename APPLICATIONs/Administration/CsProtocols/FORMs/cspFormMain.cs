@@ -8,10 +8,8 @@ using nlDataSourceSqlite;
 using System.IO;
 using System.Drawing;
 using nlApplication;
-using System.Collections.Generic;
-using System.Linq;
-using CsProtocols.DATA.Loaders;
-using CsProtocols.DATA.Models;
+using System.Data.SQLite;
+
 
 namespace naCsProtocols
 {
@@ -19,20 +17,17 @@ namespace naCsProtocols
     {
         #region = ПОЛЯ
 
-        // Левая таблица - протоколы
+        // Левая таблица - Список протоколов (Таблица Pcl)
         private cspAreaGrid _cAreaProtocols = new cspAreaGrid();
         private DataTable _oDataTableProtocols = new DataTable();
 
-        // Правая таблица - записи
+        // Правая таблица - Записи протокола (Таблица PclRrd)
         private cspAreaGrid _cAreaProtocolsRecords = new cspAreaGrid();
         private DataTable _oDataTableProtocolsRecord = new DataTable();
 
-        // Данные
-        private List<ProtocolRecord> _allRecords = new List<ProtocolRecord>();
-        private ProtocolLoader _loader = new ProtocolLoader();
-        private string _currentProtocolGuid = "";
-
         private Label lblStatus;
+        private datUnitDataSource _currentDataSource = null;
+        private string _currentFilePath = string.Empty;
 
         #endregion
 
@@ -44,10 +39,87 @@ namespace naCsProtocols
         {
             _mObjectAssembly();
             _mObjectPresentation();
-            // ← НИЧЕГО НЕ ЗАГРУЖАЕМ
         }
 
         #endregion
+
+        public void BindDataToGrid()
+        {
+            if (string.IsNullOrEmpty(_currentFilePath) || _currentDataSource == null) return;
+
+            try
+            {
+                string vQueryPcl = "SELECT * FROM Pcl";
+                DataTable vDataTablePcl = _currentDataSource.__mSqlQuery(vQueryPcl);
+
+                if (vDataTablePcl != null)
+                {
+                    foreach (DataRow vDataRow in vDataTablePcl.Rows)
+                    {
+                        if (vDataRow["CHG"] != DBNull.Value && long.TryParse(vDataRow["CHG"].ToString(), out long ticks))
+                        {
+                            vDataRow["CHG"] = new DateTime(ticks).ToString("yyyy-MM-dd HH:mm:ss");
+                        }
+                    }
+
+                    _cAreaProtocols.__fDataSource_ = vDataTablePcl;
+                    _cAreaProtocols.__mGridRefresh();
+                }
+
+                string vQueryPclRrd = "SELECT * FROM PclRrd";
+                DataTable vDataTablePclRrd = _currentDataSource.__mSqlQuery(vQueryPclRrd);
+
+                if (vDataTablePclRrd != null)
+                {
+                    foreach (DataRow vDataRow in vDataTablePclRrd.Rows)
+                    {
+                        if (vDataRow["CHG"] != DBNull.Value && long.TryParse(vDataRow["CHG"].ToString(), out long ticks))
+                        {
+                            vDataRow["CHG"] = new DateTime(ticks).ToString("yyyy-MM-dd HH:mm:ss");
+                        }
+                    }
+
+                    _cAreaProtocolsRecords.__fDataSource_ = vDataTablePclRrd;
+                    _cAreaProtocolsRecords.__mGridRefresh();
+                }
+
+                if (lblStatus != null)
+                {
+                    lblStatus.Text = "Данные успешно обновлены из БД";
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка привязки данных: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        public void LoadDataAndShow()
+        {
+            string dbPath = @"C:\Users\doy\Documents\GitHub\Administration\DATABASES\Protocols.db";
+
+            _currentFilePath = dbPath;
+            _currentDataSource = new dsqDataSourceSqlite();
+            _currentDataSource.__fDatabasePath = Path.GetDirectoryName(dbPath);
+            _currentDataSource.__fDatabaseName = Path.GetFileName(dbPath);
+
+            string vQueryPcl = "SELECT * FROM Pcl";
+            DataTable vDataTablePcl = _currentDataSource.__mSqlQuery(vQueryPcl);
+
+            if (vDataTablePcl != null)
+            {
+                foreach (DataRow vDataRow in vDataTablePcl.Rows)
+                {
+                    if (vDataRow["CHG"] != DBNull.Value && long.TryParse(vDataRow["CHG"].ToString(), out long ticks))
+                    {
+                        vDataRow["CHG"] = new DateTime(ticks).ToString("yyyy-MM-dd HH:mm:ss");
+                    }
+                }
+
+                _cAreaProtocols.__fDataSource_ = vDataTablePcl;
+                _cAreaProtocols.__mGridRefresh();
+            }
+        }
 
         #region - Объект
 
@@ -62,14 +134,14 @@ namespace naCsProtocols
             mainBlock.Controls.Add(splitter);
 
             // ============================================================
-            // ЛЕВАЯ ПАНЕЛЬ - ПРОТОКОЛЫ
+            // ЛЕВАЯ ПАНЕЛЬ: Список протоколов (Pcl)
             // ============================================================
             var leftPanel = new Panel { Dock = DockStyle.Fill };
             splitter.Panel1.Controls.Add(leftPanel);
 
             var leftHeader = new Label
             {
-                Text = "📋 ПРОТОКОЛЫ",
+                Text = "Список протоколов",
                 Dock = DockStyle.Top,
                 Height = 30,
                 BackColor = Color.FromArgb(0, 102, 204),
@@ -86,41 +158,42 @@ namespace naCsProtocols
             };
             leftPanel.Controls.Add(_cAreaProtocols);
 
-            // Колонки для левой таблицы
             _oDataTableProtocols.Columns.Clear();
             _oDataTableProtocols.Columns.Add("CLU", typeof(string));
             _oDataTableProtocols.Columns.Add("CHG", typeof(string));
-            _oDataTableProtocols.Columns.Add("App", typeof(string));
-            _oDataTableProtocols.Columns.Add("PclTyp", typeof(string));
-            _oDataTableProtocols.Columns.Add("Hst", typeof(string));
+            _oDataTableProtocols.Columns.Add("lnkApp", typeof(string));
+            _oDataTableProtocols.Columns.Add("lnkPclTyp", typeof(string));
+            _oDataTableProtocols.Columns.Add("lnkCpu", typeof(string));
             _oDataTableProtocols.Columns.Add("Prc", typeof(string));
-            _oDataTableProtocols.Columns.Add("Usr", typeof(string));
+            _oDataTableProtocols.Columns.Add("lnkUsr", typeof(string));
+            _oDataTableProtocols.Columns.Add("Fil", typeof(string));
 
             _cAreaProtocols.__fDataSource_ = _oDataTableProtocols;
 
             if (_cAreaProtocols.__fGrid_.Columns.Count == 0)
             {
-                _cAreaProtocols.__mColumnAdd("Протокол", "Ключ протокола", "CLU", true, true, DATAGRIDCOLUMNTYPE.DataGridViewTextBoxColumn);
-                _cAreaProtocols.__mColumnAdd("Время", "Время создания", "CHG", true, true, DATAGRIDCOLUMNTYPE.DataGridViewTextBoxColumn);
-                _cAreaProtocols.__mColumnAdd("Приложение", "Приложение", "App", true, true, DATAGRIDCOLUMNTYPE.DataGridViewTextBoxColumn);
-                _cAreaProtocols.__mColumnAdd("Вид", "Вид протокола", "PclTyp", true, true, DATAGRIDCOLUMNTYPE.DataGridViewTextBoxColumn);
-                _cAreaProtocols.__mColumnAdd("Хост", "Компьютер", "Hst", true, true, DATAGRIDCOLUMNTYPE.DataGridViewTextBoxColumn);
-                _cAreaProtocols.__mColumnAdd("Процедура", "Процедура", "Prc", true, true, DATAGRIDCOLUMNTYPE.DataGridViewTextBoxColumn);
-                _cAreaProtocols.__mColumnAdd("Пользователь", "Пользователь", "Usr", true, true, DATAGRIDCOLUMNTYPE.DataGridViewTextBoxColumn);
+                _cAreaProtocols.__mColumnAdd("Протокол", "CLU", "CLU", true, true, DATAGRIDCOLUMNTYPE.DataGridViewTextBoxColumn);
+                _cAreaProtocols.__mColumnAdd("Время", "CHG", "CHG", true, true, DATAGRIDCOLUMNTYPE.DataGridViewTextBoxColumn);
+                _cAreaProtocols.__mColumnAdd("Приложение", "lnkApp", "lnkApp", true, true, DATAGRIDCOLUMNTYPE.DataGridViewTextBoxColumn);
+                _cAreaProtocols.__mColumnAdd("Вид", "lnkPclTyp", "lnkPclTyp", true, true, DATAGRIDCOLUMNTYPE.DataGridViewTextBoxColumn);
+                _cAreaProtocols.__mColumnAdd("Хост", "lnkCpu", "lnkCpu", true, true, DATAGRIDCOLUMNTYPE.DataGridViewTextBoxColumn);
+                _cAreaProtocols.__mColumnAdd("Процедура", "Prc", "Prc", true, true, DATAGRIDCOLUMNTYPE.DataGridViewTextBoxColumn);
+                _cAreaProtocols.__mColumnAdd("Пользователь", "lnkUsr", "lnkUsr", true, true, DATAGRIDCOLUMNTYPE.DataGridViewTextBoxColumn);
                 _cAreaProtocols.__mGridBuild();
             }
 
             _cAreaProtocols.__eGridCellEnter += mAreaProtocols_GridCellEnter;
+            _cAreaProtocols.__fGrid_.CellEndEdit += mAreaProtocols_CellEndEdit;
 
             // ============================================================
-            // ПРАВАЯ ПАНЕЛЬ - ЗАПИСИ В ПРОТОКОЛАХ
+            // ПРАВАЯ ПАНЕЛЬ: Записи протокола (PclRrd)
             // ============================================================
             var rightPanel = new Panel { Dock = DockStyle.Fill };
             splitter.Panel2.Controls.Add(rightPanel);
 
             var rightHeader = new Label
             {
-                Text = "📝 ЗАПИСИ В ПРОТОКОЛАХ",
+                Text = "Записи протокола (PclRrd)",
                 Dock = DockStyle.Top,
                 Height = 30,
                 BackColor = Color.FromArgb(0, 102, 204),
@@ -137,25 +210,27 @@ namespace naCsProtocols
             };
             rightPanel.Controls.Add(_cAreaProtocolsRecords);
 
-            // Колонки для правой таблицы: Протокол, Ключ, Вид, Сообщение, Время
             _oDataTableProtocolsRecord.Columns.Clear();
-            _oDataTableProtocolsRecord.Columns.Add("Protocol", typeof(string));
-            _oDataTableProtocolsRecord.Columns.Add("Key", typeof(string));
-            _oDataTableProtocolsRecord.Columns.Add("Type", typeof(string));
-            _oDataTableProtocolsRecord.Columns.Add("Message", typeof(string));
-            _oDataTableProtocolsRecord.Columns.Add("Time", typeof(string));
+            _oDataTableProtocolsRecord.Columns.Add("CLU", typeof(string));
+            _oDataTableProtocolsRecord.Columns.Add("CHG", typeof(string));
+            _oDataTableProtocolsRecord.Columns.Add("lnkPcl", typeof(string));
+            _oDataTableProtocolsRecord.Columns.Add("lnkPclRrdTyp", typeof(string));
+            _oDataTableProtocolsRecord.Columns.Add("Err", typeof(string));
+            _oDataTableProtocolsRecord.Columns.Add("Tck", typeof(string));
 
             _cAreaProtocolsRecords.__fDataSource_ = _oDataTableProtocolsRecord;
 
             if (_cAreaProtocolsRecords.__fGrid_.Columns.Count == 0)
             {
-                _cAreaProtocolsRecords.__mColumnAdd("Протокол", "Ключ протокола", "Protocol", true, true, DATAGRIDCOLUMNTYPE.DataGridViewTextBoxColumn);
-                _cAreaProtocolsRecords.__mColumnAdd("Ключ", "Ключ записи", "Key", true, true, DATAGRIDCOLUMNTYPE.DataGridViewTextBoxColumn);
-                _cAreaProtocolsRecords.__mColumnAdd("Вид", "Вид записи", "Type", true, true, DATAGRIDCOLUMNTYPE.DataGridViewTextBoxColumn);
-                _cAreaProtocolsRecords.__mColumnAdd("Сообщение", "Сообщение", "Message", true, true, DATAGRIDCOLUMNTYPE.DataGridViewTextBoxColumn);
-                _cAreaProtocolsRecords.__mColumnAdd("Время", "Время", "Time", true, true, DATAGRIDCOLUMNTYPE.DataGridViewTextBoxColumn);
+                _cAreaProtocolsRecords.__mColumnAdd("Протокол", "lnkPcl", "lnkPcl", true, true, DATAGRIDCOLUMNTYPE.DataGridViewTextBoxColumn);
+                _cAreaProtocolsRecords.__mColumnAdd("Ключ", "CLU", "CLU", true, true, DATAGRIDCOLUMNTYPE.DataGridViewTextBoxColumn);
+                _cAreaProtocolsRecords.__mColumnAdd("Вид", "lnkPclRrdTyp", "lnkPclRrdTyp", true, true, DATAGRIDCOLUMNTYPE.DataGridViewTextBoxColumn);
+                _cAreaProtocolsRecords.__mColumnAdd("Сообщение", "Err", "Err", true, true, DATAGRIDCOLUMNTYPE.DataGridViewTextBoxColumn);
+                _cAreaProtocolsRecords.__mColumnAdd("Время", "CHG", "CHG", true, true, DATAGRIDCOLUMNTYPE.DataGridViewTextBoxColumn);
                 _cAreaProtocolsRecords.__mGridBuild();
             }
+
+            _cAreaProtocolsRecords.__fGrid_.CellEndEdit += mAreaProtocolsRecords_CellEndEdit;
 
             // Статус
             lblStatus = new Label
@@ -191,44 +266,111 @@ namespace naCsProtocols
 
         #endregion
 
-        #region - События
+        #region - События и Автосохранение
 
         private void mAreaProtocols_GridCellEnter(object sender, EventArgs e)
         {
-            // Таблица пустая, ничего не делаем
+            if (_cAreaProtocols.__fGrid_.CurrentRow != null && _currentDataSource != null)
+            {
+                var rowView = _cAreaProtocols.__fGrid_.CurrentRow.DataBoundItem as DataRowView;
+                if (rowView != null)
+                {
+                    string protocolClu = rowView["CLU"].ToString();
+                    string vQueryPclRrd = $"SELECT * FROM PclRrd WHERE lnkPcl = '{protocolClu}'";
+                    DataTable vDataTablePclRrd = _currentDataSource.__mSqlQuery(vQueryPclRrd);
+
+                    foreach (DataRow vDataRow in vDataTablePclRrd.Rows)
+                    {
+                        if (vDataRow["CHG"] != DBNull.Value && long.TryParse(vDataRow["CHG"].ToString(), out long ticks))
+                        {
+                            vDataRow["CHG"] = new DateTime(ticks).ToString("yyyy-MM-dd HH:mm:ss");
+                        }
+                    }
+
+                    _cAreaProtocolsRecords.__fDataSource_ = vDataTablePclRrd;
+                    _cAreaProtocolsRecords.__mGridRefresh();
+                }
+            }
         }
 
-        private void DisplayRecords(List<ProtocolRecord> records)
+        private void mAreaProtocols_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
-            _oDataTableProtocolsRecord.Rows.Clear();
+            SaveRowToDatabase(e.RowIndex, _cAreaProtocols.__fGrid_, "Pcl");
+        }
 
-            if (records.Count == 0)
+        private void mAreaProtocolsRecords_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            SaveRowToDatabase(e.RowIndex, _cAreaProtocolsRecords.__fGrid_, "PclRrd");
+        }
+
+        private void SaveRowToDatabase(int rowIndex, DataGridView grid, string tableName)
+        {
+            if (string.IsNullOrEmpty(_currentFilePath)) return;
+
+            var row = grid.Rows[rowIndex];
+            if (row.DataBoundItem is DataRowView rowView)
             {
-                _cAreaProtocolsRecords.__fDataSource_ = _oDataTableProtocolsRecord;
-                _cAreaProtocolsRecords.__mGridRefresh();
-                return;
-            }
+                DataRow dataRow = rowView.Row;
+                string clu = dataRow["CLU"]?.ToString();
 
-            foreach (var record in records)
-            {
-                DataRow row = _oDataTableProtocolsRecord.NewRow();
-                row["Protocol"] = record.Program ?? "";
+                if (string.IsNullOrEmpty(clu)) return;
 
-                string key = record.Key;
-                if (string.IsNullOrEmpty(key) && !string.IsNullOrEmpty(record.Guid))
+                using (var connection = new SQLiteConnection($"Data Source={_currentFilePath};Version=3;"))
                 {
-                    key = record.Guid.Length >= 8 ? record.Guid.Substring(0, 8) : record.Guid;
+                    connection.Open();
+
+                    string checkQuery = $"SELECT COUNT(1) FROM {tableName} WHERE CLU = @CLU";
+                    using (var checkCmd = new SQLiteCommand(checkQuery, connection))
+                    {
+                        checkCmd.Parameters.AddWithValue("@CLU", clu);
+                        long count = (long)checkCmd.ExecuteScalar();
+
+                        if (count > 0)
+                        {
+                            string updateCols = "";
+                            var cmd = new SQLiteCommand(connection);
+                            int paramIndex = 0;
+
+                            foreach (DataColumn col in dataRow.Table.Columns)
+                            {
+                                if (col.ColumnName == "CLU") continue;
+                                if (updateCols.Length > 0) updateCols += ", ";
+                                updateCols += $"{col.ColumnName} = @p{paramIndex}";
+                                cmd.Parameters.AddWithValue($"@p{paramIndex}", dataRow[col] ?? DBNull.Value);
+                                paramIndex++;
+                            }
+
+                            cmd.CommandText = $"UPDATE {tableName} SET {updateCols} WHERE CLU = @CLU";
+                            cmd.Parameters.AddWithValue("@CLU", clu);
+                            cmd.ExecuteNonQuery();
+                        }
+                        else
+                        {
+                            string cols = "";
+                            string paramsNames = "";
+                            var cmd = new SQLiteCommand(connection);
+                            int paramIndex = 0;
+
+                            foreach (DataColumn col in dataRow.Table.Columns)
+                            {
+                                if (cols.Length > 0)
+                                {
+                                    cols += ", ";
+                                    paramsNames += ", ";
+                                }
+                                cols += col.ColumnName;
+                                paramsNames += $"@p{paramIndex}";
+                                cmd.Parameters.AddWithValue($"@p{paramIndex}", dataRow[col] ?? DBNull.Value);
+                                paramIndex++;
+                            }
+
+                            cmd.CommandText = $"INSERT INTO {tableName} ({cols}) VALUES ({paramsNames})";
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
                 }
-                row["Key"] = key ?? "";
-
-                row["Type"] = record.RecordType ?? "Action";
-                row["Message"] = record.Description ?? record.Message ?? "";
-                row["Time"] = record.DateTime.ToString("yyyy-MM-dd HH:mm:ss");
-                _oDataTableProtocolsRecord.Rows.Add(row);
+                lblStatus.Text = $"Изменения в таблице {tableName} сохранены в БД";
             }
-
-            _cAreaProtocolsRecords.__fDataSource_ = _oDataTableProtocolsRecord;
-            _cAreaProtocolsRecords.__mGridRefresh();
         }
 
         #endregion
@@ -246,28 +388,38 @@ namespace naCsProtocols
 
             if (vOpenFileDialog.ShowDialog() == DialogResult.OK)
             {
-                string vFilePath = vOpenFileDialog.FileName;
+                _currentFilePath = vOpenFileDialog.FileName;
                 datUnitDataSource vDataSource = new dsqDataSourceSqlite();
-                vDataSource.__fDatabasePath = Path.GetDirectoryName(vFilePath);
-                vDataSource.__fDatabaseName = Path.GetFileName(vFilePath);
+                vDataSource.__fDatabasePath = Path.GetDirectoryName(_currentFilePath);
+                vDataSource.__fDatabaseName = Path.GetFileName(_currentFilePath);
 
-                string vQueryPcl = "SELECT P.*, A.desApp, PT.desPclTyp "
-                    + "FROM Pcl P "
-                    + "LEFT JOIN App A ON A.CLU = P.lnkApp "
-                    + "LEFT JOIN PclTyp PT ON PT.CLU = P.lnkPclTyp";
+                _currentDataSource = vDataSource;
 
+                string vQueryPcl = "SELECT * FROM Pcl";
                 DataTable vDataTablePcl = vDataSource.__mSqlQuery(vQueryPcl);
-                _cAreaProtocols.__fDataSource_ = vDataTablePcl;
+
                 foreach (DataRow vDataRow in vDataTablePcl.Rows)
                 {
-                    vDataRow["CHG"] = new DateTime(Convert.ToInt64(vDataRow["CHG"])).ToString();
+                    if (vDataRow["CHG"] != DBNull.Value && long.TryParse(vDataRow["CHG"].ToString(), out long ticks))
+                    {
+                        vDataRow["CHG"] = new DateTime(ticks).ToString("yyyy-MM-dd HH:mm:ss");
+                    }
                 }
 
-                string vQueryPclRrd = "SELECT PR.*, RT.desRrdTyp "
-                    + "FROM PclRrd PR "
-                    + "LEFT JOIN RrdTyp RT ON RT.CLU = PR.lnkRrdTyp";
+                _cAreaProtocols.__fDataSource_ = vDataTablePcl;
+                _cAreaProtocols.__mGridRefresh();
 
+                string vQueryPclRrd = "SELECT * FROM PclRrd";
                 DataTable vDataTablePclRrd = vDataSource.__mSqlQuery(vQueryPclRrd);
+
+                foreach (DataRow vDataRow in vDataTablePclRrd.Rows)
+                {
+                    if (vDataRow["CHG"] != DBNull.Value && long.TryParse(vDataRow["CHG"].ToString(), out long ticks))
+                    {
+                        vDataRow["CHG"] = new DateTime(ticks).ToString("yyyy-MM-dd HH:mm:ss");
+                    }
+                }
+
                 _cAreaProtocolsRecords.__fDataSource_ = vDataTablePclRrd;
                 _cAreaProtocolsRecords.__mGridRefresh();
 
