@@ -482,3 +482,66 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# ============================================
+# БИНАРНЫЕ И СБОРОЧНЫЕ ФАЙЛЫ
+# ============================================
+
+# Папки сборки
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+
+# Бинарные файлы
+*.dll
+*.pdb
+*.exe
+*.so
+*.dylib
+*.o
+*.obj
+
+# Файлы кэша компиляции
+*.cache
+*.AssemblyReference.cache
+*.CoreCompileInputs.cache
+*.FileListAbsolute.txt
+*.FileListAbsolute
+
+# ============================================
+# ВАШИ ПАПКИ
+# ============================================
+
+# Временные данные
+_Data/
+_Data*/
+_Data/**/*
+
+# Источники данных Excel (если временные)
+_DataSourceMsExcel/
+_DataSourceMsExcel*/
+_DataSourceMsExcel/**/*
+
+# Все файлы Excel
+*.xlsx
+*.xls
+*.xlsm
+*.csv
+*.xlsb
+
+# ============================================
+# ВРЕМЕННЫЕ И СИСТЕМНЫЕ ФАЙЛЫ
+# ============================================
+
+*.tmp
+*.temp
+*.log
+*.bak
+*.swp
+*.~*
+Thumbs.db
+desktop.ini
+.DS_Store
