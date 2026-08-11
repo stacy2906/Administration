@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using CsProtocols.DATA.Models;
 
 namespace CsProtocols.DATA.Loaders
@@ -16,7 +17,7 @@ namespace CsProtocols.DATA.Loaders
                 return result;
 
             var files = Directory.GetFiles(folderPath, "*.pcl", SearchOption.AllDirectories)
-                .Where(f => !Path.GetFileNameWithoutExtension(f).EndsWith("rr"))
+                .Where(f => !Path.GetFileNameWithoutExtension(f).EndsWith("rrd"))
                 .ToList();
 
             foreach (var file in files)
@@ -55,8 +56,10 @@ namespace CsProtocols.DATA.Loaders
             var lines = File.ReadAllLines(rrdPath, System.Text.Encoding.GetEncoding(1251));
             bool isHeader = true;
 
+            int lineNumber = 0;
             foreach (string line in lines)
             {
+                lineNumber++;
                 if (string.IsNullOrWhiteSpace(line))
                     continue;
 
@@ -76,7 +79,7 @@ namespace CsProtocols.DATA.Loaders
                     var record = new ProtocolRecord
                     {
                         Guid = parts[1].Trim(),
-                        RecordType = parts[3].Trim(),
+                        RecordType = MapRecordType(parts[3].Trim()),
                         Message = parts[4].Trim(),
                         DateTime = DateTime.Now
                     };
@@ -110,9 +113,11 @@ namespace CsProtocols.DATA.Loaders
             }
 
             bool isHeader = true;
+            int lineNumber = 0;
 
             foreach (string line in lines)
             {
+                lineNumber++;
                 if (string.IsNullOrWhiteSpace(line))
                     continue;
 
@@ -123,13 +128,43 @@ namespace CsProtocols.DATA.Loaders
                 }
                 isHeader = false;
 
-                var record = ParseCsvLine(line, programName);
+                var record = line.StartsWith("[") ? ParseBracketLine(line, filePath, lineNumber) : ParseCsvLine(line, programName);
                 if (record != null)
+                {
+                    record.SourceFile = filePath;
                     records.Add(record);
+                }
             }
 
             return records;
         }
+
+        private ProtocolRecord ParseBracketLine(string line, string filePath, int lineNumber)
+        {
+            MatchCollection matches = Regex.Matches(line, @"\[([^\]]*)\]");
+            if (matches.Count < 8)
+                return null;
+
+            long ticks;
+            var record = new ProtocolRecord
+            {
+                Guid = filePath + ":" + lineNumber,
+                Program = matches[2].Groups[1].Value,
+                Computer = matches.Count > 5 ? matches[5].Groups[1].Value : "",
+                User = matches.Count > 6 ? matches[6].Groups[1].Value : "",
+                ProtocolType = matches.Count > 7 ? MapProtocolType(ConvertToInt(matches[7].Groups[1].Value)) : "Application",
+                ProtocolTypeId = matches.Count > 7 ? ConvertToInt(matches[7].Groups[1].Value) : 0,
+                Procedure = matches.Count > 9 ? matches[9].Groups[1].Value : "",
+                Description = line,
+                Message = line,
+                RecordType = "Message",
+                ErrorType = "None"
+            };
+            record.DateTime = Int64.TryParse(matches[0].Groups[1].Value, out ticks) ? new DateTime(ticks) : DateTime.Now;
+            return record;
+        }
+
+        private static int ConvertToInt(string value) { int result; return Int32.TryParse(value, out result) ? result : 0; }
 
         private ProtocolRecord ParseCsvLine(string line, string programName)
         {
@@ -172,6 +207,7 @@ namespace CsProtocols.DATA.Loaders
 
                 if (parts.Length > 8 && int.TryParse(parts[8].Trim(), out int protocolTypeId))
                 {
+                    record.ProtocolTypeId = protocolTypeId;
                     record.ProtocolType = MapProtocolType(protocolTypeId);
                     record.ErrorType = MapErrorType(protocolTypeId);
                 }
@@ -205,12 +241,38 @@ namespace CsProtocols.DATA.Loaders
         {
             switch (id)
             {
-                case 0: case 1: case 2: case 3: case 4: return "Application";
-                case 5: case 6: return "Database";
-                case 7: case 8: return "Network";
-                case 9: case 10: case 11: return "User";
-                case 12: return "Security";
-                default: return "Application";
+                case 1: return "Ошибка приложения";
+                case 2: return "Ошибка программирования";
+                case 3: return "Исключение";
+                case 4: return "Событие приложения";
+                case 5: return "Ошибка источника данных";
+                case 6: return "Событие источника данных";
+                case 7: return "Ошибка устройства";
+                case 8: return "Событие устройства";
+                case 9: return "Ошибка пользователя";
+                case 10: return "Событие пользователя";
+                case 11: return "Сообщение пользователю";
+                case 12: return "Прочее";
+                default: return "Не указан";
+            }
+        }
+
+        private string MapRecordType(string pRawId)
+        {
+            int vId;
+            if (int.TryParse(pRawId, out vId) == false)
+                return pRawId; // Не число - возвращаем как есть, не портим данные
+
+            switch (vId)
+            {
+                case 0: return "Решение пользователя";   // Answer
+                case 1: return "Детали события";          // Detail
+                case 2: return "Исключение";              // Exception
+                case 3: return "Изображение";             // Image
+                case 4: return "Сообщение";               // Message
+                case 5: return "Свойство объекта";        // ObjectProperty
+                case 6: return "Причина ошибки";          // Reason
+                default: return pRawId;
             }
         }
 

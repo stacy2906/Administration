@@ -9,6 +9,7 @@ namespace CsProtocols.DATA.Models
         public string User { get; set; }
         public string Computer { get; set; }
         public string ProtocolType { get; set; }
+        public int ProtocolTypeId { get; set; }
         public string ErrorType { get; set; }
         public string Procedure { get; set; }
         public string Description { get; set; }
@@ -18,5 +19,6 @@ namespace CsProtocols.DATA.Models
         public string ImageFile { get; set; }
         public string Message { get; set; }
         public string Key { get; set; }  // ← ДОБАВЛЕНО
+        public string SourceFile { get; set; }  // ← ДОБАВЛЕНО: путь к .pcl файлу-источнику, нужен для загрузки записей протокола
     }
 }

@@ -1,6 +1,7 @@
 ﻿using nlApplication;
 using nlData;
 using System;
+using System.IO;
 
 namespace nlDataSourceSqlite
 {
@@ -8,8 +9,20 @@ namespace nlDataSourceSqlite
     {
         #region = ДИЗАЙНЕРЫ
 
+        /// <summary>
+        /// Конструктор по умолчанию. База данных размещается в подпапке 'Databases' рядом с исполняемым файлом
+        /// </summary>
         public dsqProtocols()
         {
+            _mObjectAssembly();
+        }
+        /// <summary>
+        /// Конструктор с указанием пути размещения базы данных
+        /// </summary>
+        /// <param name="pDatabasePath">Путь к папке, в которой должен быть расположен файл базы данных протоколов</param>
+        public dsqProtocols(string pDatabasePath)
+        {
+            __fDatabasePath = pDatabasePath;
             _mObjectAssembly();
         }
 
@@ -21,10 +34,18 @@ namespace nlDataSourceSqlite
 
         protected void _mObjectAssembly()
         {
+            /// БАГ (исправлено): 'fDatabasePath' раньше никогда не присваивался и оставался пустой
+            /// строкой, из-за чего база данных создавалась бы в текущей рабочей папке процесса,
+            /// а не в организованном месте
+            if (string.IsNullOrEmpty(__fDatabasePath) == true)
+                __fDatabasePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Databases");
+
             oDataSourceSqlite.__fDatabaseName = "protocols.db";
             oDataSourceSqlite.__fDatabasePath = __fDatabasePath;
 
-            //__mTablesFill();
+            /// БАГ (исправлено): вызов был закомментирован, из-за чего таблицы базы данных
+            /// никогда не создавались
+            __mTablesFill();
 
             return;
         }
@@ -36,9 +57,14 @@ namespace nlDataSourceSqlite
         public override void __mCreate(PROTOCOLSTYPES pProtocolType, string pProcedure, bool pPrintScreen = false)
         {
             long vPclClu = DateTime.Now.Ticks; //
-            int vApplicationClue = Convert.ToInt32(oDataSourceSqlite.__mSqlValue("App", "CLU", "desApp = '" + appApplication.__fProcessName_ + "'"));
-            int vProtocolTyp = (int) pProtocolType; // Идентификатор вида протокола
-            //int vApplicationClue = oDataSourceSqlite.__mSqlValue("App", "CLU", "desApp = " + )
+
+            /// БАГ (исправлено): значение 'vApplicationClue' вычислялось, но никогда не использовалось -
+            /// в столбец 'lnkApp' ошибочно записывался идентификатор вида протокола вместо идентификатора
+            /// приложения. Также добавлена защита от [null] на случай первого запуска, до регистрации
+            /// приложения в таблице 'App'
+            object vApplicationClueValue = oDataSourceSqlite.__mSqlValue("App", "CLU", "desApp = '" + appApplication.__fProcessName_ + "'");
+            int vApplicationClue = (vApplicationClueValue != null && vApplicationClueValue != DBNull.Value) ? Convert.ToInt32(vApplicationClueValue) : -1;
+
             string vPrintScreenFile = "";
 
             if (pPrintScreen == true)
@@ -47,10 +73,10 @@ namespace nlDataSourceSqlite
             }
 
             string vCommand = "Insert Into Pcl (CHG, lnkApp, lnkPclTyp, FilPrnScr, Hst, Prc, Usr)"
-                              + " Values(" 
+                              + " Values("
                               + "'" + DateTime.Now.Ticks.ToString() + "'"
-                              + ", " + vProtocolTyp.ToString()
-                              + ", " + ((int) pProtocolType).ToString()
+                              + ", " + vApplicationClue.ToString()
+                              + ", " + ((int)pProtocolType).ToString()
                               + ", '" + vPrintScreenFile + "'"
                               + ", '" + Environment.MachineName + "'"
                               + ", '" + pProcedure + "'"
@@ -60,11 +86,11 @@ namespace nlDataSourceSqlite
             fProtocolClue = oDataSourceSqlite.__mClueLastInserted("Pcl");
         }
         public override void __mRecord(PROTOCOLRECORDSTYPES pRecordType, string pRecordText, long pTick = -1)
-        { 
+        {
             string vCommand = "Insert Into PclRrd(lnkPcl, lnkRrdTyp, Msg, Tck)"
                               + " Values("
                               + fProtocolClue.ToString()
-                              + ", " + ((int) pRecordType).ToString()
+                              + ", " + ((int)pRecordType).ToString()
                               + ", '" + pRecordText + "'"
                               + ", " + pTick.ToString() + ")";
             oDataSourceSqlite.__mSqlCommand(vCommand);
@@ -86,7 +112,11 @@ namespace nlDataSourceSqlite
                 oDataSourceSqlite.__mSqlCommand(vQuery);
             }
             /// Регистрация приложения в базе данных
-            if (oDataSourceSqlite.__mSqlCount("App", "desApp = " + datApplication.__fProcessName_) != 0)
+            /// БАГ (исправлено): пропущены кавычки вокруг строкового значения (SQL был некорректен),
+            /// и условие было инвертировано - строка вставлялась при КАЖДОМ запуске уже
+            /// зарегистрированного приложения, и пропускалась именно в тот единственный раз,
+            /// когда она действительно была нужна (первая регистрация)
+            if (oDataSourceSqlite.__mSqlCount("App", "desApp = '" + datApplication.__fProcessName_ + "'") == 0)
             {
                 string vCommand = "Insert Into App (desApp, dpnApp, Pfx)"
                                   + " Values("

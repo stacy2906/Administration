@@ -259,6 +259,7 @@ namespace nlApplication
         /// Путь и имя папки для размещения файлов протоколов
         /// </summary>
         private string fDirectoryProtocols = "";
+        private string fDirectoryDatabases = "";
         /// <summary>
         /// Путь и имя папки для размещения файлов изображений протоколов
         /// </summary>
@@ -417,6 +418,39 @@ namespace nlApplication
                 return fDirectoryProtocols;
             }
             set { fDirectoryProtocols = value.Trim(); }
+        }
+        /// <summary>
+        /// Путь и имя папки для размещения файлов баз данных ('Databases')
+        /// </summary>
+        public string __fDirectoryDatabases_
+        {
+            get
+            {
+                if (fDirectoryDatabases.Length == 0)
+                {
+                    fDirectoryDatabases = Path.Combine(__fDirectoryStart, @"Databases\");
+                }
+                try
+                {
+                    if (Directory.Exists(fDirectoryDatabases) == false)
+                    {
+                        Directory.CreateDirectory(fDirectoryDatabases);
+                    }
+                }
+                catch
+                {
+                    fDirectoryDatabases = Path.Combine(__fDirectoryStart, @"Databases\");
+                    _fError.__fErrorType_ = ERRORSTYPES.User;
+                    _fError.__fProcedure_ = "__fDirectoryDatabases_";
+                    _fError.__mReasonAdd("Не верный путь в файле настроек");
+                    _fError.__fMessage_ = appApplication.__oTunes.__mTranslate("Не верно указан путь к папке с файлами баз данных");
+                    appApplication.__oErrorsHandler.__mProtocol(_fError);
+                    _fError.__mClear();
+                }
+
+                return fDirectoryDatabases;
+            }
+            set { fDirectoryDatabases = value.Trim(); }
         }
         /// <summary>
         /// Путь и имя папки для размещения файлов протоколов

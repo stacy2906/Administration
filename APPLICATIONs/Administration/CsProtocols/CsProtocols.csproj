@@ -91,6 +91,10 @@
       <Project>{F65B3F8E-78FB-4203-9F36-02C98C43123C}</Project>
       <Name>_Elements</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\ROOT\LIBRARIEs\_Protocols\_Protocols.csproj">
+      <Project>{900bb11f-0539-4ca4-84f6-f0cc353d1a9b}</Project>
+      <Name>_Protocols</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\ROOT\LIBRARIEs\_ResourcesImages\_ResourcesImages.csproj">
       <Project>{bd8cbe90-270a-49e6-b09c-33d4730e3e58}</Project>
       <Name>_ResourcesImages</Name>

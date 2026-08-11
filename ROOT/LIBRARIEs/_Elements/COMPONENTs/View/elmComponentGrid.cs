@@ -626,9 +626,11 @@ namespace nlElements
                 //Select(); Потребовалось удаление при использование OnRowEnter
 
                 if (Rows.Count > 0 & CurrentRow != null)
-                    return Convert.ToInt32(this[0, CurrentRow.Index].Value.ToString());
-                else
-                    return -1;
+                {
+                    int vClue;
+                    return Int32.TryParse(Convert.ToString(this[0, CurrentRow.Index].Value), out vClue) ? vClue : -1;
+                }
+                return -1;
             }
             set
             {

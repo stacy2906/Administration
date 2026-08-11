@@ -1,270 +1,185 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Text;
+using CsProtocols.DATA.Loaders;
+using CsProtocols.DATA.Models;
+using nlData;
 using nlDataSourceSqlite;
 
 namespace CsProtocols
 {
+    /// <summary>
+    /// Загружает файлы *.pcl и *rrd.pcl в единую базу protocols.db.
+    /// Формат таблиц совместим с уже созданными базами протоколов: Pcl/App/PclRrd.
+    /// </summary>
     public class ProtocolsDbLoader
     {
-        private dsqDataSourceSqlite _dataSource;
-        private List<string> _foundFolders = new List<string>();
+        // Обычный dsqDataSourceSqlite показывает модальное окно на каждую строку с ошибкой.
+        // Для фонового импорта используем вариант, который записывает одну техническую ошибку в лог.
+        private readonly datUnitDataSource _dataSource;
+        private readonly ProtocolLoader _protocolLoader = new ProtocolLoader();
 
-        public ProtocolsDbLoader(string dbPath)
+        public ProtocolsDbLoader(string pDatabasePath)
         {
-            _dataSource = new dsqDataSourceSqlite();
-            _dataSource.__fDatabasePath = Path.GetDirectoryName(dbPath);
-            _dataSource.__fDatabaseName = Path.GetFileName(dbPath);
-            CreateTablesIfNotExist();
+            Directory.CreateDirectory(Path.GetDirectoryName(pDatabasePath));
+            _dataSource = new dsqDataSourceSqliteWithProtocol();
+            _dataSource.__fDatabasePath = Path.GetDirectoryName(pDatabasePath);
+            _dataSource.__fDatabaseName = Path.GetFileName(pDatabasePath);
+            _dataSource.__mDatabaseCreate();
+            mTablesEnsure();
         }
 
-        private void CreateTablesIfNotExist()
+        /// <summary>Загружает известную папку рекурсивно. Повторный запуск не создаёт дубликатов.</summary>
+        public int LoadFromFolder(string pFolderPath)
         {
-            _dataSource.__mSqlCommand(@"
-                CREATE TABLE IF NOT EXISTS App (
-                    CHG INTEGER NOT NULL,
-                    CLU INTEGER NOT NULL UNIQUE,
-                    ELD INTEGER NOT NULL,
-                    GID TEXT NOT NULL,
-                    cgzApp INTEGER NOT NULL,
-                    dsiApp TEXT NOT NULL,
-                    Pfx TEXT,
-                    PRIMARY KEY(CLU AUTOINCREMENT)
-                )");
+            if (!Directory.Exists(pFolderPath)) return 0;
 
-            _dataSource.__mSqlCommand(@"
-                CREATE TABLE IF NOT EXISTS Pcl (
-                    CHG INTEGER NOT NULL,
-                    CLU INTEGER NOT NULL UNIQUE,
-                    ELD INTEGER NOT NULL,
-                    GID TEXT NOT NULL,
-                    InkApp INTEGER NOT NULL,
-                    InkCpu INTEGER NOT NULL,
-                    InkPclTyp INTEGER NOT NULL,
-                    InkUsr INTEGER NOT NULL,
-                    Prc TEXT NOT NULL,
-                    Fil INTEGER,
-                    PRIMARY KEY(CLU AUTOINCREMENT)
-                )");
-
-            _dataSource.__mSqlCommand(@"
-                CREATE TABLE IF NOT EXISTS PclRrd (
-                    CHG INTEGER NOT NULL,
-                    CLU INTEGER NOT NULL UNIQUE,
-                    ELD INTEGER NOT NULL,
-                    GID TEXT NOT NULL,
-                    InkPcl INTEGER NOT NULL,
-                    InkPclRrdTyp INTEGER NOT NULL,
-                    Err TEXT,
-                    Tck INTEGER,
-                    PRIMARY KEY(CLU AUTOINCREMENT)
-                )");
-        }
-
-        public void LoadAllFromDisk()
-        {
-            FindAllProtocolFolders();
-
-            if (_foundFolders.Count == 0)
-                throw new Exception("Папки PROTOCOLS не найдены!");
-
-            int totalPcl = 0;
-            int totalRrd = 0;
-
-            foreach (string folder in _foundFolders)
+            int vImported = 0;
+            foreach (string vPclFile in Directory.GetFiles(pFolderPath, "*.pcl", SearchOption.AllDirectories)
+                .Where(pFile => !Path.GetFileNameWithoutExtension(pFile).EndsWith("rrd", StringComparison.OrdinalIgnoreCase)))
             {
-                try
+                vImported += mImportPclFile(vPclFile);
+                string vRrdFile = Path.Combine(Path.GetDirectoryName(vPclFile), Path.GetFileNameWithoutExtension(vPclFile) + "rrd.pcl");
+                if (File.Exists(vRrdFile)) vImported += mImportRrdFile(vRrdFile);
+            }
+            return vImported;
+        }
+
+        /// <summary>
+        /// Копирует исходные файлы в архив приложения, не перемещая их и не меняя источники.
+        /// Относительная структура папок сохраняется, поэтому протоколы разных программ не смешиваются.
+        /// </summary>
+        public int CopyFolderToArchive(string pSourceFolder, string pArchiveFolder)
+        {
+            if (!Directory.Exists(pSourceFolder)) return 0;
+            int vCopied = 0;
+            foreach (string vSourceFile in Directory.GetFiles(pSourceFolder, "*.pcl", SearchOption.AllDirectories))
+            {
+                string vRelativePath = vSourceFile.Substring(pSourceFolder.Length).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                string vDestinationFile = Path.Combine(pArchiveFolder, vRelativePath);
+                Directory.CreateDirectory(Path.GetDirectoryName(vDestinationFile));
+                if (!File.Exists(vDestinationFile) || File.GetLastWriteTimeUtc(vSourceFile) > File.GetLastWriteTimeUtc(vDestinationFile) || new FileInfo(vSourceFile).Length != new FileInfo(vDestinationFile).Length)
                 {
-                    var files = Directory.GetFiles(folder, "*.pcl")
-                        .Where(f => !Path.GetFileNameWithoutExtension(f).EndsWith("rr"))
-                        .ToList();
-
-                    foreach (var file in files)
-                    {
-                        totalPcl += InsertPclFile(file);
-
-                        string rrdFile = Path.ChangeExtension(file, null) + "rrd.pcl";
-                        if (File.Exists(rrdFile))
-                        {
-                            totalRrd += InsertRrdFile(rrdFile);
-                        }
-                    }
+                    File.Copy(vSourceFile, vDestinationFile, true);
+                    vCopied++;
                 }
-                catch { }
             }
-
-            Console.WriteLine($"Загружено Pcl: {totalPcl}, PclRrd: {totalRrd}");
+            return vCopied;
         }
 
-        private void FindAllProtocolFolders()
+        private void mTablesEnsure()
         {
-            // Поиск на диске U:\
-            try
-            {
-                var found = Directory.GetDirectories(@"U:\", "PROTOCOLS", SearchOption.AllDirectories);
-                _foundFolders.AddRange(found);
-            }
-            catch { }
+            _dataSource.__mSqlCommand("CREATE TABLE IF NOT EXISTS App (CLU INTEGER PRIMARY KEY AUTOINCREMENT, dsiApp TEXT, GID TEXT, Pfx TEXT)");
+            _dataSource.__mSqlCommand("CREATE TABLE IF NOT EXISTS Pcl (CLU INTEGER PRIMARY KEY AUTOINCREMENT, CHG TEXT, GID TEXT, InkApp INTEGER, InkPclTyp INTEGER, Prc TEXT, Fil TEXT, Hst TEXT, Usr TEXT, desPclTyp TEXT)");
+            _dataSource.__mSqlCommand("CREATE TABLE IF NOT EXISTS PclRrd (CLU INTEGER PRIMARY KEY AUTOINCREMENT, CHG TEXT, GID TEXT, InkPcl TEXT, InkPclRrdTyp INTEGER, Err TEXT, Msg TEXT, Tck TEXT, desRrdTyp TEXT)");
 
-            // Поиск на диске C:\
-            try
-            {
-                var found = Directory.GetDirectories(@"C:\", "PROTOCOLS", SearchOption.AllDirectories);
-                _foundFolders.AddRange(found);
-            }
-            catch { }
-
-            // Добавляем явные пути (диск C и U)
-            string[] knownPaths = {
-                @"C:\KviNA\APPLICATIONS\Administration\Administration\bin\Debug\PROTOCOLS",
-                @"C:\KviNA\ADDITIVE\CsProtocols\CsProtocols\bin\Debug\PROTOCOLS",
-                @"C:\KviNA\ADDITIVE\csManual\csManual\bin\Debug\PROTOCOLS",
-                @"U:\KviNA\APPLICATIONS\Administration\Administration\bin\Debug\PROTOCOLS",
-                @"U:\KviNA\ADDITIVE\CsProtocols\CsProtocols\bin\Debug\PROTOCOLS",
-                @"U:\KviNA\ADDITIVE\csManual\csManual\bin\Debug\PROTOCOLS"
-            };
-
-            foreach (string path in knownPaths)
-            {
-                if (Directory.Exists(path) && !_foundFolders.Contains(path))
-                    _foundFolders.Add(path);
-            }
-
-            _foundFolders = _foundFolders.Distinct().ToList();
+            mColumnEnsure("App", "dsiApp", "TEXT");
+            mColumnEnsure("App", "GID", "TEXT");
+            mColumnEnsure("App", "Pfx", "TEXT");
+            mColumnEnsure("Pcl", "GID", "TEXT");
+            mColumnEnsure("Pcl", "InkApp", "INTEGER");
+            mColumnEnsure("Pcl", "InkPclTyp", "INTEGER");
+            mColumnEnsure("Pcl", "Fil", "TEXT");
+            mColumnEnsure("Pcl", "Hst", "TEXT");
+            mColumnEnsure("Pcl", "Usr", "TEXT");
+            mColumnEnsure("Pcl", "desPclTyp", "TEXT");
+            mColumnEnsure("PclRrd", "CHG", "TEXT");
+            mColumnEnsure("PclRrd", "GID", "TEXT");
+            mColumnEnsure("PclRrd", "InkPcl", "TEXT");
+            mColumnEnsure("PclRrd", "InkPclRrdTyp", "INTEGER");
+            mColumnEnsure("PclRrd", "Err", "TEXT");
+            mColumnEnsure("PclRrd", "Msg", "TEXT");
+            mColumnEnsure("PclRrd", "Tck", "TEXT");
+            mColumnEnsure("PclRrd", "desRrdTyp", "TEXT");
         }
 
-        private int InsertPclFile(string filePath)
+        private void mColumnEnsure(string pTableName, string pColumnName, string pType)
         {
-            int count = 0;
-            var lines = File.ReadAllLines(filePath);
-            bool isHeader = true;
+            DataTable vColumns = _dataSource.__mSqlQuery("PRAGMA table_info(" + pTableName + ")");
+            bool vExists = vColumns != null && vColumns.AsEnumerable().Any(pRow => String.Equals(Convert.ToString(pRow["name"]), pColumnName, StringComparison.OrdinalIgnoreCase));
+            if (!vExists) _dataSource.__mSqlCommand("ALTER TABLE " + pTableName + " ADD COLUMN " + pColumnName + " " + pType);
+        }
 
-            foreach (string line in lines)
+        private int mImportPclFile(string pFilePath)
+        {
+            int vImported = 0;
+            foreach (ProtocolRecord vRecord in _protocolLoader.LoadSingleFile(pFilePath))
             {
-                if (string.IsNullOrWhiteSpace(line)) continue;
-                if (isHeader && line.StartsWith("CHG"))
+                string vGid = String.IsNullOrWhiteSpace(vRecord.Guid) ? pFilePath + ":" + vRecord.DateTime.Ticks : vRecord.Guid;
+                if (mExists("Pcl", "GID", vGid))
                 {
-                    isHeader = false;
+                    _dataSource.__mSqlCommand("UPDATE Pcl SET InkPclTyp = " + mProtocolTypeId(vRecord) + ", desPclTyp = '" + mSql(vRecord.ProtocolType) + "' WHERE GID = '" + mSql(vGid) + "'");
                     continue;
                 }
-                isHeader = false;
 
-                var parts = line.Split(',');
-                if (parts.Length < 11) continue;
-
-                try
-                {
-                    string chg = parts[0].Trim();
-                    string guid = parts[1].Trim();
-                    string appName = parts[2].Trim();
-                    string user = parts[6].Trim();
-                    string pclTyp = parts[8].Trim();
-                    string prc = parts[10].Trim();
-                    string fil = parts.Length > 11 ? parts[11].Trim() : "";
-
-                    int appClu = InsertApp(appName);
-
-                    if (!PclExists(guid))
-                    {
-                        InsertPclRecord(chg, guid, appClu, pclTyp, user, prc, fil);
-                        count++;
-                    }
-                }
-                catch { }
+                int vAppClu = mAppEnsure(vRecord.Program);
+                string vCommand = "INSERT INTO Pcl (CHG, GID, InkApp, InkPclTyp, Prc, Fil, Hst, Usr, desPclTyp) VALUES ("
+                    + "'" + mSql(vRecord.DateTime.Ticks.ToString()) + "', '" + mSql(vGid) + "', " + vAppClu + ", " + mProtocolTypeId(vRecord) + ", "
+                    + "'" + mSql(vRecord.Procedure) + "', '" + mSql(pFilePath) + "', '" + mSql(vRecord.Computer) + "', '" + mSql(vRecord.User) + "', '" + mSql(vRecord.ProtocolType) + "')";
+                _dataSource.__mSqlCommand(vCommand);
+                vImported++;
             }
-
-            return count;
+            return vImported;
         }
 
-        private int InsertRrdFile(string filePath)
+        private int mImportRrdFile(string pFilePath)
         {
-            int count = 0;
-            var lines = File.ReadAllLines(filePath);
-            bool isHeader = true;
-
-            foreach (string line in lines)
+            int vImported = 0;
+            foreach (string vLine in File.ReadAllLines(pFilePath, Encoding.GetEncoding(1251)))
             {
-                if (string.IsNullOrWhiteSpace(line)) continue;
-                if (isHeader && line.StartsWith("CHG"))
-                {
-                    isHeader = false;
-                    continue;
-                }
-                isHeader = false;
+                if (String.IsNullOrWhiteSpace(vLine) || vLine.StartsWith("CHG", StringComparison.OrdinalIgnoreCase)) continue;
+                string[] vParts = vLine.Split(',');
+                if (vParts.Length < 5) continue;
 
-                var parts = line.Split(',');
-                if (parts.Length < 5) continue;
+                string vGid = vParts[1].Trim();
+                string vPclGid = vParts[2].Trim();
+                if (String.IsNullOrEmpty(vGid) || mExists("PclRrd", "GID", vGid)) continue;
 
-                try
-                {
-                    string chg = parts[0].Trim();
-                    string guid = parts[1].Trim();
-                    string inkPcl = parts[2].Trim();
-                    string rrdTyp = parts[3].Trim();
-                    string err = parts[4].Trim();
-                    string tck = parts.Length > 5 ? parts[5].Trim() : "-1";
-
-                    if (!RrdExists(inkPcl, guid))
-                    {
-                        InsertRrdRecord(chg, guid, inkPcl, rrdTyp, err, tck);
-                        count++;
-                    }
-                }
-                catch { }
+                string vTick = vParts.Length > 5 ? vParts[5].Trim() : vParts[0].Trim();
+                string vRecordType = mRecordTypeName(vParts[3].Trim());
+                string vMessage = String.Join(",", vParts.Skip(4).Take(vParts.Length > 5 ? vParts.Length - 5 : 1)).Trim();
+                _dataSource.__mSqlCommand("INSERT INTO PclRrd (CHG, GID, InkPcl, InkPclRrdTyp, Err, Msg, Tck, desRrdTyp) VALUES ('"
+                    + mSql(vParts[0].Trim()) + "', '" + mSql(vGid) + "', '" + mSql(vPclGid) + "', " + mNumber(vParts[3]) + ", '"
+                    + mSql(vMessage) + "', '" + mSql(vMessage) + "', '" + mSql(vTick) + "', '" + mSql(vRecordType) + "')");
+                vImported++;
             }
-
-            return count;
+            return vImported;
         }
 
-        private int InsertApp(string appName)
+        private int mAppEnsure(string pAppName)
         {
-            if (string.IsNullOrEmpty(appName)) return -1;
-
-            string checkQuery = $"SELECT CLU FROM App WHERE dsiApp = '{appName}'";
-            var result = _dataSource.__mSqlValue(checkQuery);
-            if (result != null && result != DBNull.Value)
-                return Convert.ToInt32(result);
-
-            string chg = DateTime.Now.Ticks.ToString();
-            string guid = Guid.NewGuid().ToString();
-            string insertQuery = $"INSERT INTO App (CHG, GID, ELD, cgzApp, dsiApp, Pfx) " +
-                                 $"VALUES ('{chg}', '{guid}', 0, 0, '{appName}', '')";
-            _dataSource.__mSqlCommand(insertQuery);
-
-            result = _dataSource.__mSqlValue(checkQuery);
-            return Convert.ToInt32(result);
+            string vAppName = String.IsNullOrWhiteSpace(pAppName) ? "Неизвестное приложение" : pAppName.Trim();
+            object vClu = _dataSource.__mSqlValue("SELECT CLU FROM App WHERE dsiApp = '" + mSql(vAppName) + "' LIMIT 1");
+            if (vClu != null && vClu != DBNull.Value) return Convert.ToInt32(vClu);
+            _dataSource.__mSqlCommand("INSERT INTO App (dsiApp, GID, Pfx) VALUES ('" + mSql(vAppName) + "', '" + Guid.NewGuid() + "', '')");
+            vClu = _dataSource.__mSqlValue("SELECT CLU FROM App WHERE dsiApp = '" + mSql(vAppName) + "' ORDER BY CLU DESC LIMIT 1");
+            return vClu == null || vClu == DBNull.Value ? 0 : Convert.ToInt32(vClu);
         }
 
-        private bool PclExists(string guid)
+        private bool mExists(string pTableName, string pFieldName, string pValue)
         {
-            string query = $"SELECT COUNT(*) FROM Pcl WHERE GID = '{guid}'";
-            var result = _dataSource.__mSqlValue(query);
-            return result != null && Convert.ToInt32(result) > 0;
+            object vCount = _dataSource.__mSqlValue("SELECT COUNT(*) FROM " + pTableName + " WHERE " + pFieldName + " = '" + mSql(pValue) + "'");
+            return vCount != null && vCount != DBNull.Value && Convert.ToInt32(vCount) > 0;
         }
 
-        private void InsertPclRecord(string chg, string guid, int appClu, string pclTyp, string user, string prc, string fil)
+        private static string mSql(string pValue) { return (pValue ?? String.Empty).Replace("'", "''"); }
+        private static int mNumber(string pValue) { int vValue; return Int32.TryParse(pValue, out vValue) ? vValue : 0; }
+        private static int mProtocolTypeId(ProtocolRecord pRecord) { return pRecord == null ? 0 : pRecord.ProtocolTypeId; }
+        private static string mRecordTypeName(string pValue)
         {
-            string newGuid = Guid.NewGuid().ToString();
-            string query = $"INSERT INTO Pcl (CHG, GID, ELD, InkApp, InkPclTyp, InkUsr, Prc, Fil) " +
-                           $"VALUES ('{chg}', '{newGuid}', 0, {appClu}, {pclTyp}, '{user}', '{prc}', '{fil}')";
-            _dataSource.__mSqlCommand(query);
-        }
-
-        private bool RrdExists(string inkPcl, string guid)
-        {
-            string query = $"SELECT COUNT(*) FROM PclRrd WHERE InkPcl = '{inkPcl}' AND GID = '{guid}'";
-            var result = _dataSource.__mSqlValue(query);
-            return result != null && Convert.ToInt32(result) > 0;
-        }
-
-        private void InsertRrdRecord(string chg, string guid, string inkPcl, string rrdTyp, string err, string tck)
-        {
-            string newGuid = Guid.NewGuid().ToString();
-            string query = $"INSERT INTO PclRrd (CHG, GID, ELD, InkPcl, InkPclRrdTyp, Err, Tck) " +
-                           $"VALUES ('{chg}', '{newGuid}', 0, {inkPcl}, {rrdTyp}, '{err}', {tck})";
-            _dataSource.__mSqlCommand(query);
+            switch (mNumber(pValue))
+            {
+                case 0: return "Решение пользователя";
+                case 1: return "Детали";
+                case 2: return "Исключение";
+                case 3: return "Изображение";
+                case 4: return "Сообщение";
+                case 5: return "Свойства объекта";
+                default: return "Запись протокола";
+            }
         }
     }
 }

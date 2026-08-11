@@ -36,6 +36,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "csManual", "csManual\csManu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsProtocols", "CsProtocols\CsProtocols.csproj", "{8D05B162-A7AB-4490-9A99-61F9532ADA33}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "_Protocols", "..\..\ROOT\LIBRARIEs\_Protocols\_Protocols.csproj", "{900BB11F-0539-4CA4-84F6-F0CC353D1A9B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -106,6 +108,10 @@ Global
 		{8D05B162-A7AB-4490-9A99-61F9532ADA33}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D05B162-A7AB-4490-9A99-61F9532ADA33}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D05B162-A7AB-4490-9A99-61F9532ADA33}.Release|Any CPU.Build.0 = Release|Any CPU
+		{900BB11F-0539-4CA4-84F6-F0CC353D1A9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{900BB11F-0539-4CA4-84F6-F0CC353D1A9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{900BB11F-0539-4CA4-84F6-F0CC353D1A9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{900BB11F-0539-4CA4-84F6-F0CC353D1A9B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -121,6 +127,7 @@ Global
 		{7BAAB592-6DE5-47C7-BD0F-017D2B907F90} = {D905AB1C-0C69-4365-98BD-5CEEEA663F77}
 		{BD51AA26-F13D-4343-AAB6-24444567E284} = {D905AB1C-0C69-4365-98BD-5CEEEA663F77}
 		{1D0174D8-F2D1-454E-9CED-6BEB68AA1CE3} = {D905AB1C-0C69-4365-98BD-5CEEEA663F77}
+		{900BB11F-0539-4CA4-84F6-F0CC353D1A9B} = {D905AB1C-0C69-4365-98BD-5CEEEA663F77}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {08ab3577-a99a-4b08-a8c2-bd1dc7e67402}

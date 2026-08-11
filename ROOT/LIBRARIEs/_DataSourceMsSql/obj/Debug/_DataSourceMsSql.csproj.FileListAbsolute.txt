@@ -209,3 +209,6 @@ C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_DataSourceMsSql\obj
 C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_DataSourceMsSql\obj\Debug\_DataSou.6C49CF7B.Up2Date
 C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_DataSourceMsSql\obj\Debug\dsms.dll
 C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_DataSourceMsSql\obj\Debug\dsms.pdb
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_DataSourceMsSql\bin\Debug\ptcl.dll
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_DataSourceMsSql\bin\Debug\System.Data.SQLite.dll
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_DataSourceMsSql\bin\Debug\ptcl.pdb
