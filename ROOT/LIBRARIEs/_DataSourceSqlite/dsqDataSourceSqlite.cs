@@ -50,7 +50,7 @@ namespace nlDataSourceSqlite
             try
             {
                 /// Установка соединения
-                if (__fOnLine == false & _fConnection == null)
+                if (__fOnLine == false & (_fConnection == null || _fConnection.State != ConnectionState.Open))
                 {
                     __mConnectionOn();
                 }
@@ -98,7 +98,7 @@ namespace nlDataSourceSqlite
 
             try
             {
-                if (__fOnLine == false & _fConnection == null)
+                if (__fOnLine == false & (_fConnection == null || _fConnection.State != ConnectionState.Open))
                 {
                     __mConnectionOn();
                 } /// Установка соединения
@@ -111,7 +111,7 @@ namespace nlDataSourceSqlite
                 SQLiteDataReader vSqlDataReader = vSqliteCommand.ExecuteReader();
                 vDataTable = new DataTable();
                 vDataTable.Load(vSqlDataReader);
-                if (_fTransaction == null) 
+                if (_fTransaction == null)
                 {
                     if (__fOnLine == false & _fConnection != null)
                         __mConnectionOff();
@@ -146,7 +146,7 @@ namespace nlDataSourceSqlite
 
             try
             {
-                if (__fOnLine == false & _fConnection == null)
+                if (__fOnLine == false & (_fConnection == null || _fConnection.State != ConnectionState.Open))
                 {
                     __mConnectionOn();
                 } /// * Установка соединения

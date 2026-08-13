@@ -529,24 +529,24 @@ namespace nlDataSourceSqlite
         /// <summary>
         /// Начало транзакции - см. 'dsqDataSourceSqliteWithProtocol.__mTransactionBegin'
         /// </summary>
-        public bool __mTransactionBegin()
-        {
-            return oDataSourceSqlite.__mTransactionBegin();
-        }
-        /// <summary>
-        /// Подтверждение транзакции - см. 'dsqDataSourceSqliteWithProtocol.__mTransactionCommit'
-        /// </summary>
-        public bool __mTransactionCommit()
-        {
-            return oDataSourceSqlite.__mTransactionCommit();
-        }
-        /// <summary>
-        /// Откат транзакции - см. 'dsqDataSourceSqliteWithProtocol.__mTransactionRollback'
-        /// </summary>
-        public void __mTransactionRollback()
-        {
-            oDataSourceSqlite.__mTransactionRollback();
-        }
+        //public bool __mTransactionBegin()
+        //{
+        //    return oDataSourceSqlite.__mTransactionBegin();
+        //}
+        ///// <summary>
+        ///// Подтверждение транзакции - см. 'dsqDataSourceSqliteWithProtocol.__mTransactionCommit'
+        ///// </summary>
+        //public bool __mTransactionCommit()
+        //{
+        //    return oDataSourceSqlite.__mTransactionCommit();
+        //}
+        ///// <summary>
+        ///// Откат транзакции - см. 'dsqDataSourceSqliteWithProtocol.__mTransactionRollback'
+        ///// </summary>
+        //public void __mTransactionRollback()
+        //{
+        //    oDataSourceSqlite.__mTransactionRollback();
+        //}
         /// <summary>
         /// Отметка о том, что строка протокола (заголовок из '.pcl') импортирована, вместе с полученным реальным CLU
         /// </summary>
@@ -709,10 +709,10 @@ namespace nlDataSourceSqlite
         /// <summary>
         /// Текст последнего сбоя SQL-операции - см. примечание к 'dsqDataSourceSqliteWithProtocol.__fLastError_'
         /// </summary>
-        public string __fLastError_
-        {
-            get { return oDataSourceSqlite.__fLastError_; }
-        }
+        //public string __fLastError_
+        //{
+        //    get { return oDataSourceSqlite.__fLastError_; }
+        //}
 
         #endregion СВОЙСТВА
     }

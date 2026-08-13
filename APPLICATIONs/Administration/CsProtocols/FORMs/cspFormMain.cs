@@ -25,7 +25,7 @@ namespace naCsProtocols
 
         // Данные
         private dsqProtocols _oProtocols;
-        private bool _manualDbMode = false; 
+        private bool _manualDbMode = false; // [true] - открыт сторонний .db вручную; клик по строке не должен запрашивать записи из _oProtocols (другая база)
 
         private Label lblStatus;
 
@@ -56,7 +56,9 @@ namespace naCsProtocols
             var splitter = new elmComponentSplitter();
             mainBlock.Controls.Add(splitter);
 
-
+            // ============================================================
+            // ЛЕВАЯ ПАНЕЛЬ - ПРОТОКОЛЫ
+            // ============================================================
             var leftPanel = new Panel { Dock = DockStyle.Fill };
             splitter.Panel1.Controls.Add(leftPanel);
 
@@ -105,7 +107,9 @@ namespace naCsProtocols
 
             _cAreaProtocols.__eGridCellEnter += mAreaProtocols_GridCellEnter;
 
-
+            // ============================================================
+            // ПРАВАЯ ПАНЕЛЬ - ЗАПИСИ В ПРОТОКОЛАХ
+            // ============================================================
             var rightPanel = new Panel { Dock = DockStyle.Fill };
             splitter.Panel2.Controls.Add(rightPanel);
 
@@ -215,17 +219,6 @@ namespace naCsProtocols
                 return;
             }
 
-            /// 'oDataSourceSqlite.__mSqlQuery' сама по себе не выбрасывает исключений (см. примечание к
-            /// 'dsqDataSourceSqliteWithProtocol') - при сбое соединения она просто вернёт пустую таблицу,
-            /// а 'catch' выше никогда не сработает. Поэтому здесь отдельно проверяется реальная причина,
-            /// если результат оказался пустым, чтобы не показывать пользователю просто "Загружено: 0"
-            /// при настоящем сбое подключения к базе данных
-            if (vDataTable.Rows.Count == 0 && string.IsNullOrEmpty(_oProtocols.__fLastError_) == false)
-            {
-                lblStatus.Text = "Ошибка базы данных протоколов: " + _oProtocols.__fLastError_;
-                return;
-            }
-
             mProtocolsDisplay(vDataTable);
         }
         /// <summary>
@@ -287,16 +280,9 @@ namespace naCsProtocols
             {
                 vRecords = _oProtocols.__mQuery(vQuery);
             }
-            catch (Exception vException)
+            catch
             {
-                lblStatus.Text = "Ошибка загрузки записей протокола: " + vException.Message;
-                return;
-            }
-
-            if (vRecords.Rows.Count == 0 && string.IsNullOrEmpty(_oProtocols.__fLastError_) == false)
-            {
-                lblStatus.Text = "Ошибка базы данных протоколов: " + _oProtocols.__fLastError_;
-                return;
+                vRecords = new DataTable();
             }
 
             _cAreaProtocolsRecords.__fDataSource_ = vRecords;
@@ -316,7 +302,6 @@ namespace naCsProtocols
             vOpenFileDialog.AutoUpgradeEnabled = true;
             vOpenFileDialog.CheckFileExists = true;
             vOpenFileDialog.CheckPathExists = true;
-            vOpenFileDialog.RestoreDirectory = true; // Без этого диалог может незаметно поменять Environment.CurrentDirectory на папку, где пользователь просматривал файлы - и все дальнейшие относительные пути в приложении (включая путь к своей же базе данных) будут строиться неверно до перезапуска
             vOpenFileDialog.Filter = "База данных протоколов (*.db)|*.db|Все файлы (*.*)|*.*";
 
             if (vOpenFileDialog.ShowDialog() == DialogResult.OK)
@@ -327,26 +312,44 @@ namespace naCsProtocols
                 vDataSource.__fDatabasePath = Path.GetDirectoryName(vFilePath);
                 vDataSource.__fDatabaseName = Path.GetFileName(vFilePath);
 
-                string vQueryPcl = "SELECT P.*, A.desApp AS App, PT.desPclTyp AS PclTyp "
+                /// Примечание: реальная схема 'Protocols.db' (сгенерированная Model/Essence в _Administration) отличается
+                /// от схемы, которую создаёт 'dsqProtocols': App.dsiApp (не desApp), PclTyp.dsiPclTyp (не desPclTyp),
+                /// таблица записей называется 'PclRrdTyp' (не 'RrdTyp'), связь - 'lnkPclRrdTyp' (не 'lnkRrdTyp'),
+                /// текст записи хранится в 'Err' (не 'Msg'). У 'Pcl' нет отдельных текстовых полей Hst/Usr - только
+                /// нерасшифрованные связи lnkCpu/lnkUsr (таблиц Cpu/Usr в этой базе пока нет) - показываем как есть.
+                string vQueryPcl = "SELECT P.CLU, P.CHG, A.dsiApp AS App, PT.dsiPclTyp AS PclTyp, P.Prc, P.lnkCpu AS Hst, P.lnkUsr AS Usr "
                     + "FROM Pcl P "
                     + "LEFT JOIN App A ON A.CLU = P.lnkApp "
                     + "LEFT JOIN PclTyp PT ON PT.CLU = P.lnkPclTyp";
 
                 DataTable vDataTablePcl = vDataSource.__mSqlQuery(vQueryPcl);
+                if (vDataTablePcl == null)
+                {
+                    lblStatus.Text = "Не удалось загрузить протоколы из '" + vFilePath + "' - см. окно ошибки выше";
+                    return;
+                }
+
                 _cAreaProtocols.__fDataSource_ = vDataTablePcl;
                 foreach (DataRow vDataRow in vDataTablePcl.Rows)
                 {
-                    vDataRow["CHG"] = new DateTime(Convert.ToInt64(vDataRow["CHG"])).ToString();
+                    long vChgTicks;
+                    if (vDataRow["CHG"] != DBNull.Value && long.TryParse(vDataRow["CHG"].ToString(), out vChgTicks) == true)
+                        vDataRow["CHG"] = new DateTime(vChgTicks).ToString();
                 }
 
-                string vQueryPclRrd = "SELECT PR.lnkPcl AS Protocol, PR.CLU AS \"Key\", RT.desRrdTyp AS Type, PR.Msg AS Message, PR.Tck AS Time "
+                string vQueryPclRrd = "SELECT PR.lnkPcl AS Protocol, PR.CLU AS \"Key\", RT.dsiPclRrdTyp AS Type, PR.Err AS Message, PR.Tck AS Time "
                     + "FROM PclRrd PR "
-                    + "LEFT JOIN RrdTyp RT ON RT.CLU = PR.lnkRrdTyp";
-                /// Примечание: 'Tck' в таблице 'PclRrd' - это затраченное время выполнения (тики-длительность),
-                /// а не момент времени создания записи - в схеме 'dsqProtocols' у 'PclRrd' нет отдельной колонки CHG,
-                /// поэтому здесь он выводится как есть, без ложного форматирования в дату
+                    + "LEFT JOIN PclRrdTyp RT ON RT.CLU = PR.lnkPclRrdTyp";
+                /// Примечание: 'Tck' в 'PclRrd' - затраченное время выполнения (тики-длительность), а не момент времени
+                /// создания записи - у 'PclRrd' нет отдельной колонки CHG, поэтому выводится как есть, без форматирования в дату
 
                 DataTable vDataTablePclRrd = vDataSource.__mSqlQuery(vQueryPclRrd);
+                if (vDataTablePclRrd == null)
+                {
+                    lblStatus.Text = $"Протоколы загружены ({vDataTablePcl.Rows.Count}), но записи не удалось загрузить - см. окно ошибки выше";
+                    return;
+                }
+
                 _cAreaProtocolsRecords.__fDataSource_ = vDataTablePclRrd;
                 _cAreaProtocolsRecords.__mGridRefresh();
 
