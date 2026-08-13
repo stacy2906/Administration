@@ -39,24 +39,24 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="System.Data.SQLite">
-      <HintPath>..\..\LIBRARIEsEXTERNAL\System.Data.SQLite.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Class1.cs" />
     <Compile Include="dsqProtocols.cs" />
-    <Compile Include="dsqDataSourceSqliteWithProtocol.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\_Application\_Application.csproj">
-      <Project>{dfd37905-3166-4ce2-9d52-326f73e3fa73}</Project>
+      <Project>{CC78B6C2-2804-4FD1-9CA1-2196FD50C239}</Project>
       <Name>_Application</Name>
     </ProjectReference>
     <ProjectReference Include="..\_Data\_Data.csproj">
-      <Project>{a05053df-7087-4a21-a320-1e278c1342a9}</Project>
+      <Project>{B60F57D4-4F53-428C-86FE-A0D47338E371}</Project>
       <Name>_Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\_DataSourceSqlite\_DataSourceSqlite.csproj">
+      <Project>{1D0174D8-F2D1-454E-9CED-6BEB68AA1CE3}</Project>
+      <Name>_DataSourceSqlite</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

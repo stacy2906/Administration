@@ -111,7 +111,7 @@ namespace nlDataSourceSqlite
                 SQLiteDataReader vSqlDataReader = vSqliteCommand.ExecuteReader();
                 vDataTable = new DataTable();
                 vDataTable.Load(vSqlDataReader);
-                if (_fTransaction == null)
+                if (_fTransaction == null) 
                 {
                     if (__fOnLine == false & _fConnection != null)
                         __mConnectionOff();

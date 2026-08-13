@@ -16,3 +16,5 @@ C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Protocols\bin\Debug
 C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Protocols\obj\Debug\_Protocols.csproj.Up2Date
 C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Protocols\obj\Debug\ptcl.dll
 C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Protocols\obj\Debug\ptcl.pdb
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Protocols\bin\Debug\dssq.dll
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_Protocols\bin\Debug\dssq.pdb

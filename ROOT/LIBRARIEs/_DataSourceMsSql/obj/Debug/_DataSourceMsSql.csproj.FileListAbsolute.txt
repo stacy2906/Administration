@@ -212,3 +212,5 @@ C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_DataSourceMsSql\obj
 C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_DataSourceMsSql\bin\Debug\ptcl.dll
 C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_DataSourceMsSql\bin\Debug\System.Data.SQLite.dll
 C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_DataSourceMsSql\bin\Debug\ptcl.pdb
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_DataSourceMsSql\bin\Debug\dssq.dll
+C:\Users\taa\Documents\GitHub\Administration\ROOT\LIBRARIEs\_DataSourceMsSql\bin\Debug\dssq.pdb

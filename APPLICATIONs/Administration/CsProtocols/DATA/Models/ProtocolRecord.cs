@@ -9,7 +9,6 @@ namespace CsProtocols.DATA.Models
         public string User { get; set; }
         public string Computer { get; set; }
         public string ProtocolType { get; set; }
-        public int ProtocolTypeId { get; set; }
         public string ErrorType { get; set; }
         public string Procedure { get; set; }
         public string Description { get; set; }

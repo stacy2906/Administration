@@ -54,6 +54,7 @@
     <Compile Include="cspBegin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProtocolsDbLoader.cs" />
+    <Compile Include="ProtocolSqliteImporter.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
