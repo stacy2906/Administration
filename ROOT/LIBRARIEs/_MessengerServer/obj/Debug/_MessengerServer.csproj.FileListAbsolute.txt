@@ -1,6 +1,0 @@
-D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_MessengerServer\bin\Debug\_MessengerServer.dll
-D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_MessengerServer\bin\Debug\_MessengerServer.pdb
-D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_MessengerServer\obj\Debug\_MessengerServer.csproj.AssemblyReference.cache
-D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_MessengerServer\obj\Debug\_MessengerServer.csproj.CoreCompileInputs.cache
-D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_MessengerServer\obj\Debug\_MessengerServer.dll
-D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_MessengerServer\obj\Debug\_MessengerServer.pdb
