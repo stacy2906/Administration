@@ -148,6 +148,18 @@ namespace nlDataSourceSqlite
         {
             oDataSourceSqlite.__mDatabaseCreate();
 
+            /// Самовосстановление: более старая версия этого класса создавала столбцы связей с опечаткой
+            /// ('InkApp'/'InkPclTyp'/'InkPcl'/'InkPclRrdTyp' - заглавная 'I' вместо строчной 'l' в 'lnk').
+            /// Поскольку таблицы создаются только "если их ещё нет", уже созданная с опечаткой база
+            /// никогда не исправилась бы сама по себе, а весь текущий код (включая фильтры) обращается
+            /// к правильным именам 'lnk*' - без этой миграции реальная база с накопленными данными
+            /// (например 'CsProtocols\bin\Debug\Databases\protocols.db') падала бы на каждом запросе
+            /// с ошибкой "no such column: lnkApp"
+            mColumnRenameIfExists("Pcl", "InkApp", "lnkApp");
+            mColumnRenameIfExists("Pcl", "InkPclTyp", "lnkPclTyp");
+            mColumnRenameIfExists("PclRrd", "InkPcl", "lnkPcl");
+            mColumnRenameIfExists("PclRrd", "InkPclRrdTyp", "lnkPclRrdTyp");
+
             /// Таблица 'App' - Приложения (реальные столбцы: 'admEssenceApp.__mRecordNew')
             if (oDataSourceSqlite.__mTableExists("App") == false)
             {
@@ -320,6 +332,23 @@ namespace nlDataSourceSqlite
                                 + ", PRIMARY KEY('GID'))";
                 oDataSourceSqlite.__mSqlCommand(vQuery);
             }
+        }
+        /// <summary>
+        /// Переименование столбца таблицы, если он существует под старым именем (самовосстановление
+        /// от опечатки 'Ink*' в более старой версии этого класса - см. примечание в '__mTablesFill')
+        /// </summary>
+        /// <param name="pTableName">Таблица</param>
+        /// <param name="pOldColumnName">Старое (ошибочное) имя столбца</param>
+        /// <param name="pNewColumnName">Правильное имя столбца</param>
+        private void mColumnRenameIfExists(string pTableName, string pOldColumnName, string pNewColumnName)
+        {
+            if (oDataSourceSqlite.__mTableExists(pTableName) == false)
+                return; // Таблицы ещё нет - переименовывать нечего, __mTablesFill создаст её ниже с правильным именем
+
+            if (__mColumnExists(pTableName, pOldColumnName) == false)
+                return; // Опечатки нет - таблица уже в правильной схеме (или ещё пустая свежесозданная)
+
+            oDataSourceSqlite.__mSqlCommand("ALTER TABLE " + pTableName + " RENAME COLUMN " + pOldColumnName + " TO " + pNewColumnName);
         }
         /// <summary>
         /// Вставка одной засеваемой строки 'PclTyp' с ровно одним установленным флагом (по имени столбца)
@@ -559,6 +588,63 @@ namespace nlDataSourceSqlite
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Полная карта GID -&gt; CLU из таблицы 'ImportedGid' одним запросом (для пакетного импорта легаси '.pcl').
+        /// Для записей протоколов (не заголовков) 'lnkPcl' хранится как -1.
+        /// </summary>
+        public System.Collections.Generic.Dictionary<string, int> __mImportedGidCluMapGet()
+        {
+            System.Collections.Generic.Dictionary<string, int> vMap = new System.Collections.Generic.Dictionary<string, int>();
+            try
+            {
+                System.Data.DataTable vTable = oDataSourceSqlite.__mSqlQuery("SELECT GID, lnkPcl FROM ImportedGid");
+                if (vTable == null)
+                    return vMap;
+
+                foreach (System.Data.DataRow vRow in vTable.Rows)
+                {
+                    if (vRow["GID"] == System.DBNull.Value)
+                        continue;
+                    string vGid = Convert.ToString(vRow["GID"]);
+                    if (string.IsNullOrEmpty(vGid) == true)
+                        continue;
+                    int vClu = -1;
+                    if (vRow["lnkPcl"] != System.DBNull.Value)
+                        int.TryParse(Convert.ToString(vRow["lnkPcl"]), out vClu);
+                    vMap[vGid] = vClu;
+                }
+            }
+            catch
+            {
+                /// Пустая/ещё не созданная таблица - карта остаётся пустой, импорт начнёт с нуля
+            }
+            return vMap;
+        }
+
+        /// <summary>
+        /// Открытие транзакции на источнике данных SQLite (для пакетного импорта легаси-файлов)
+        /// </summary>
+        public bool __mTransactionBegin()
+        {
+            return oDataSourceSqlite.__mTransactionOn();
+        }
+
+        /// <summary>
+        /// Фиксация открытой транзакции
+        /// </summary>
+        public bool __mTransactionCommit()
+        {
+            return oDataSourceSqlite.__mTransactionOff(true);
+        }
+
+        /// <summary>
+        /// Откат открытой транзакции
+        /// </summary>
+        public bool __mTransactionRollback()
+        {
+            return oDataSourceSqlite.__mTransactionOff(false);
         }
 
         #endregion Процедуры
