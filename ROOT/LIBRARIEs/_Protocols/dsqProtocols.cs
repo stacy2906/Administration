@@ -9,19 +9,13 @@ namespace nlDataSourceSqlite
     /// </summary>
     /// <remarks>SQLite-реализация протоколирования ('appApplication.__oProtocols'). Пишет напрямую в базу
     /// данных вместо файлов '.pcl'.</remarks>
-    /// <fixed>ПРИВЕДЕНО К РЕАЛЬНОЙ Essence-СХЕМЕ: раньше таблицы 'App'/'Pcl'/'PclTyp'/'PclRrd' были
-    /// придуманы с нуля (например 'desApp' вместо 'dsiApp', хост/пользователь хранились прямо текстом
-    /// в 'Pcl.Hst'/'Pcl.Usr' вместо связей 'lnkCpu'/'lnkUsr' на таблицы 'Cpu'/'Usr') - именно это вызывало
-    /// ошибку "no such column: A.dsiApp" (запрос вьювера уже ожидал реальную схему, а таблица в базе
-    /// была создана по старой). Столбцы сверены построчно с реальными классами-сущностями проекта:
-    /// 'admEssenceApp.cs', 'admEssenceCpu.cs', 'admEssenceUsr.cs', 'admEssencePcl.cs', 'admEssencePclTyp.cs',
-    /// 'admEssencePclRrd.cs', 'admEssencePclRrdTyp.cs' (метод '__mRecordNew' каждого класса - точный список
-    /// столбцов). Общие для всех Essence-таблиц столбцы: 'CHG' (дата изменения), 'CLU' (первичный ключ),
-    /// 'ELD' (0 - не удалено), 'GID' (глобальный идентификатор).
-    /// ЕДИНСТВЕННОЕ намеренное отклонение от реальной схемы: в 'admEssencePclRrd' НЕТ текстового поля
-    /// сообщения вообще ('dsrErr'/'dsrExc' там - целые числа, не текст) - у просмотрщика протоколов
-    /// тогда нечего было бы показывать в качестве текста лога. Поэтому здесь добавлен столбец 'Msg TEXT',
-    /// которого в реальной Essence-таблице нет - см. пометку 'РАСШИРЕНИЕ' в '__mTablesFill'</fixed>
+    /// <fixed>ПРИВЕДЕНО К ПОДТВЕРЖДЁННОЙ ЭТАЛОННОЙ СХЕМЕ (файл 'Protocols.db', сверено построчно по
+    /// фактическому 'sqlite_master'): 'App' (CHG,CLU,ELD,GID,cgzApp,dsiApp,Pfx), 'Pcl' (CHG,CLU,ELD,GID,
+    /// lnkApp,lnkCpu,lnkPclTyp,lnkUsr,Prc,Fil), 'PclTyp'/'PclRrdTyp' - только (CHG,CLU,ELD,GID,cgz*,dsi*),
+    /// БЕЗ столбцов-флагов 'opt*', 'PclRrd' (CHG,CLU,ELD,GID,lnkPcl,lnkPclRrdTyp,Err,Tck) - столбец
+    /// сообщения называется 'Err', не 'Msg'. ПОДТВЕРЖДЕНО ОТДЕЛЬНО: в этой схеме НЕТ таблиц 'Cpu'/'Usr' -
+    /// 'Pcl.lnkCpu'/'Pcl.lnkUsr' это внешние ключи без цели внутри этой базы; см. пометку 'ВНИМАНИЕ' у
+    /// 'mComputerEnsure'/'mUserEnsure' - разрешение имени компьютера/пользователя пока не реализовано</fixed>
     /// <conception>Lucasin V.</conception>
     public class dsqProtocols : appProtocols
     {
@@ -37,6 +31,50 @@ namespace nlDataSourceSqlite
         #region = МЕТОДЫ
 
         #region - Объект
+
+        /// <fixed>Раньше три разных места ('cspFormMain', 'cspFormLoader', 'cspFormCombinedViewer') сами
+        /// делали 'cspApplication.__oProtocols as dsqProtocols' и сами решали, что делать при [null] -
+        /// в 'cspFormLoader' это была видимая строка в логе, в 'cspFormCombinedViewer' - тихо пустая
+        /// таблица без всякого объяснения. Раз причина одна ('appApplication.__oProtocols' по умолчанию
+        /// это 'appProtocols', а не 'dsqProtocols', и что-то - обычно 'cspBegin.Main()' - должно успеть
+        /// его переопределить до того как форма делает приведение типов), решение тоже должно быть одно -
+        /// здесь, а не в каждой форме. Это ещё и защищает от значения по умолчанию для ЛЮБОЙ будущей точки
+        /// входа/тестового запуска, которая забудет сделать переопределение в своём 'Main()' - вместо
+        /// молчаливого [null] это самовосстанавливающееся свойство просто создаст 'dsqProtocols' само</fixed>
+        /// <summary>
+        /// Активный экземпляр 'dsqProtocols'. Приводит 'appApplication.__oProtocols' к этому типу; если
+        /// он ещё не был переопределён (равен базовому 'appProtocols' по умолчанию), создаёт и
+        /// устанавливает 'dsqProtocols' сам - возвращаемое значение никогда не бывает [null]
+        /// </summary>
+        public static dsqProtocols __oActive_
+        {
+            get
+            {
+                dsqProtocols vProtocols = appApplication.__oProtocols as dsqProtocols;
+                if (vProtocols == null)
+                {
+                    vProtocols = new dsqProtocols();
+                    appApplication.__oProtocols = vProtocols;
+                }
+                return vProtocols;
+            }
+        }
+        /// <fixed>ДОБАВЛЕНО: раньше 'cspFormCombinedViewer' сам читал 'dsqProtocols.__oActive_' - то есть
+        /// ВСЕГДА показывал "родную" базу приложения ('Databases\protocols.db'), независимо от того, что
+        /// пользователь вручную открыл через "Файл / Открыть" в 'cspFormMain' - две формы показывали разные
+        /// базы данных без какой-либо связи между собой. '__oActive_' для этого не годится: он специально
+        /// самовосстанавливающийся и всегда указывает на "родную" базу - смешивать в нём же "то, что сейчас
+        /// открыто для просмотра" означало бы либо сломать самовосстановление, либо запутать оба смысла.
+        /// Это ОТДЕЛЬНОЕ свойство: "какая база сейчас выбрана для просмотра в интерфейсе", не привязанное
+        /// к типу 'dsqProtocols' (открытый вручную файл - это 'dsqDataSourceSqliteWithProtocol', не
+        /// 'dsqProtocols'), по умолчанию [null] - НИЧЕГО не показывается, пока пользователь сам не откроет
+        /// базу. 'cspFormMain' обновляет его при "Файл / Открыть" и "Файл / Закрыть"; 'cspFormCombinedViewer'
+        /// только читает</fixed>
+        /// <summary>
+        /// База данных, выбранная пользователем для просмотра в интерфейсе (через "Файл / Открыть протокол"
+        /// в 'cspFormMain'). [null] - ничего не открыто, формы просмотра должны показывать пустые таблицы
+        /// </summary>
+        public static nlData.datUnitDataSource __oViewing_ = null;
 
         protected void _mObjectAssembly()
         {
@@ -64,24 +102,23 @@ namespace nlDataSourceSqlite
             string vDateTimeNow = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             string vPrintScreenFile = pPrintScreen == true ? __mPrintScreen() : "";
 
-            string vCommand = "Insert Into Pcl (CHG, GID, dtmPclCre, lnkApp, lnkCpu, lnkPclTyp, lnkUsr, Prc, Fil)"
+            string vCommand = "Insert Into Pcl (CHG, GID, lnkApp, lnkCpu, lnkPclTyp, lnkUsr, Prc, Fil)"
                               + " Values("
                               + "'" + vDateTimeNow + "'"
                               + ", '" + Guid.NewGuid().ToString() + "'"
-                              + ", '" + vDateTimeNow + "'"
                               + ", " + vApplicationClue.ToString()
                               + ", " + vCpuClue.ToString()
                               + ", " + vProtocolTypClue.ToString()
                               + ", " + vUsrClue.ToString()
                               + ", '" + pProcedure.Replace("'", "''") + "'"
-                              + ", '" + vPrintScreenFile.Replace("'", "''") + "')";
+                              + ", " + (string.IsNullOrEmpty(vPrintScreenFile) == true ? "NULL" : "'" + vPrintScreenFile.Replace("'", "''") + "'") + ")";
 
             oDataSourceSqlite.__mSqlCommand(vCommand);
             fProtocolClue = oDataSourceSqlite.__mClueLastInserted("Pcl");
         }
         public override void __mRecord(PROTOCOLRECORDSTYPES pRecordType, string pRecordText, long pTick = -1)
         {
-            string vCommand = "Insert Into PclRrd (CHG, GID, lnkPcl, lnkPclRrdTyp, Msg, Tck)"
+            string vCommand = "Insert Into PclRrd (CHG, GID, lnkPcl, lnkPclRrdTyp, Err, Tck)"
                               + " Values("
                               + "'" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "'"
                               + ", '" + Guid.NewGuid().ToString() + "'"
@@ -95,10 +132,8 @@ namespace nlDataSourceSqlite
         /// Соответствие вида протокола (enum 'PROTOCOLSTYPES') реальному 'CLU' строки в таблице 'PclTyp'.
         /// </summary>
         /// <remarks>Строки в 'PclTyp' сеются в '__mTablesFill' СТРОГО в этом порядке (одна 'Insert' на
-        /// значение enum, от 'ApplicationError' до 'Other') - поэтому 'CLU' построчно совпадает со
-        /// значением enum, независимо от того, в каком порядке объявлены сами флаговые столбцы
-        /// ('optAppErr'/'optAppExc'/... - в реальном 'admEssencePclTyp.cs' они идут НЕ в порядке enum,
-        /// но это не важно: значение CLU определяется порядком ВСТАВКИ строк, а не порядком столбцов)</remarks>
+        /// значение enum, от 'ApplicationError' до 'Other'), и 'cgzPclTyp' у каждой строки явно
+        /// установлен равным тому же числу - поэтому 'CLU' построчно совпадает со значением enum</remarks>
         /// <param name="pProtocolType">Вид протокола</param>
         /// <returns>Реальный CLU строки в 'PclTyp'</returns>
         private int mProtocolTypeClue(PROTOCOLSTYPES pProtocolType)
@@ -123,10 +158,8 @@ namespace nlDataSourceSqlite
         /// <summary>
         /// Соответствие вида записи протокола (enum 'PROTOCOLRECORDSTYPES') реальному 'CLU' строки в таблице 'PclRrdTyp'.
         /// </summary>
-        /// <remarks>Реальный 'admEssencePclRrdTyp.cs' определяет СЕМЬ флагов ('optAns','optDtl','optExc',
-        /// 'optImg','optMsg','optObjPrp','optRsn'), а не шесть - у исходного enum 'PROTOCOLRECORDSTYPES'
-        /// нет соответствия для 'optRsn' ('Причина'). Строки сеются в этом же порядке, поэтому CLU=7
-        /// теперь занят типом 'Причина' - зарезервировано на будущее, из enum пока недостижимо</remarks>
+        /// <remarks>Строки в 'PclRrdTyp' сеются в этом же порядке; седьмая ('Причина', CLU=7) не имеет
+        /// соответствия в enum 'PROTOCOLRECORDSTYPES' - зарезервирована на будущее, из enum пока недостижима</remarks>
         /// <param name="pRecordType">Вид записи протокола</param>
         /// <returns>Реальный CLU строки в 'PclRrdTyp'</returns>
         private int mRecordTypeClue(PROTOCOLRECORDSTYPES pRecordType)
@@ -159,6 +192,11 @@ namespace nlDataSourceSqlite
             mColumnRenameIfExists("Pcl", "InkPclTyp", "lnkPclTyp");
             mColumnRenameIfExists("PclRrd", "InkPcl", "lnkPcl");
             mColumnRenameIfExists("PclRrd", "InkPclRrdTyp", "lnkPclRrdTyp");
+            /// <fixed>ДОБАВЛЕНО: ещё более старая версия этого класса писала текст сообщения в столбец
+            /// 'Msg' - подтверждённая эталонная схема ('Protocols.db', см. обсуждение) называет этот
+            /// столбец 'Err'. Та же причина, что и для опечатки 'Ink*' выше: без миграции уже
+            /// накопленная локальная база осталась бы навсегда с 'Msg' и падала бы на "no such column: Err"</fixed>
+            mColumnRenameIfExists("PclRrd", "Msg", "Err");
 
             /// Таблица 'App' - Приложения (реальные столбцы: 'admEssenceApp.__mRecordNew')
             if (oDataSourceSqlite.__mTableExists("App") == false)
@@ -176,57 +214,32 @@ namespace nlDataSourceSqlite
             }
             mApplicationEnsure(datApplication.__fProcessName_, datApplication.__fDescription_, datApplication.__fPrefix_);
 
-            /// Таблица 'Cpu' - Компьютеры (реальные столбцы: 'admEssenceCpu.__mRecordNew')
-            if (oDataSourceSqlite.__mTableExists("Cpu") == false)
-            {
-                string vQuery = "CREATE TABLE Cpu ("
-                                + "CHG TEXT,"
-                                + "CLU INTEGER NOT NULL UNIQUE,"
-                                + "ELD INTEGER DEFAULT 0,"
-                                + "GID TEXT,"
-                                + "cgzCpu INTEGER,"
-                                + "dsiCpu TEXT,"
-                                + "PRIMARY KEY('CLU' AUTOINCREMENT))";
-                oDataSourceSqlite.__mSqlCommand(vQuery);
-            }
+            /// <fixed>УДАЛЕНО: таблицы 'Cpu' и 'Usr' здесь больше НЕ создаются. Подтверждённая эталонная
+            /// схема ('Protocols.db') не содержит таких таблиц вообще - 'Pcl.lnkCpu'/'Pcl.lnkUsr' в ней
+            /// это внешние ключи без локальной таблицы-цели внутри этой базы (см. примечание к
+            /// 'mComputerEnsure'/'mUserEnsure' ниже - реальное разрешение имени компьютера/пользователя
+            /// пока не определено и требует уточнения)</fixed>
 
-            /// Таблица 'Usr' - Пользователи (реальные столбцы: 'admEssenceUsr.__mRecordNew')
-            if (oDataSourceSqlite.__mTableExists("Usr") == false)
-            {
-                string vQuery = "CREATE TABLE Usr ("
-                                + "CHG TEXT,"
-                                + "CLU INTEGER NOT NULL UNIQUE,"
-                                + "ELD INTEGER DEFAULT 0,"
-                                + "GID TEXT,"
-                                + "codUsr INTEGER,"
-                                + "dsiUsr TEXT,"
-                                + "mrkAdm INTEGER DEFAULT 0,"
-                                + "PswCod TEXT,"
-                                + "PRIMARY KEY('CLU' AUTOINCREMENT))";
-                oDataSourceSqlite.__mSqlCommand(vQuery);
-            }
-
-            /// Таблица 'Pcl' - Протоколы (реальные столбцы: 'admEssencePcl.__mRecordNew')
+            /// Таблица 'Pcl' - Протоколы (реальные столбцы - сверено с подтверждённой эталонной 'Protocols.db')
             if (oDataSourceSqlite.__mTableExists("Pcl") == false)
             {
                 string vQuery = "CREATE TABLE Pcl ("
-                                + "CHG TEXT,"
+                                + "CHG INTEGER NOT NULL,"
                                 + "CLU INTEGER NOT NULL UNIQUE,"
-                                + "ELD INTEGER DEFAULT 0,"
-                                + "GID TEXT,"
-                                + "cgzPcl INTEGER,"
-                                + "dtmPclCre TEXT,"
-                                + "lnkApp INTEGER,"
-                                + "lnkCpu INTEGER,"
-                                + "lnkPclTyp INTEGER,"
-                                + "lnkUsr INTEGER,"
-                                + "Prc TEXT,"
-                                + "Fil TEXT,"
+                                + "ELD INTEGER NOT NULL DEFAULT 0,"
+                                + "GID TEXT NOT NULL,"
+                                + "lnkApp INTEGER NOT NULL,"
+                                + "lnkCpu INTEGER NOT NULL,"
+                                + "lnkPclTyp INTEGER NOT NULL,"
+                                + "lnkUsr INTEGER NOT NULL,"
+                                + "Prc TEXT NOT NULL,"
+                                + "Fil INTEGER,"
                                 + "PRIMARY KEY('CLU' AUTOINCREMENT))";
                 oDataSourceSqlite.__mSqlCommand(vQuery);
             }
 
-            /// Таблица 'PclTyp' - Виды протоколов (реальные столбцы: 'admEssencePclTyp.__mRecordNew')
+            /// Таблица 'PclTyp' - Виды протоколов (упрощено до подтверждённой эталонной схемы: только
+            /// 'cgzPclTyp'/'dsiPclTyp' - никаких столбцов-флагов 'opt*', которых в 'Protocols.db' нет)
             if (oDataSourceSqlite.__mTableExists("PclTyp") == false)
             {
                 string vQuery = "CREATE TABLE PclTyp ("
@@ -236,62 +249,44 @@ namespace nlDataSourceSqlite
                                 + "GID TEXT,"
                                 + "cgzPclTyp INTEGER,"
                                 + "dsiPclTyp TEXT,"
-                                + "optAppErr INTEGER,"
-                                + "optAppExc INTEGER,"
-                                + "optAppErrPrg INTEGER,"
-                                + "optAppEvn INTEGER,"
-                                + "optDatErr INTEGER,"
-                                + "optDatEvn INTEGER,"
-                                + "optDevErr INTEGER,"
-                                + "optDevEvn INTEGER,"
-                                + "optOth INTEGER,"
-                                + "optUsrErr INTEGER,"
-                                + "optUsrEvn INTEGER,"
-                                + "optUsrMsg INTEGER,"
                                 + "PRIMARY KEY('CLU' AUTOINCREMENT))";
                 oDataSourceSqlite.__mSqlCommand(vQuery);
 
                 /// Засеяно СТРОГО в порядке значений enum 'PROTOCOLSTYPES' (1..12), чтобы CLU совпадал со
-                /// значением enum - см. примечание к 'mProtocolTypeClue'. У каждой строки установлен ровно
-                /// ОДИН верный флаг по имени (не по позиции) - соответствие проверено по названию столбца
-                mPclTypSeed("Ошибка приложения", "optAppErr");
-                mPclTypSeed("Ошибка программирования", "optAppErrPrg");
-                mPclTypSeed("Исключение", "optAppExc");
-                mPclTypSeed("Событие приложения", "optAppEvn");
-                mPclTypSeed("Ошибка источника данных", "optDatErr");
-                mPclTypSeed("Событие источника данных", "optDatEvn");
-                mPclTypSeed("Ошибка устройства", "optDevErr");
-                mPclTypSeed("Событие устройства", "optDevEvn");
-                mPclTypSeed("Ошибка пользователя", "optUsrErr");
-                mPclTypSeed("Событие пользователя", "optUsrEvn");
-                mPclTypSeed("Сообщение пользователю", "optUsrMsg");
-                mPclTypSeed("Прочее", "optOth");
+                /// значением enum - см. примечание к 'mProtocolTypeClue'. 'cgzPclTyp' также равен тому же
+                /// числу явно (а не оставлен пустым), т.к. флаговых столбцов для различения видов больше нет
+                mPclTypSeed(1, "Ошибка приложения");
+                mPclTypSeed(2, "Ошибка программирования");
+                mPclTypSeed(3, "Исключение");
+                mPclTypSeed(4, "Событие приложения");
+                mPclTypSeed(5, "Ошибка источника данных");
+                mPclTypSeed(6, "Событие источника данных");
+                mPclTypSeed(7, "Ошибка устройства");
+                mPclTypSeed(8, "Событие устройства");
+                mPclTypSeed(9, "Ошибка пользователя");
+                mPclTypSeed(10, "Событие пользователя");
+                mPclTypSeed(11, "Сообщение пользователю");
+                mPclTypSeed(12, "Прочее");
             }
 
-            /// Таблица 'PclRrd' - Записи протокола (реальные столбцы: 'admEssencePclRrd.__mRecordNew' + 'Msg')
+            /// Таблица 'PclRrd' - Записи протокола (столбец сообщения - 'Err', подтверждено эталонной схемой)
             if (oDataSourceSqlite.__mTableExists("PclRrd") == false)
             {
                 string vQuery = "CREATE TABLE PclRrd ("
-                                + "CHG TEXT,"
+                                + "CHG INTEGER NOT NULL,"
                                 + "CLU INTEGER NOT NULL UNIQUE,"
-                                + "ELD INTEGER DEFAULT 0,"
-                                + "GID TEXT,"
-                                + "lnkPcl INTEGER,"
-                                + "lnkPclRrdTyp INTEGER,"
-                                + "dsrErr INTEGER DEFAULT 0,"
-                                + "dsrExc INTEGER DEFAULT 0,"
-                                + "Tck INTEGER,"
-                                /// РАСШИРЕНИЕ сверх реальной Essence-схемы: у 'admEssencePclRrd' в проекте
-                                /// нет текстового поля сообщения вообще ('dsrErr'/'dsrExc' - целые числа,
-                                /// не текст). Без текста сообщения просмотрщик протоколов не может показать
-                                /// сам лог - добавлен столбец 'Msg TEXT', отсутствующий в реальной таблице
-                                + "Msg TEXT,"
+                                + "ELD INTEGER NOT NULL DEFAULT 0,"
+                                + "GID INTEGER NOT NULL,"
+                                + "lnkPcl INTEGER NOT NULL,"
+                                + "lnkPclRrdTyp INTEGER NOT NULL,"
+                                + "Err TEXT NOT NULL,"
+                                + "Tck INTEGER NOT NULL,"
                                 + "PRIMARY KEY('CLU' AUTOINCREMENT))";
                 oDataSourceSqlite.__mSqlCommand(vQuery);
             }
 
-            /// Таблица 'PclRrdTyp' - Виды записей протокола (реальные столбцы: 'admEssencePclRrdTyp.__mRecordNew';
-            /// реальное название таблицы - 'PclRrdTyp', а НЕ 'RrdTyp', как было раньше)
+            /// Таблица 'PclRrdTyp' - Виды записей протокола (упрощено до 'cgzPclRrdTyp'/'dsiPclRrdTyp' -
+            /// без столбцов-флагов 'opt*', как и 'PclTyp' выше)
             if (oDataSourceSqlite.__mTableExists("PclRrdTyp") == false)
             {
                 string vQuery = "CREATE TABLE PclRrdTyp ("
@@ -301,25 +296,18 @@ namespace nlDataSourceSqlite
                                 + "GID TEXT,"
                                 + "cgzPclRrdTyp INTEGER,"
                                 + "dsiPclRrdTyp TEXT,"
-                                + "optAns INTEGER,"
-                                + "optDtl INTEGER,"
-                                + "optExc INTEGER,"
-                                + "optImg INTEGER,"
-                                + "optMsg INTEGER,"
-                                + "optObjPrp INTEGER,"
-                                + "optRsn INTEGER,"
                                 + "PRIMARY KEY('CLU' AUTOINCREMENT))";
                 oDataSourceSqlite.__mSqlCommand(vQuery);
 
-                /// Засеяно строго в порядке enum 'PROTOCOLRECORDSTYPES' (1..6) плюс 'Причина' (7-й реальный
-                /// флаг 'optRsn', которому раньше не было соответствия) - см. примечание к 'mRecordTypeClue'
-                mPclRrdTypSeed("Решение пользователя", "optAns");
-                mPclRrdTypSeed("Детали", "optDtl");
-                mPclRrdTypSeed("Исключение", "optExc");
-                mPclRrdTypSeed("Изображение", "optImg");
-                mPclRrdTypSeed("Сообщение", "optMsg");
-                mPclRrdTypSeed("Свойства объекта", "optObjPrp");
-                mPclRrdTypSeed("Причина", "optRsn");
+                /// Засеяно строго в порядке enum 'PROTOCOLRECORDSTYPES' (1..6) плюс 'Причина' (7) -
+                /// см. примечание к 'mRecordTypeClue'
+                mPclRrdTypSeed(1, "Решение пользователя");
+                mPclRrdTypSeed(2, "Детали");
+                mPclRrdTypSeed(3, "Исключение");
+                mPclRrdTypSeed(4, "Изображение");
+                mPclRrdTypSeed(5, "Сообщение");
+                mPclRrdTypSeed(6, "Свойства объекта");
+                mPclRrdTypSeed(7, "Причина");
             }
 
             /// Таблица 'ImportedGid' - отслеживание уже импортированных строк из легаси '.pcl' файлов
@@ -353,17 +341,17 @@ namespace nlDataSourceSqlite
         /// <summary>
         /// Вставка одной засеваемой строки 'PclTyp' с ровно одним установленным флагом (по имени столбца)
         /// </summary>
-        private void mPclTypSeed(string pCaption, string pFlagColumnName)
+        private void mPclTypSeed(int pCgz, string pCaption)
         {
-            string vCommand = "Insert Into PclTyp (dsiPclTyp, " + pFlagColumnName + ") Values('" + pCaption + "', 1)";
+            string vCommand = "Insert Into PclTyp (cgzPclTyp, dsiPclTyp) Values(" + pCgz.ToString() + ", '" + pCaption + "')";
             oDataSourceSqlite.__mSqlCommand(vCommand);
         }
         /// <summary>
-        /// Вставка одной засеваемой строки 'PclRrdTyp' с ровно одним установленным флагом (по имени столбца)
+        /// Вставка одной засеваемой строки 'PclRrdTyp'
         /// </summary>
-        private void mPclRrdTypSeed(string pCaption, string pFlagColumnName)
+        private void mPclRrdTypSeed(int pCgz, string pCaption)
         {
-            string vCommand = "Insert Into PclRrdTyp (dsiPclRrdTyp, " + pFlagColumnName + ") Values('" + pCaption + "', 1)";
+            string vCommand = "Insert Into PclRrdTyp (cgzPclRrdTyp, dsiPclRrdTyp) Values(" + pCgz.ToString() + ", '" + pCaption + "')";
             oDataSourceSqlite.__mSqlCommand(vCommand);
         }
         /// <summary>
@@ -418,17 +406,16 @@ namespace nlDataSourceSqlite
             int vProtocolTypClue = mProtocolTypeClueByRawId(pProtocolType);
             string vChg = new DateTime(pChgTicks > 0 ? pChgTicks : DateTime.Now.Ticks).ToString("yyyy-MM-dd HH:mm:ss");
 
-            string vCommand = "Insert Into Pcl (CHG, GID, dtmPclCre, lnkApp, lnkCpu, lnkPclTyp, lnkUsr, Prc, Fil)"
+            string vCommand = "Insert Into Pcl (CHG, GID, lnkApp, lnkCpu, lnkPclTyp, lnkUsr, Prc, Fil)"
                               + " Values("
                               + "'" + vChg + "'"
                               + ", '" + pGid + "'"
-                              + ", '" + vChg + "'"
                               + ", " + vApplicationClue.ToString()
                               + ", " + vCpuClue.ToString()
                               + ", " + vProtocolTypClue.ToString()
                               + ", " + vUsrClue.ToString()
                               + ", '" + (pProcedure ?? "").Replace("'", "''") + "'"
-                              + ", '')";
+                              + ", NULL)";
             oDataSourceSqlite.__mSqlCommand(vCommand);
 
             return oDataSourceSqlite.__mClueLastInserted("Pcl");
@@ -445,7 +432,7 @@ namespace nlDataSourceSqlite
         {
             int vRecordTypClue = mRecordTypeClueByRawId(pRawRecordType);
 
-            string vCommand = "Insert Into PclRrd (CHG, GID, lnkPcl, lnkPclRrdTyp, Msg, Tck)"
+            string vCommand = "Insert Into PclRrd (CHG, GID, lnkPcl, lnkPclRrdTyp, Err, Tck)"
                               + " Values("
                               + "'" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "'"
                               + ", '" + pGid + "'"
@@ -482,55 +469,31 @@ namespace nlDataSourceSqlite
 
             return oDataSourceSqlite.__mClueLastInserted("App");
         }
+        /// <fixed>ВНИМАНИЕ - ТРЕБУЕТ УТОЧНЕНИЯ: подтверждённая эталонная схема ('Protocols.db') не содержит
+        /// таблицы 'Cpu' - только 'Pcl.lnkCpu' как внешний ключ без цели внутри этой базы. Раньше этот
+        /// метод сам создавал строки в локальной 'Cpu' и возвращал их настоящий CLU; теперь, раз такой
+        /// таблицы нет, реальный CLU получить неоткуда. Возвращается заглушка [0] ("не определено") -
+        /// имя компьютера ('pHostName') сейчас НИКУДА не сохраняется и теряется. Если разрешение имени
+        /// компьютера/пользователя на самом деле должно идти в другую (общую для всего решения) базу
+        /// данных - например туда, где 'admEssenceCpu'/'admEssenceUsr' основного приложения 'Administration'
+        /// действительно хранят свои записи - этому методу нужен доступ к ней, которого сейчас нет</fixed>
         /// <summary>
-        /// Поиск (или создание) строки компьютера по имени
+        /// Заглушка вместо поиска/создания строки компьютера - см. пометку 'ВНИМАНИЕ' выше
         /// </summary>
-        /// <remarks>НОВОЕ: раньше имя компьютера писалось прямо текстом в 'Pcl.Hst' - реальная схема
-        /// связывает 'Pcl.lnkCpu' с отдельной таблицей 'Cpu' (см. 'admEssencePcl.__mRecordNew')</remarks>
-        /// <param name="pHostName">Имя компьютера</param>
-        /// <returns>Реальный CLU строки в 'Cpu'</returns>
+        /// <param name="pHostName">Имя компьютера (сейчас не сохраняется никуда)</param>
+        /// <returns>[0] - "не определено" (таблицы 'Cpu' в подтверждённой схеме нет)</returns>
         private int mComputerEnsure(string pHostName)
         {
-            if (string.IsNullOrEmpty(pHostName) == true)
-                pHostName = "(неизвестно)";
-
-            object vExisting = oDataSourceSqlite.__mSqlValue("Cpu", "CLU", "dsiCpu = '" + pHostName.Replace("'", "''") + "'");
-            if (vExisting != null && vExisting != DBNull.Value)
-                return Convert.ToInt32(vExisting);
-
-            string vCommand = "Insert Into Cpu (CHG, GID, dsiCpu)"
-                              + " Values("
-                              + "'" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "'"
-                              + ", '" + Guid.NewGuid().ToString() + "'"
-                              + ", '" + pHostName.Replace("'", "''") + "')";
-            oDataSourceSqlite.__mSqlCommand(vCommand);
-
-            return oDataSourceSqlite.__mClueLastInserted("Cpu");
+            return 0;
         }
         /// <summary>
-        /// Поиск (или создание) строки пользователя по имени
+        /// Заглушка вместо поиска/создания строки пользователя - см. пометку 'ВНИМАНИЕ' у 'mComputerEnsure'
         /// </summary>
-        /// <remarks>НОВОЕ: раньше имя пользователя писалось прямо текстом в 'Pcl.Usr' - реальная схема
-        /// связывает 'Pcl.lnkUsr' с отдельной таблицей 'Usr' (см. 'admEssencePcl.__mRecordNew')</remarks>
-        /// <param name="pUserName">Имя пользователя</param>
-        /// <returns>Реальный CLU строки в 'Usr'</returns>
+        /// <param name="pUserName">Имя пользователя (сейчас не сохраняется никуда)</param>
+        /// <returns>[0] - "не определено" (таблицы 'Usr' в подтверждённой схеме нет)</returns>
         private int mUserEnsure(string pUserName)
         {
-            if (string.IsNullOrEmpty(pUserName) == true)
-                pUserName = "(неизвестно)";
-
-            object vExisting = oDataSourceSqlite.__mSqlValue("Usr", "CLU", "dsiUsr = '" + pUserName.Replace("'", "''") + "'");
-            if (vExisting != null && vExisting != DBNull.Value)
-                return Convert.ToInt32(vExisting);
-
-            string vCommand = "Insert Into Usr (CHG, GID, dsiUsr)"
-                              + " Values("
-                              + "'" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "'"
-                              + ", '" + Guid.NewGuid().ToString() + "'"
-                              + ", '" + pUserName.Replace("'", "''") + "')";
-            oDataSourceSqlite.__mSqlCommand(vCommand);
-
-            return oDataSourceSqlite.__mClueLastInserted("Usr");
+            return 0;
         }
         /// <summary>
         /// Соответствие сырого числового id вида протокола, как он записан в легаси '.pcl' файле, реальному CLU в 'PclTyp'.

@@ -134,6 +134,34 @@ namespace naCsProtocols
                             vReturn.Add(vPath);
                     }
                 }
+
+                /// <fixed>ДОБАВЛЕНО: 'RELEASE\' - папка выложенных сборок ('Administration\RELEASE\<Приложение>\...') -
+                /// находится на 2 уровня ВЫШЕ 'APPLICATIONs\Administration' (корень решения), куда цикл выше не
+                /// поднимался вообще - ни один опубликованный '.pcl' из 'RELEASE' раньше не попадал в импорт</fixed>
+                DirectoryInfo vSolutionRoot = vDirectory;
+                for (int i = 0; i < 2 && vSolutionRoot != null && vSolutionRoot.Parent != null; i++)
+                    vSolutionRoot = vSolutionRoot.Parent;
+
+                if (vSolutionRoot != null && vSolutionRoot.Exists == true)
+                {
+                    DirectoryInfo vReleaseDirectory = new DirectoryInfo(Path.Combine(vSolutionRoot.FullName, "RELEASE"));
+                    if (vReleaseDirectory.Exists == true)
+                    {
+                        foreach (DirectoryInfo vReleasedApp in vReleaseDirectory.GetDirectories())
+                        {
+                            string[] vReleaseCandidates = new string[]
+                            {
+                                Path.Combine(vReleasedApp.FullName, "PROTOCOLs"),
+                                Path.Combine(vReleasedApp.FullName, "Protocols"),
+                            };
+                            foreach (string vPath in vReleaseCandidates)
+                            {
+                                if (Directory.Exists(vPath) == true && vReturn.Contains(vPath) == false)
+                                    vReturn.Add(vPath);
+                            }
+                        }
+                    }
+                }
             }
             catch
             {
@@ -168,6 +196,7 @@ namespace naCsProtocols
             }
 
             Dictionary<string, int> vAppCache = new Dictionary<string, int>(); // Кэш 'Имя приложения -> CLU' на время импорта этого файла
+            int vRecognizedLines = 0; // Строк, структурно похожих на заголовок протокола (>=12 полей через запятую) - см. примечание ниже
 
             if (pProtocols.__mTransactionBegin() == false)
                 return 0;
@@ -181,7 +210,9 @@ namespace naCsProtocols
 
                     string[] vParts = vLine.Split(',');
                     if (vParts.Length < 12)
-                        continue; // Не строка заголовка протокола (либо заголовок CSV, либо повреждённая строка)
+                        continue; // Не строка заголовка протокола (либо заголовок CSV, либо повреждённая строка, либо не тот формат файла целиком - см. 'mUnrecognizedFormatLog')
+
+                    vRecognizedLines++;
 
                     string vGid = vParts[1].Trim();
                     if (string.IsNullOrEmpty(vGid) == true || pImportedGidMap.ContainsKey(vGid) == true)
@@ -218,6 +249,14 @@ namespace naCsProtocols
                 throw;
             }
 
+            /// Ни одна строка не распознана как заголовок протокола, хотя файл не пуст - вероятно, это
+            /// файл в другом, устаревшем формате (например обнаруженный на практике легаси-формат
+            /// '[тики][дата][приложение][...]' вместо ожидаемого CSV - от более старой версии логгера,
+            /// без соответствующего писателя в текущей кодовой базе). Раньше такой файл молча давал 0
+            /// импортированных строк, неотличимо от файла, для которого просто нечего было импортировать
+            if (vRecognizedLines == 0 && vLines.Any(pLine => string.IsNullOrWhiteSpace(pLine) == false))
+                mUnrecognizedFormatLog(pFilePath);
+
             return vImportedCount;
         }
         /// <summary>
@@ -246,6 +285,8 @@ namespace naCsProtocols
             if (pProtocols.__mTransactionBegin() == false)
                 return 0;
 
+            int vRecognizedLines = 0;
+
             try
             {
                 foreach (string vLine in vLines)
@@ -256,6 +297,8 @@ namespace naCsProtocols
                     string[] vParts = vLine.Split(',');
                     if (vParts.Length < 6)
                         continue;
+
+                    vRecognizedLines++;
 
                     string vGid = vParts[1].Trim();
                     if (string.IsNullOrEmpty(vGid) == true || pImportedGidMap.ContainsKey(vGid) == true)
@@ -286,6 +329,9 @@ namespace naCsProtocols
                 throw;
             }
 
+            if (vRecognizedLines == 0 && vLines.Any(pLine => string.IsNullOrWhiteSpace(pLine) == false))
+                mUnrecognizedFormatLog(pFilePath);
+
             return vImportedCount;
         }
         /// <summary>
@@ -298,6 +344,28 @@ namespace naCsProtocols
             {
                 string vLine = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
                     + " | Файл пропущен (" + pLinesCount + " строк, лимит " + cMaxLinesPerFile + ") - похоже на повреждённый легаси-файл: "
+                    + pFilePath + Environment.NewLine;
+
+                File.AppendAllText(Path.Combine(Path.GetDirectoryName(pFilePath), "protocols_import_skipped.log"), vLine);
+            }
+            catch
+            {
+                /// Запись предупреждения не должна иметь права сорвать импорт остальных файлов
+            }
+        }
+        /// <summary>
+        /// Регистрация файла, содержимое которого не удалось разобрать ни в одной строке - непустой файл,
+        /// но ни одна строка не совпала с ожидаемым CSV-форматом ('CHG,GID,...' с запятыми). На практике
+        /// в проекте встречались файлы в другом, устаревшем формате (без соответствующего писателя в
+        /// текущей кодовой базе - см. примечание к классу) - такие файлы раньше молча давали 0 импортированных
+        /// строк, неотличимо от файла, для которого действительно нечего было импортировать
+        /// </summary>
+        private void mUnrecognizedFormatLog(string pFilePath)
+        {
+            try
+            {
+                string vLine = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+                    + " | Формат файла не распознан (ни одна строка не похожа на ожидаемый CSV) - пропущен: "
                     + pFilePath + Environment.NewLine;
 
                 File.AppendAllText(Path.Combine(Path.GetDirectoryName(pFilePath), "protocols_import_skipped.log"), vLine);

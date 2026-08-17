@@ -53,6 +53,7 @@ namespace naCsProtocols
             _cBlockFormMain.Controls.Add(_cSplitter);
             _cBlockFormMain.Controls.SetChildIndex(_cSplitter, 0);
             _cBlockFormMain.__mMenuAdd(_cMenuFile);
+            _cBlockFormMain.__mMenuAdd(_cMenuView);
 
             // Левая панель: TableLayoutPanel — фильтры в фиксированной строке, сетка в оставшемся месте.
             // Dock Top+Fill на обычной Panel с cspAreaGrid (сам SplitContainer) давал перекрытие и «серую» сетку.
@@ -103,6 +104,15 @@ namespace naCsProtocols
                     _cMenuFileClose.__fCaption_ = "Закрыть протокол";
                     _cMenuFileClose.Click += mMenuFileClose_Click;
                 }
+            }
+            // _cMenuView - Form 3 (совмещённый просмотр) не была доступна ниоткуда в приложении: класс
+            // существовал и был зарегистрирован в проекте, но ничто его не показывало (ни пункт меню, ни
+            // кнопка) - форма фактически была недостижима для пользователя
+            {
+                _cMenuView.__fCaption_ = "Вид";
+                _cMenuView.DropDownItems.Add(_cMenuViewCombined);
+                _cMenuViewCombined.__fCaption_ = "Совмещённый просмотр (записи + заголовок)";
+                _cMenuViewCombined.Click += mMenuViewCombined_Click;
             }
             // _cAreaProtocols
             {
@@ -310,7 +320,14 @@ namespace naCsProtocols
         {
             base._mObjectPresentation();
 
-            mProtocolsAutoLoad();
+            /// ИСПРАВЛЕНО (по запросу пользователя): раньше здесь стоял 'mProtocolsAutoLoad()', который
+            /// сразу показывал "родную" базу приложения ('dsqProtocols.__oActive_') при каждом открытии
+            /// формы - даже если пользователь ничего не открывал. Импорт легаси '.pcl' файлов по-прежнему
+            /// нужен (иначе база не пополняется), но ПОКАЗ данных теперь строго по запросу: пусто, пока
+            /// не выполнено "Файл / Открыть протокол"
+            mProtocolsImportSilently();
+            mClearProtocolsView();
+            _cLabelStatus.Text = "База данных не открыта. Файл / Открыть протокол...";
         }
 
         /// <summary>
@@ -371,52 +388,36 @@ namespace naCsProtocols
         #region - Протоколы (авто-загрузка из 'dsqProtocols' + фильтры)
 
         /// <summary>
-        /// Загрузка списка протоколов из SQLite базы данных 'dsqProtocols' (общий экземпляр, назначенный
-        /// активным логгером приложения в 'cspBegin.cs')
+        /// Импорт легаси '.pcl' файлов из папок 'PROTOCOLs' всех приложений решения в "родную" базу
+        /// приложения ('dsqProtocols.__oActive_'), БЕЗ показа результата на форме - см. примечание у
+        /// '_mObjectPresentation' о том, почему показ теперь строго по запросу пользователя. Использует
+        /// локальную переменную, а не поле '_oProtocols' - иначе форма стала бы неявно "активной" для
+        /// показа родной базы ещё до того, как пользователь сам что-то открыл
         /// </summary>
-        private void mProtocolsAutoLoad()
+        private void mProtocolsImportSilently()
         {
-            _manualDbMode = false;
-            _oManualDataSource = null;
-            _oProtocols = cspApplication.__oProtocols as dsqProtocols;
-
-            if (_oProtocols == null)
-            {
-                mClearProtocolsView();
-                mFiltersEnable(true);
-                _cLabelStatus.Text = "Нет открытой базы. Откройте .db через «Файл / Открыть протокол».";
-                return;
-            }
-
-            // Импорт легаси .pcl из папок PROTOCOLs/Protocols всех приложений решения
             try
             {
+                dsqProtocols vProtocols = dsqProtocols.__oActive_;
                 int vImported = 0;
                 List<string> vFolders = ProtocolSqliteImporter.__mProtocolsFoldersDiscover(System.Environment.CurrentDirectory);
                 ProtocolSqliteImporter vImporter = new ProtocolSqliteImporter();
                 foreach (string vFolder in vFolders)
-                    vImported += vImporter.__mImportFromFolder(_oProtocols, vFolder);
+                    vImported += vImporter.__mImportFromFolder(vProtocols, vFolder);
 
                 try
                 {
                     string vOwn = nlApplication.appApplication.__oPathes.__fDirectoryProtocols_;
                     if (string.IsNullOrEmpty(vOwn) == false && System.IO.Directory.Exists(vOwn) == true && vFolders.Contains(vOwn) == false)
-                        vImported += vImporter.__mImportFromFolder(_oProtocols, vOwn);
+                        vImported += vImporter.__mImportFromFolder(vProtocols, vOwn);
                 }
                 catch { }
-
-                if (vImported > 0)
-                    _cLabelStatus.Text = "Импортировано строк из .pcl: " + vImported;
             }
-            catch (Exception vEx)
+            catch
             {
-                _cLabelStatus.Text = "Импорт .pcl: " + vEx.Message;
+                /// Молчаливый импорт - ошибка не должна мешать открытию пустой формы; пользователь
+                /// всё равно может открыть любую базу вручную через "Файл / Открыть протокол"
             }
-
-            mFiltersEnable(true);
-            mFiltersPopulate();
-            mAdjustDateFilterToData();
-            mProtocolsLoad();
         }
 
         /// <summary>
@@ -1125,6 +1126,11 @@ namespace naCsProtocols
             _manualDbMode = true;
             _oManualDataSource = vDataSource;
 
+            /// ДОБАВЛЕНО: делает эту же базу видимой и для 'cspFormCombinedViewer' (Form 3) - см.
+            /// примечание к 'dsqProtocols.__oViewing_'. Раньше "Вид / Совмещённый" всегда показывал
+            /// "родную" базу приложения, никак не связанную с тем, что открыто здесь
+            dsqProtocols.__oViewing_ = vDataSource;
+
             mFiltersEnable(true);
             mFiltersPopulate();
             mAdjustDateFilterToData();
@@ -1136,23 +1142,28 @@ namespace naCsProtocols
         {
             _manualDbMode = false;
             _oManualDataSource = null;
+            _oProtocols = null;
 
-            // Сброс фильтров и таблиц — без «ошибки логгера»
+            /// ИСПРАВЛЕНО (по запросу пользователя): раньше здесь стояло 'dsqProtocols.__oActive_' -
+            /// закрытие вручную открытого файла тут же показывало "родную" базу приложения вместо
+            /// пустой формы. Теперь закрытие означает по-настоящему "ничего не открыто", как и при
+            /// первом запуске - см. '_mObjectPresentation'
+            dsqProtocols.__oViewing_ = null;
+
             mFilterClear_Click(sender, e);
             mClearProtocolsView();
             mFiltersEnable(true);
 
-            _oProtocols = cspApplication.__oProtocols as dsqProtocols;
-            if (_oProtocols != null)
-            {
-                mFiltersPopulate();
-                mProtocolsLoad();
-                _cLabelStatus.Text = "Файл закрыт. Показана база приложения.";
-            }
-            else
-            {
-                _cLabelStatus.Text = "Протокол закрыт. Откройте .db через «Файл / Открыть протокол».";
-            }
+            _cLabelStatus.Text = "Файл закрыт. База данных не открыта.";
+        }
+        /// <summary>
+        /// Открытие Form 3 (совмещённый просмотр) - см. примечание к '_cMenuView' о том, почему эта форма
+        /// иначе была недостижима из работающего приложения
+        /// </summary>
+        private void mMenuViewCombined_Click(object sender, EventArgs e)
+        {
+            cspFormCombinedViewer vFormCombined = new cspFormCombinedViewer();
+            vFormCombined.ShowDialog();
         }
 
         /// <summary>
@@ -1197,6 +1208,14 @@ namespace naCsProtocols
         /// Пункт меню 'Файл / Закрыть протокол'
         /// </summary>
         protected elmComponentMenuItem _cMenuFileClose = new elmComponentMenuItem();
+        /// <summary>
+        /// Меню 'Вид' - навигация к Form 3 (совмещённый просмотр)
+        /// </summary>
+        protected elmComponentMenuItem _cMenuView = new elmComponentMenuItem();
+        /// <summary>
+        /// Пункт меню 'Вид / Совмещённый просмотр'
+        /// </summary>
+        protected elmComponentMenuItem _cMenuViewCombined = new elmComponentMenuItem();
 
         /// <summary>
         /// Контейнер левой панели (фильтры + список протоколов)
