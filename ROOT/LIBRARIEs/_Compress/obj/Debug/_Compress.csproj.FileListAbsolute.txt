@@ -1,6 +1,0 @@
-D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_Compress\bin\Debug\_Compress.dll
-D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_Compress\bin\Debug\_Compress.pdb
-D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_Compress\obj\Debug\_Compress.csproj.AssemblyReference.cache
-D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_Compress\obj\Debug\_Compress.csproj.CoreCompileInputs.cache
-D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_Compress\obj\Debug\_Compress.dll
-D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_Compress\obj\Debug\_Compress.pdb

@@ -192,12 +192,7 @@ namespace nlApplication
                     }
                 }
 
-                //// Дополнительная проверка: Попытка получить полный путь.
-                //// Это может отловить некоторые некорректные форматы,
-                //// но не гарантирует существования.
-                // string fullPath = Path.GetFullPath(pPath);
-                //// Если сюда дошли, значит, синтаксически путь корректен.
-                //goto LabelReturn; // Переход к метке LabelReturn
+           
             }
             catch (ArgumentException vArgumentException) // Отлавливаем исключения, которые могут возникнуть при некорректном пути
             {
@@ -241,7 +236,8 @@ namespace nlApplication
         /// <summary>
         /// Путь и имя папки из которой запущено приложение
         /// </summary>
-        public string __fDirectoryStart = Environment.CurrentDirectory;
+       
+        public string __fDirectoryStart = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
 
         #endregion Атрибуты
 
@@ -259,6 +255,7 @@ namespace nlApplication
         /// Путь и имя папки для размещения файлов протоколов
         /// </summary>
         private string fDirectoryProtocols = "";
+        private string fDirectoryDatabases = "";
         /// <summary>
         /// Путь и имя папки для размещения файлов изображений протоколов
         /// </summary>
@@ -419,6 +416,39 @@ namespace nlApplication
             set { fDirectoryProtocols = value.Trim(); }
         }
         /// <summary>
+        /// Путь и имя папки для размещения файлов баз данных ('Databases')
+        /// </summary>
+        public string __fDirectoryDatabases_
+        {
+            get
+            {
+                if (fDirectoryDatabases.Length == 0)
+                {
+                    fDirectoryDatabases = Path.Combine(__fDirectoryStart, @"Databases\");
+                }
+                try
+                {
+                    if (Directory.Exists(fDirectoryDatabases) == false)
+                    {
+                        Directory.CreateDirectory(fDirectoryDatabases);
+                    }
+                }
+                catch
+                {
+                    fDirectoryDatabases = Path.Combine(__fDirectoryStart, @"Databases\");
+                    _fError.__fErrorType_ = ERRORSTYPES.User;
+                    _fError.__fProcedure_ = "__fDirectoryDatabases_";
+                    _fError.__mReasonAdd("Не верный путь в файле настроек");
+                    _fError.__fMessage_ = appApplication.__oTunes.__mTranslate("Не верно указан путь к папке с файлами баз данных");
+                    appApplication.__oErrorsHandler.__mProtocol(_fError);
+                    _fError.__mClear();
+                }
+
+                return fDirectoryDatabases;
+            }
+            set { fDirectoryDatabases = value.Trim(); }
+        }
+        /// <summary>
         /// Путь и имя папки для размещения файлов протоколов
         /// </summary>
         public string __fDirectoryProtocolsImages_
@@ -568,7 +598,7 @@ namespace nlApplication
         }
 
         #endregion Файлы
-
+   
         #endregion СВОЙСТВА
     }
 }

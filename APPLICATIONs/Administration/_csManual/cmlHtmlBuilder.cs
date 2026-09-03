@@ -1,7 +1,13 @@
-﻿using System;
+﻿using nlcsManual;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Windows.Forms;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace nlcsManual
 {
@@ -11,7 +17,7 @@ namespace nlcsManual
     /// <remarks>Класс построения HTML-документации: формирует страницу отдельного типа (класс/интерфейс/
     /// структура/перечисление) и главную страницу 'index.html' со списком типов, группировкой по
     /// пространствам имён и функцией поиска/фильтрации. Оформление согласовано между обоими шаблонами</remarks>
-    /// <conception>Lucasin V.</conception>
+
     public class cmlHtmlBuilder
     {
         #region = ПОЛЯ
@@ -40,6 +46,7 @@ header.top .spacer{flex:1}
 .badge.kind{color:var(--accent2);border-color:var(--accent2);margin-left:6px}
 h1{font-size:22px;margin:0 0 4px}
 h2{font-size:17px;border-bottom:1px solid var(--border);padding-bottom:6px;margin-top:36px}
+h3.region{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:22px 0 4px;padding-bottom:4px;border-bottom:1px dashed var(--border)}
 h3.member{font-size:14px;background:var(--panel2);border:1px solid var(--border);border-left:3px solid var(--accent);padding:8px 12px;border-radius:4px;margin:14px 0 6px;font-family:Consolas,monospace}
 .panel{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:16px}
 .namespace{color:var(--muted);font-family:Consolas,monospace;font-size:13px}
@@ -51,6 +58,15 @@ table th,table td{text-align:left;padding:6px 10px;border-bottom:1px solid var(-
 table th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.03em}
 code, .code{font-family:Consolas,monospace;background:var(--code);border:1px solid var(--border);border-radius:4px;padding:1px 6px}
 pre.example{background:var(--code);border:1px solid var(--border);border-radius:6px;padding:12px;overflow:auto;font-family:Consolas,monospace}
+.body-notes{background:var(--panel2);border:1px solid var(--border);border-left:3px solid var(--accent2);border-radius:6px;padding:8px 14px;margin:8px 0;font-size:13px;color:var(--text)}
+.body-notes ul{margin:6px 0 2px 0;padding-left:0;list-style:none}
+.body-notes li{margin:6px 0;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.body-notes li:last-child{border-bottom:none;padding-bottom:0}
+.body-notes .note-text{color:var(--text)}
+.fixed-note{background:var(--panel2);border:1px solid var(--border);border-left:3px solid var(--warn, #d9822b);border-radius:6px;padding:8px 14px;margin:8px 0;font-size:13px;color:var(--text)}
+.exception-note{background:var(--panel2);border:1px solid var(--border);border-left:3px solid #c0392b;border-radius:6px;padding:6px 12px;margin:6px 0;font-size:12.5px;color:var(--text)}
+.exception-note ul{margin:4px 0 0 0;padding-left:16px}
+.exception-note li{margin:2px 0}
 .sig{font-family:Consolas,monospace;color:var(--text)}
 .type-list{list-style:none;padding:0;margin:0}
 .type-list li{padding:6px 0;border-bottom:1px solid var(--border)}
@@ -103,9 +119,11 @@ footer{color:var(--muted);font-size:11px;text-align:center;padding:30px 0 10px}
             vHtml.Append("<h1 style=\"margin-top:10px\">" + mEsc(pType.__fName) + "</h1>");
             vHtml.Append("<div class=\"namespace\">namespace " + mEsc(pType.__fNamespace) + "</div>");
 
-            vHtml.Append("<p class=\"summary\">" + (pType.__fSummary.Length > 0 ? mEsc(pType.__fSummary) : "<span class='empty'>Описание отсутствует</span>") + "</p>");
+            vHtml.Append(pType.__fSummary.Length > 0 ? mEscParagraphs(pType.__fSummary, "summary") : "<p class=\"summary\"><span class='empty'>Описание отсутствует</span></p>");
             if (pType.__fRemarks.Length > 0)
-                vHtml.Append("<p class=\"summary\">" + mEsc(pType.__fRemarks) + "</p>");
+                vHtml.Append(mEscParagraphs(pType.__fRemarks, "summary"));
+            if (pType.__fFixed.Length > 0)
+                vHtml.Append("<div class=\"fixed-note\"><b>Исправлено:</b> " + mEscInlineParagraphs(pType.__fFixed) + "</div>");
 
             vHtml.Append("<div class=\"meta-row\">");
             if (pType.__fBaseClass.Length > 0)
@@ -128,7 +146,7 @@ footer{color:var(--muted);font-size:11px;text-align:center;padding:30px 0 10px}
             }
 
             if (pType.__fExample.Length > 0)
-                vHtml.Append("<pre class=\"example\">" + mEsc(pType.__fExample) + "</pre>");
+                vHtml.Append("<pre class=\"example\">" + mEsc(pType.__fExample.Replace('\u2029', '\n')) + "</pre>");
 
             vHtml.Append("</div>"); // panel
 
@@ -236,8 +254,6 @@ function filterClasses(){
 (function(){
   var notes = document.getElementById('notes');
   if (!notes) return;
-  /// В окне предварительного просмотра (локальный файл, встроенный IE) 'localStorage' может быть недоступен -
-  /// доступ выполняется через try/catch, чтобы отсутствие хранилища не приводило к ошибке скрипта
   var storage = null;
   try { storage = window.localStorage; } catch (eStorage) { storage = null; }
   if (storage){
@@ -261,48 +277,155 @@ function filterClasses(){
         #region - Функции закрытые
 
         /// <summary>
-        /// Добавление раздела членов типа (методы/свойства/поля/конструкторы/события) на страницу
+        /// Добавление раздела членов типа (методы/свойства/поля/конструкторы/события) на страницу.
+        /// Внутри раздела члены группируются по их '#region' в исходном файле (см. 'cmlUnitMember.__fRegionPath') -
+        /// без этого, например, все методы класса из разных смысловых подразделов ('Процедуры', 'Поведение',
+        /// 'Функции закрытые' и т.п.) показывались бы одним общим неструктурированным списком
         /// </summary>
+        /// <param name="pHtml">Строитель HTML-документа страницы типа, в конец которого добавляется раздел</param>
+        /// <param name="pTitle">Заголовок раздела ('Методы', 'Свойства' и т.п.)</param>
+        /// <param name="pMemberS">Список членов типа для этого раздела</param>
+        /// <param name="pCtorName">Имя типа (для построения сигнатуры конструктора), пусто для прочих разделов</param>
+        /// <param name="pShowReturns">[true] - показывать блок "Возвращает" (используется для методов)</param>
         private void mAppendMemberSection(StringBuilder pHtml, string pTitle, List<cmlUnitMember> pMemberS, string pCtorName, bool pShowReturns)
         {
             pHtml.Append("<h2>" + pTitle + "</h2>");
-            foreach (cmlUnitMember vMember in pMemberS.OrderByDescending(m => m.__fAccess == "public").ThenBy(m => m.__fName))
+
+            /// Группировка по пути '#region' - члены без региона идут одной группой первыми (без
+            /// подзаголовка), сохраняя прежний вид для файлов/участков кода без региона
+            var vGroupS = pMemberS
+                .Select((m, vIndex) => new { Member = m, Index = vIndex })
+                .GroupBy(x => x.Member.__mRegionLabel())
+                .OrderBy(g => g.Key.Length == 0 ? 0 : 1)
+                .ThenBy(g => g.Min(x => x.Index)); // Внутри - в порядке появления региона в исходном файле, а не по алфавиту
+
+            foreach (var vGroup in vGroupS)
             {
-                string vSignature = mBuildSignature(vMember, pCtorName);
-                pHtml.Append("<h3 class=\"member\">" + mEsc(vSignature) + "</h3>");
+                if (vGroup.Key.Length > 0)
+                    pHtml.Append("<h3 class=\"region\">" + mEsc(vGroup.Key) + "</h3>");
 
-                pHtml.Append("<span class=\"badge " + vMember.__fAccess.Split(' ')[0] + "\">" + mEsc(vMember.__fAccess) + "</span>");
-                foreach (string vMod in vMember.__fModifiers)
-                    pHtml.Append(" <span class=\"badge kind\">" + mEsc(vMod) + "</span>");
+                foreach (cmlUnitMember vMember in vGroup.Select(x => x.Member).OrderByDescending(m => m.__fAccess == "public").ThenBy(m => m.__fName))
+                    mAppendMember(pHtml, vMember, pCtorName, pShowReturns);
+            }
+        }
 
-                if (vMember.__fSummary.Length > 0)
-                    pHtml.Append("<p class=\"summary\">" + mEsc(vMember.__fSummary) + "</p>");
-                else
-                    pHtml.Append("<p class=\"summary empty\">Описание отсутствует</p>");
+        /// <summary>
+        /// Добавление одного члена типа (заголовок сигнатуры, модификаторы, описание, параметры,
+        /// возвращаемое значение, ход выполнения, пример) на страницу
+        /// </summary>
+        /// <param name="pHtml">Строитель HTML-документа страницы типа, в конец которого добавляется член</param>
+        /// <param name="vMember">Разобранный член типа</param>
+        /// <param name="pCtorName">Имя типа (для построения сигнатуры конструктора), пусто для прочих разделов</param>
+        /// <param name="pShowReturns">[true] - показывать блок "Возвращает" (используется для методов)</param>
+        private void mAppendMember(StringBuilder pHtml, cmlUnitMember vMember, string pCtorName, bool pShowReturns)
+        {
+            string vSignature = mBuildSignature(vMember, pCtorName);
+            pHtml.Append("<h3 class=\"member\">" + mEsc(vSignature) + "</h3>");
 
-                if (vMember.__fRemarks.Length > 0)
-                    pHtml.Append("<p class=\"summary\">" + mEsc(vMember.__fRemarks) + "</p>");
+            pHtml.Append("<span class=\"badge " + vMember.__fAccess.Split(' ')[0] + "\">" + mEsc(vMember.__fAccess) + "</span>");
+            foreach (string vMod in vMember.__fModifiers)
+                pHtml.Append(" <span class=\"badge kind\">" + mEsc(vMod) + "</span>");
 
-                if (vMember.__fParamS.Count > 0)
+            if (vMember.__fSummary.Length > 0)
+                pHtml.Append(mEscParagraphs(vMember.__fSummary, "summary"));
+            else
+                pHtml.Append("<p class=\"summary empty\">Описание отсутствует</p>");
+
+            if (vMember.__fRemarks.Length > 0)
+                pHtml.Append(mEscParagraphs(vMember.__fRemarks, "summary"));
+
+            if (vMember.__fFixed.Length > 0)
+                pHtml.Append("<div class=\"fixed-note\"><b>Исправлено:</b> " + mEscInlineParagraphs(vMember.__fFixed) + "</div>");
+
+            if (vMember.__fParamS.Count > 0)
+            {
+                pHtml.Append("<table><tr><th>Параметр</th><th>Тип</th><th>По умолчанию</th><th>Описание</th></tr>");
+                foreach (cmlUnitParam vParam in vMember.__fParamS)
                 {
-                    pHtml.Append("<table><tr><th>Параметр</th><th>Тип</th><th>По умолчанию</th><th>Описание</th></tr>");
-                    foreach (cmlUnitParam vParam in vMember.__fParamS)
-                    {
-                        pHtml.Append("<tr><td><code>" + mEsc(vParam.__fName) + "</code></td><td><code>" + mEsc(vParam.__fType) + "</code></td>" +
-                            "<td>" + (vParam.__fDefault.Length > 0 ? "<code>" + mEsc(vParam.__fDefault) + "</code>" : "-") + "</td>" +
-                            "<td>" + (vParam.__fDescription.Length > 0 ? mEsc(vParam.__fDescription) : "<span class='empty'>-</span>") + "</td></tr>");
-                    }
-                    pHtml.Append("</table>");
+                    pHtml.Append("<tr><td><code>" + mEsc(vParam.__fName) + "</code></td><td><code>" + mEsc(vParam.__fType) + "</code></td>" +
+                        "<td>" + (vParam.__fDefault.Length > 0 ? "<code>" + mEsc(vParam.__fDefault) + "</code>" : "-") + "</td>" +
+                        "<td>" + (vParam.__fDescription.Length > 0 ? mEsc(vParam.__fDescription) : "<span class='empty'>-</span>") + "</td></tr>");
                 }
+                pHtml.Append("</table>");
+            }
 
-                if (pShowReturns && vMember.__fType != "void" && vMember.__fType.Length > 0)
+            if (pShowReturns && vMember.__fType != "void" && vMember.__fType.Length > 0)
+            {
+                pHtml.Append("<div class=\"meta-row\"><div><b>Возвращает (" + mEsc(vMember.__fType) + "):</b> " +
+                    (vMember.__fReturns.Length > 0 ? mEsc(vMember.__fReturns) : "<span class='empty'>не описано</span>") + "</div></div>");
+            }
+
+
+            if (vMember.__fExceptionS.Count > 0)
+            {
+                pHtml.Append("<div class=\"exception-note\"><b>Исключения:</b><ul>");
+                foreach (KeyValuePair<string, string> vException in vMember.__fExceptionS)
                 {
-                    pHtml.Append("<div class=\"meta-row\"><div><b>Возвращает (" + mEsc(vMember.__fType) + "):</b> " +
-                        (vMember.__fReturns.Length > 0 ? mEsc(vMember.__fReturns) : "<span class='empty'>не описано</span>") + "</div></div>");
+                    pHtml.Append("<li><code>" + mEsc(vException.Key) + "</code>"
+                        + (vException.Value.Length > 0 ? " - " + mEscInlineParagraphs(vException.Value) : "") + "</li>");
                 }
+                pHtml.Append("</ul></div>");
+            }
+            if (vMember.__fBodyNoteS.Count > 0)
+            {
+                pHtml.Append("<div class=\"body-notes\"><b>Ход выполнения:</b><ul>");
+                foreach (cmlUnitBodyNote vNote in vMember.__fBodyNoteS)
+                {
+                    string vNoteText = vNote.__fNote ?? "";
+                    int vDepth = 0;
+                    mStripBodyNoteMarker(ref vNoteText, out vDepth);
 
-                if (vMember.__fExample.Length > 0)
-                    pHtml.Append("<pre class=\"example\">" + mEsc(vMember.__fExample) + "</pre>");
+                    string vMargin = vDepth > 0
+                        ? "margin-left:" + (vDepth * 18).ToString() + "px;"
+                        : "";
+                    pHtml.Append("<li style=\"" + vMargin + "\"><span class=\"note-text\">"
+                        + mEsc(vNoteText) + "</span></li>");
+                }
+                pHtml.Append("</ul></div>");
+            }
+
+            if (vMember.__fExample.Length > 0)
+                pHtml.Append("<pre class=\"example\">" + mEsc(vMember.__fExample.Replace('\u2029', '\n')) + "</pre>");
+
+            return;
+        }
+
+
+        /// <summary>
+        /// Убирает маркер шага в начале пометки хода выполнения и вычисляет глубину вложенности.
+        /// Маркер не показывается в HTML. Отступ только если после точки есть часть (цифра или буква).
+        /// Примеры: "1. текст" → depth 0; "1.Y текст" / "2.N текст" / "1.1 текст" → depth 1;
+        /// "Y текст" (буква без номера) → depth 1.
+        /// </summary>
+        private static void mStripBodyNoteMarker(ref string pNoteText, out int pDepth)
+        {
+            pDepth = 0;
+            if (string.IsNullOrEmpty(pNoteText))
+                return;
+
+            // 1 / 1. / 1.1 / 1.2.3 / 1.X / 1.T / 2.N
+            Match vMatch = Regex.Match(pNoteText,
+                @"^(?<marker>\d+(?:\.(?:\d+|[A-Za-zА-Яа-яЁё]))*)\.?\s*");
+            if (vMatch.Success)
+            {
+                string vMarker = vMatch.Groups["marker"].Value;
+                int vDots = 0;
+                for (int i = 0; i < vMarker.Length; i++)
+                {
+                    if (vMarker[i] == '.')
+                        vDots++;
+                }
+                pDepth = vDots;
+                pNoteText = pNoteText.Substring(vMatch.Length).TrimStart();
+                return;
+            }
+
+            // "Y текст" / "R текст" — вложенный подпункт без ведущей цифры
+            Match vLetter = Regex.Match(pNoteText, @"^(?<letter>[A-Za-zА-Яа-яЁё])\s+");
+            if (vLetter.Success)
+            {
+                pDepth = 1;
+                pNoteText = pNoteText.Substring(vLetter.Length).TrimStart();
             }
         }
 
@@ -334,13 +457,46 @@ function filterClasses(){
                 : mEsc(pTypeName);
         }
 
+
+        /// <summary>
+        /// То же самое, но для текста ВНУТРИ уже оформленного блока (fixed-note/exception-note) - без
+        /// вложенных &lt;p&gt; (у которых свои отступы браузера по умолчанию, не покрытые CSS этих блоков) -
+        /// абзацы разделяются компактным двойным переносом строки
+        /// </summary>
+        private string mEscInlineParagraphs(string pText)
+        {
+            if (string.IsNullOrEmpty(pText)) return "";
+            return string.Join("<br><br>", pText.Split('\u2029').Select(p => p.Trim()).Where(p => p.Length > 0).Select(mEsc));
+        }
+
+
+        /// <summary>
+        /// Экранирование многострочного (с возможными абзацами) текста и обёртка в один или несколько
+        /// компактных &lt;p&gt; заданного класса
+        /// </summary>
+        private string mEscParagraphs(string pText, string pCssClass)
+        {
+            if (string.IsNullOrEmpty(pText)) return "";
+            string[] vParagraphS = pText.Split('\u2029');
+            StringBuilder vBuilder = new StringBuilder();
+            foreach (string vParagraph in vParagraphS)
+            {
+                string vTrimmed = vParagraph.Trim();
+                if (vTrimmed.Length == 0) continue;
+                vBuilder.Append("<p class=\"" + pCssClass + "\">" + mEsc(vTrimmed) + "</p>");
+            }
+            return vBuilder.ToString();
+        }
+
         /// <summary>
         /// Экранирование текста для безопасной вставки в HTML
         /// </summary>
         private string mEsc(string pText)
         {
             if (string.IsNullOrEmpty(pText)) return "";
-            return pText.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;");
+            string vText = pText
+                .Replace("&lt;", "<").Replace("&gt;", ">").Replace("&quot;", "\"").Replace("&amp;", "&");
+            return vText.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;");
         }
 
         #endregion Функции закрытые

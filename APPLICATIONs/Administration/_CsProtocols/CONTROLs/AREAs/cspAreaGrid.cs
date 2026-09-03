@@ -243,6 +243,20 @@ namespace nlCsProtocols
             get { return _cGrid; }
         }
 
+        /// <summary>
+        /// Видимость служебной панели операций. Когда операции не требуются,
+        /// её отключение отдаёт высоту строкам таблицы.
+        /// </summary>
+        public bool __fToolBarVisible_
+        {
+            get { return _cToolBar != null && _cToolBar.Visible; }
+            set
+            {
+                if (_cToolBar != null)
+                    _cToolBar.Visible = value;
+            }
+        }
+
         #endregion
 
         #region = СОБЫТИЯ

@@ -46,14 +46,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DATA\Loaders\ProtocolLoader.cs" />
-    <Compile Include="DATA\Models\ProtocolRecord.cs" />
+    <Compile Include="DATA\ProtocolsSchemaDetector.cs" />
+    <Compile Include="FORMs\cspFormCombinedViewer.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="FORMs\cspFormMain.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FORMs\cspFormLoader.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="cspBegin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ProtocolsDbLoader.cs" />
+    <Compile Include="ProtocolSqliteImporter.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -91,6 +96,10 @@
       <Project>{F65B3F8E-78FB-4203-9F36-02C98C43123C}</Project>
       <Name>_Elements</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\ROOT\LIBRARIEs\_Protocols\_Protocols.csproj">
+      <Project>{900bb11f-0539-4ca4-84f6-f0cc353d1a9b}</Project>
+      <Name>_Protocols</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\ROOT\LIBRARIEs\_ResourcesImages\_ResourcesImages.csproj">
       <Project>{bd8cbe90-270a-49e6-b09c-33d4730e3e58}</Project>
       <Name>_ResourcesImages</Name>
@@ -100,5 +109,6 @@
       <Name>_CsProtocols</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

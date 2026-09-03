@@ -50,7 +50,7 @@ namespace nlDataSourceSqlite
             try
             {
                 /// Установка соединения
-                if (__fOnLine == false & _fConnection == null)
+                if (__fOnLine == false & (_fConnection == null || _fConnection.State != ConnectionState.Open))
                 {
                     __mConnectionOn();
                 }
@@ -98,7 +98,7 @@ namespace nlDataSourceSqlite
 
             try
             {
-                if (__fOnLine == false & _fConnection == null)
+                if (__fOnLine == false & (_fConnection == null || _fConnection.State != ConnectionState.Open))
                 {
                     __mConnectionOn();
                 } /// Установка соединения
@@ -146,7 +146,7 @@ namespace nlDataSourceSqlite
 
             try
             {
-                if (__fOnLine == false & _fConnection == null)
+                if (__fOnLine == false & (_fConnection == null || _fConnection.State != ConnectionState.Open))
                 {
                     __mConnectionOn();
                 } /// * Установка соединения
@@ -200,7 +200,6 @@ namespace nlDataSourceSqlite
         /// <summary>
         /// Печать структуры базы данных в источнике
         /// </summary>
-        /// https://www.codeproject.com/Questions/1213783/Restore-sqlite-database-in-Csharp
         /// <returns>Путь созданного файла копии базы данных</returns>
         public override string __mDatabaseBackUp()
         {

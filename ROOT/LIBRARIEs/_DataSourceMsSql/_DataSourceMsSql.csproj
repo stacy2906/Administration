@@ -77,6 +77,10 @@
       <Project>{a05053df-7087-4a21-a320-1e278c1342a9}</Project>
       <Name>_Data</Name>
     </ProjectReference>
+    <ProjectReference Include="..\_Protocols\_Protocols.csproj">
+      <Project>{900bb11f-0539-4ca4-84f6-f0cc353d1a9b}</Project>
+      <Name>_Protocols</Name>
+    </ProjectReference>
     <ProjectReference Include="..\_ReportHtml\_ReportHtml.csproj">
       <Project>{7baab592-6de5-47c7-bd0f-017d2b907f90}</Project>
       <Name>_ReportHtml</Name>

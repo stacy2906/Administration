@@ -1,26 +1,14 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\CODING\\VCS\\LuNA\\LuNA_9.0\\ROOT\\LIBRARIEs\\",
+  "WorkspaceRootPath": "U:\\KviNA\\ROOT\\LIBRARIEs\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{CC78B6C2-2804-4FD1-9CA1-2196FD50C239}|_Application\\_Application.csproj|d:\\coding\\vcs\\luna\\luna_9.0\\root\\libraries\\_application\\apperrorshandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CC78B6C2-2804-4FD1-9CA1-2196FD50C239}|_Application\\_Application.csproj|solutionrelative:_application\\apperrorshandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{CC78B6C2-2804-4FD1-9CA1-2196FD50C239}|_Application\\_Application.csproj|u:\\kvina\\root\\libraries\\_application\\files\\appfileini.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CC78B6C2-2804-4FD1-9CA1-2196FD50C239}|_Application\\_Application.csproj|solutionrelative:_application\\files\\appfileini.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CC78B6C2-2804-4FD1-9CA1-2196FD50C239}|_Application\\_Application.csproj|d:\\coding\\vcs\\luna\\luna_9.0\\root\\libraries\\_application\\appprotocols.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CC78B6C2-2804-4FD1-9CA1-2196FD50C239}|_Application\\_Application.csproj|solutionrelative:_application\\appprotocols.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CC78B6C2-2804-4FD1-9CA1-2196FD50C239}|_Application\\_Application.csproj|d:\\coding\\vcs\\luna\\luna_9.0\\root\\libraries\\_application\\apppathes.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CC78B6C2-2804-4FD1-9CA1-2196FD50C239}|_Application\\_Application.csproj|solutionrelative:_application\\apppathes.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CC78B6C2-2804-4FD1-9CA1-2196FD50C239}|_Application\\_Application.csproj|d:\\coding\\vcs\\luna\\luna_9.0\\root\\libraries\\_application\\apptunes.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CC78B6C2-2804-4FD1-9CA1-2196FD50C239}|_Application\\_Application.csproj|solutionrelative:_application\\apptunes.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CC78B6C2-2804-4FD1-9CA1-2196FD50C239}|_Application\\_Application.csproj|d:\\coding\\vcs\\luna\\luna_9.0\\root\\libraries\\_application\\appapplication.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CC78B6C2-2804-4FD1-9CA1-2196FD50C239}|_Application\\_Application.csproj|solutionrelative:_application\\appapplication.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{B60F57D4-4F53-428C-86FE-A0D47338E371}|_Data\\_Data.csproj|u:\\kvina\\root\\libraries\\_data\\datdata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B60F57D4-4F53-428C-86FE-A0D47338E371}|_Data\\_Data.csproj|solutionrelative:_data\\datdata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -139,66 +127,27 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "appErrorsHandler.cs",
-              "DocumentMoniker": "D:\\CODING\\VCS\\LuNA\\LuNA_9.0\\ROOT\\LIBRARIEs\\_Application\\appErrorsHandler.cs",
-              "RelativeDocumentMoniker": "_Application\\appErrorsHandler.cs",
-              "ToolTip": "D:\\CODING\\VCS\\LuNA\\LuNA_9.0\\ROOT\\LIBRARIEs\\_Application\\appErrorsHandler.cs",
-              "RelativeToolTip": "_Application\\appErrorsHandler.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAJkAAAAAAAAAAAAAAA==",
+              "Title": "appFileIni.cs",
+              "DocumentMoniker": "U:\\KviNA\\ROOT\\LIBRARIEs\\_Application\\Files\\appFileIni.cs",
+              "RelativeDocumentMoniker": "_Application\\Files\\appFileIni.cs",
+              "ToolTip": "U:\\KviNA\\ROOT\\LIBRARIEs\\_Application\\Files\\appFileIni.cs",
+              "RelativeToolTip": "_Application\\Files\\appFileIni.cs",
+              "ViewState": "AgIAAKgBAAAAAAAAAAAUwE4BAAApAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-27T12:48:25.903Z",
+              "WhenOpened": "2026-07-30T08:10:32.241Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "appProtocols.cs",
-              "DocumentMoniker": "D:\\CODING\\VCS\\LuNA\\LuNA_9.0\\ROOT\\LIBRARIEs\\_Application\\appProtocols.cs",
-              "RelativeDocumentMoniker": "_Application\\appProtocols.cs",
-              "ToolTip": "D:\\CODING\\VCS\\LuNA\\LuNA_9.0\\ROOT\\LIBRARIEs\\_Application\\appProtocols.cs",
-              "RelativeToolTip": "_Application\\appProtocols.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsBAAAAAAAAAAAAAA==",
+              "Title": "datData.cs",
+              "DocumentMoniker": "U:\\KviNA\\ROOT\\LIBRARIEs\\_Data\\datData.cs",
+              "RelativeDocumentMoniker": "_Data\\datData.cs",
+              "ToolTip": "U:\\KviNA\\ROOT\\LIBRARIEs\\_Data\\datData.cs",
+              "RelativeToolTip": "_Data\\datData.cs",
+              "ViewState": "AgIAAGYCAAAAAAAAAAAqwOwCAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-27T12:42:28.779Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "appPathes.cs",
-              "DocumentMoniker": "D:\\CODING\\VCS\\LuNA\\LuNA_9.0\\ROOT\\LIBRARIEs\\_Application\\appPathes.cs",
-              "RelativeDocumentMoniker": "_Application\\appPathes.cs",
-              "ToolTip": "D:\\CODING\\VCS\\LuNA\\LuNA_9.0\\ROOT\\LIBRARIEs\\_Application\\appPathes.cs",
-              "RelativeToolTip": "_Application\\appPathes.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAADwCAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-27T12:42:08.831Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "appTunes.cs",
-              "DocumentMoniker": "D:\\CODING\\VCS\\LuNA\\LuNA_9.0\\ROOT\\LIBRARIEs\\_Application\\appTunes.cs",
-              "RelativeDocumentMoniker": "_Application\\appTunes.cs",
-              "ToolTip": "D:\\CODING\\VCS\\LuNA\\LuNA_9.0\\ROOT\\LIBRARIEs\\_Application\\appTunes.cs",
-              "RelativeToolTip": "_Application\\appTunes.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAEMBAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-27T12:39:50.687Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "appApplication.cs",
-              "DocumentMoniker": "D:\\CODING\\VCS\\LuNA\\LuNA_9.0\\ROOT\\LIBRARIEs\\_Application\\appApplication.cs",
-              "RelativeDocumentMoniker": "_Application\\appApplication.cs",
-              "ToolTip": "D:\\CODING\\VCS\\LuNA\\LuNA_9.0\\ROOT\\LIBRARIEs\\_Application\\appApplication.cs",
-              "RelativeToolTip": "_Application\\appApplication.cs",
-              "ViewState": "AgIAAN0AAAAAAAAAAAAQwJ8AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-27T12:36:54.953Z",
+              "WhenOpened": "2026-07-30T07:58:03.981Z",
               "EditorCaption": ""
             }
           ]

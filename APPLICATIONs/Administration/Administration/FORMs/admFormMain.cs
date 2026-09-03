@@ -115,26 +115,16 @@ namespace naAdministration
                 switch ((sender as elmComponentTree).SelectedNode.Tag.ToString())
                 {
                     case "admProtocolsLoad":
-                        //admFormGridChgTyp vFormGridChgTyp = new admFormGridChgTyp();
-                        //vFormGridChgTyp.__cAreaGrid.__fButtonSelectVisible_ = false;
-                        //vFormGridChgTyp.__cAreaGrid.__fButtonRefreshVisible_ = admApplication.__oData.__mDataSourceGet().__fUserAdministrator;
-                        //vFormGridChgTyp.__cAreaGrid.__fButtonEditEnabled_ = admApplication.__oData.__mDataSourceGet().__fUserAdministrator;
-                        //vFormGridChgTyp.__cAreaGrid.__fButtonEditCopyVisible_ = false;
-                        //vFormGridChgTyp.__cAreaGrid.__fButtonEditCreateVisible_ = false;
-                        //vFormGridChgTyp.ShowDialog();
+                        cspFormLoader vFormLoad = new cspFormLoader();
+                        vFormLoad.ShowDialog();
                         break;
                     case "admProtocolsList":
                         cspFormMain vForm = new cspFormMain();
                         vForm.ShowDialog();
                         break;
                     case "admProtocolsCombine":
-                        //admFormGridChgTyp vFormGridChgTyp = new admFormGridChgTyp();
-                        //vFormGridChgTyp.__cAreaGrid.__fButtonSelectVisible_ = false;
-                        //vFormGridChgTyp.__cAreaGrid.__fButtonRefreshVisible_ = admApplication.__oData.__mDataSourceGet().__fUserAdministrator;
-                        //vFormGridChgTyp.__cAreaGrid.__fButtonEditEnabled_ = admApplication.__oData.__mDataSourceGet().__fUserAdministrator;
-                        //vFormGridChgTyp.__cAreaGrid.__fButtonEditCopyVisible_ = false;
-                        //vFormGridChgTyp.__cAreaGrid.__fButtonEditCreateVisible_ = false;
-                        //vFormGridChgTyp.ShowDialog();
+                        cspFormCombinedViewer vFormCombine = new cspFormCombinedViewer();
+                        vFormCombine.ShowDialog();
                         break;
                     case "admDocumentation":
                         using (cmlFormMain vFormManual = new cmlFormMain())

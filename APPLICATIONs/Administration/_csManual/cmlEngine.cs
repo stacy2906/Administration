@@ -16,8 +16,7 @@ namespace nlcsManual
     /// разбор каждого файла *.cs классом 'cmlSourceParser', построение HTML-страниц классом
     /// 'cmlHtmlBuilder' и запись итоговой документации (по одному файлу на тип + 'index.html')
     /// в подпапку '# MANUAL' документируемого проекта</remarks>
-    /// <adjustment>Реализована полная логика построения документации (была заготовка)</adjustment>
-    /// <conception>Lucasin V.</conception>
+ 
     public class cmlEngine
     {
         #region = МЕТОДЫ

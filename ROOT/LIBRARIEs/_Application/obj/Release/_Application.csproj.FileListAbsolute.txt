@@ -1,6 +1,0 @@
-D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_Application\bin\Release\_Application.dll
-D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_Application\bin\Release\_Application.pdb
-D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_Application\obj\Release\_Application.csproj.AssemblyReference.cache
-D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_Application\obj\Release\_Application.csproj.CoreCompileInputs.cache
-D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_Application\obj\Release\_Application.dll
-D:\CODING\VCS\LuNA\LuNA_9.0\ROOT\LIBRARIEs\_Application\obj\Release\_Application.pdb

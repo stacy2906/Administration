@@ -14,7 +14,7 @@ namespace nlcsManual
     /// и сопутствующие XML-комментарии документирования. Разбор построен на построчном сканировании с
     /// учётом глубины фигурных скобок, без использования компилятора Roslyn, чтобы оставаться совместимым
     /// с целевым фреймворком проекта ('appFileIni.cs' и соседние классы библиотеки)</remarks>
-    /// <conception>Lucasin V.</conception>
+
     public class cmlSourceParser
     {
         #region = ПОЛЯ
@@ -63,7 +63,7 @@ namespace nlcsManual
             string[] vLineS;
             try
             {
-                vLineS = File.ReadAllLines(pFilePath, Encoding.UTF8);
+                vLineS = mReadAllLinesAutoEncoding(pFilePath);
             }
             catch (Exception vException)
             {
@@ -74,8 +74,15 @@ namespace nlcsManual
             string vNamespace = "";
             int vBraceDepth = 0;
             int vTypeBraceDepth = -1;
+            bool vInBlockComment = false; // Состояние '/* ... */' на границе строк (может открыться на одной строке, закрыться на другой)
+            bool vInVerbatimString = false; // Состояние '@"..."' на границе строк (см. <fixed> у 'mScanLine' - раньше не отслеживалось между строками вообще)
             cmlUnitType vCurrentType = null;
             List<string> vPendingDoc = new List<string>();
+            cmlUnitMember vCurrentMember = null; // Член, чьё тело сейчас разбирается (для захвата внутренних '///'-пометок хода выполнения)
+            int vMemberBraceDepth = -1;
+            cmlUnitBodyNote vPendingBodyNote = null; // Последняя пометка хода выполнения, ещё не "закрытая" строкой кода
+            bool vPendingBodyNoteConsumed = false; // [true] - после этой пометки уже встретилась строка кода - следующий '///' должен начать НОВУЮ пометку, а не продолжать эту (раньше для этого проверялась 'vPendingBodyNote.__fCode.Length == 0' - убрано вместе с самим кодом, см. <fixed> ниже)
+            List<string> vRegionStack = new List<string>(); // Путь вложенных '#region' на текущей строке (для группировки членов на странице документации)
 
             for (int i = 0; i < vLineS.Length; i++)
             {
@@ -85,17 +92,55 @@ namespace nlcsManual
                 /// 1. Накопление строк XML-документации, предшествующих объявлению
                 if (vTrim.StartsWith("///"))
                 {
-                    vPendingDoc.Add(vTrim.Substring(3).Trim());
+                    string vDocText = vTrim.Substring(3).Trim();
+
+                    /// 1.Y Внутри тела текущего члена (глубже уровня его объявления) - это не XML-документация
+                    /// следующего члена, а построчная пометка хода выполнения (например '1.T ...') - сохраняется
+                    /// в самом члене, а не в общем накопителе 'vPendingDoc'
+                    if (vCurrentMember != null && vBraceDepth > vMemberBraceDepth && vDocText.Length > 0)
+                    {
+
+                        bool vIsNewStepMarker = Regex.IsMatch(vDocText, @"^\d+(\.[A-Za-zА-Яа-яЁё])?\.?\s");
+                        if (vPendingBodyNote != null && vPendingBodyNoteConsumed == false && vIsNewStepMarker == false)
+                        {
+                            vPendingBodyNote.__fNote += " " + vDocText;
+                        }
+                        else
+                        {
+                            vPendingBodyNote = new cmlUnitBodyNote { __fNote = vDocText };
+                            vPendingBodyNoteConsumed = false;
+                            vCurrentMember.__fBodyNoteS.Add(vPendingBodyNote);
+                        }
+                    }
+                    else
+                        vPendingDoc.Add(vDocText);
+
                     continue;
                 }
 
-                /// 2. Пустые строки и обычные комментарии не прерывают накопленный блок документации,
-                /// но строки кода (кроме region/атрибутов) - сбрасывают его, если он не был использован
+                /// 2. Пустые строки, обычные комментарии и одиночная открывающая скобка (когда '{' у метода
+                /// стоит на своей отдельной строке - частый в проекте стиль форматирования) не прерывают
+                /// накопленный блок документации и не считаются "новым членом", но обычные строки кода
+                /// (кроме region/атрибутов) - сбрасывают его, если он не был использован.
                 bool vIsStructural = vTrim.Length == 0
                     || vTrim.StartsWith("//")
                     || vTrim.StartsWith("#region")
                     || vTrim.StartsWith("#endregion")
-                    || vTrim.StartsWith("[");
+                    || vTrim.StartsWith("[")
+                    || vTrim == "{";
+
+                /// 2.R Учёт вложенности '#region'/'#endregion'
+                if (vTrim.StartsWith("#region"))
+                {
+                    string vRegionName = vTrim.Substring("#region".Length).Trim();
+                    vRegionName = Regex.Replace(vRegionName, @"^[=\-*]\s*", "");
+                    vRegionStack.Add(vRegionName);
+                }
+                else if (vTrim.StartsWith("#endregion"))
+                {
+                    if (vRegionStack.Count > 0)
+                        vRegionStack.RemoveAt(vRegionStack.Count - 1);
+                }
 
                 /// 3. Пространство имён
                 Match vMatchNamespace = rNamespace.Match(vLine);
@@ -104,8 +149,33 @@ namespace nlcsManual
                     vNamespace = vMatchNamespace.Groups[1].Value;
                 }
 
+
+                string vLogicalLine = vLine;
+                List<string> vLogicalConsumedLineS = new List<string> { vLine };
+                if (vIsStructural == false && vTrim.Length > 0)
+                {
+                    bool vTempInBlockComment = vInBlockComment;
+                    bool vTempInVerbatimString = vInVerbatimString;
+                    int vParenDepth;
+                    bool vEndsOnContinuation;
+                    mScanLine(vLine, ref vTempInBlockComment, ref vTempInVerbatimString, out int vUnusedBraceDelta1, out vParenDepth, out vEndsOnContinuation);
+
+                    int vLookaheadIndex = i;
+                    while ((vParenDepth > 0 || vEndsOnContinuation == true) && vLookaheadIndex + 1 < vLineS.Length)
+                    {
+                        vLookaheadIndex++;
+                        string vNextLine = vLineS[vLookaheadIndex];
+                        vLogicalLine = vLogicalLine + " " + vNextLine.Trim();
+                        vLogicalConsumedLineS.Add(vNextLine);
+
+                        int vNextParenDelta;
+                        mScanLine(vNextLine, ref vTempInBlockComment, ref vTempInVerbatimString, out int vUnusedBraceDelta2, out vNextParenDelta, out vEndsOnContinuation);
+                        vParenDepth += vNextParenDelta;
+                    }
+                }
+
                 /// 4. Объявление типа (класс/интерфейс/структура/перечисление)
-                Match vMatchType = rType.Match(vLine);
+                Match vMatchType = rType.Match(vLogicalLine);
                 if (vMatchType.Success && vCurrentType == null)
                 {
                     cmlUnitType vType = new cmlUnitType();
@@ -138,6 +208,7 @@ namespace nlcsManual
                     Dictionary<string, string> vTypeParamDescSUnused;
                     mApplyDoc(vPendingDoc, out vType.__fSummary, out vType.__fRemarks, out vType.__fAuthor,
                         out vType.__fVersion, out vType.__fExample, out vTypeParamDescSUnused);
+                    vType.__fFixed = mExtractTag(vPendingDoc, "fixed");
 
                     vCurrentType = vType;
                     vTypeBraceDepth = vBraceDepth;
@@ -151,32 +222,141 @@ namespace nlcsManual
                 /// 5. Члены типа (только на уровень ниже открывающей скобки самого типа)
                 else if (vCurrentType != null && vBraceDepth == vTypeBraceDepth + 1 && !vIsStructural)
                 {
-                    mTryParseMember(vLine, i + 1, vCurrentType, vPendingDoc, vReturn.__fProtocolS);
+                    vCurrentMember = mTryParseMember(vLogicalLine, i + 1, vCurrentType, vPendingDoc, vReturn.__fProtocolS, vRegionStack);
+                    vMemberBraceDepth = vBraceDepth; // Тело члена начнётся на следующем уровне вложенности
+                    vPendingBodyNote = null; // Новый член - пометка предыдущего к нему не относится
+                    vPendingBodyNoteConsumed = false;
                     vPendingDoc.Clear();
                 }
                 else if (!vIsStructural && vTrim.Length > 0)
                 {
                     /// Строка кода, не являющаяся членом верхнего уровня (тело метода, вложенный блок и т.п.) - документация не относится к ней
                     vPendingDoc.Clear();
+
+                   
+                    if (vPendingBodyNote != null)
+                        vPendingBodyNoteConsumed = true;
                 }
 
-                /// 6. Обновление глубины вложенности фигурных скобок (после обработки строки)
-                foreach (char vChar in vLine)
+
+                foreach (string vConsumedLine in vLogicalConsumedLineS)
                 {
-                    if (vChar == '{') vBraceDepth++;
-                    else if (vChar == '}')
+                    mScanLine(vConsumedLine, ref vInBlockComment, ref vInVerbatimString, out int vBraceDelta, out int vUnusedParenDelta, out bool vUnusedEndsOnContinuation);
+                    vBraceDepth += vBraceDelta;
+
+                    if (vCurrentType != null && vBraceDepth <= vTypeBraceDepth && vConsumedLine.Contains("}"))
                     {
-                        vBraceDepth--;
-                        if (vCurrentType != null && vBraceDepth == vTypeBraceDepth)
-                        {
-                            vCurrentType = null;
-                            vTypeBraceDepth = -1;
-                        }
+                        vCurrentType = null;
+                        vTypeBraceDepth = -1;
                     }
                 }
+
+                /// Курсор основного цикла продвигается сразу до последней "поглощённой" в логическую
+                /// строку физической строки - иначе строки-продолжения были бы разобраны ещё раз заново
+                i += vLogicalConsumedLineS.Count - 1;
             }
 
             return vReturn;
+        }
+
+        /// <summary>
+        /// Разбор одной физической строки с учётом строковых/символьных литералов и комментариев
+        /// (однострочных '//' и блочных '/* ... */', в т.ч. переходящих через границу строк) - считает
+        /// только символы РЕАЛЬНОГО кода, а не содержимое литералов, чтобы буквальные '{'/'}'/'('/')'
+        /// внутри строковых констант (например регэксп-паттернов) не искажали разбор структуры файла
+        /// </summary>
+        /// <param name="pLine">Разбираемая физическая строка</param>
+        /// <param name="pInBlockComment">Состояние "внутри блочного комментария" на входе - обновляется на выходе</param>
+        /// <param name="pInVerbatimString">Состояние "внутри многострочного '@\"...\"'" на входе - обновляется на выходе</param>
+        /// <param name="pBraceDelta">Чистое изменение глубины фигурных скобок ('{' минус '}'), только для символов реального кода</param>
+        /// <param name="pParenDelta">Чистое изменение глубины круглых скобок ('(' минус ')'), только для символов реального кода</param>
+        /// <param name="pEndsOnContinuation">[true] - строка (без учёта хвостовых литералов/комментариев) заканчивается конкатенирующим '+' - вероятное продолжение объявления на следующей строке</param>
+      
+        private void mScanLine(string pLine, ref bool pInBlockComment, ref bool pInVerbatimString, out int pBraceDelta, out int pParenDelta, out bool pEndsOnContinuation)
+        {
+            pBraceDelta = 0;
+            pParenDelta = 0;
+            pEndsOnContinuation = false;
+
+            bool vInVerbatimString = pInVerbatimString; // Продолжение многострочного '@"..."' с предыдущей строки
+            bool vInString = vInVerbatimString;
+            bool vInChar = false;
+            char vLastCodeChar = '\0';
+
+            for (int j = 0; j < pLine.Length; j++)
+            {
+                char vChar = pLine[j];
+                char vNext = j + 1 < pLine.Length ? pLine[j + 1] : '\0';
+
+                if (pInBlockComment == true)
+                {
+                    if (vChar == '*' && vNext == '/') { pInBlockComment = false; j++; }
+                    continue;
+                }
+                if (vInString == true)
+                {
+                    if (vInVerbatimString == true)
+                    {
+                        if (vChar == '"' && vNext == '"') { j++; continue; } // '""' - экранированная кавычка внутри '@"..."'
+                        if (vChar == '"') { vInString = false; vInVerbatimString = false; }
+                    }
+                    else
+                    {
+                        if (vChar == '\\') { j++; continue; } // Экранированный символ - следующий символ не анализируется
+                        if (vChar == '"') vInString = false;
+                    }
+                    continue;
+                }
+                if (vInChar == true)
+                {
+                    if (vChar == '\\') { j++; continue; }
+                    if (vChar == '\'') vInChar = false;
+                    continue;
+                }
+
+                if (vChar == '/' && vNext == '/') break; // Однострочный комментарий - остаток строки не код
+                if (vChar == '/' && vNext == '*') { pInBlockComment = true; j++; continue; }
+                if (vChar == '@' && vNext == '"') { vInString = true; vInVerbatimString = true; j++; vLastCodeChar = '\0'; continue; }
+                if (vChar == '"') { vInString = true; vInVerbatimString = false; vLastCodeChar = '\0'; continue; }
+                if (vChar == '\'') { vInChar = true; vLastCodeChar = '\0'; continue; }
+
+                if (vChar == '{') pBraceDelta++;
+                else if (vChar == '}') pBraceDelta--;
+                else if (vChar == '(') pParenDelta++;
+                else if (vChar == ')') pParenDelta--;
+
+                if (char.IsWhiteSpace(vChar) == false)
+                    vLastCodeChar = vChar;
+            }
+
+            pInVerbatimString = vInVerbatimString; // Сохраняем на случай, если многострочный '@"..."' не закрылся и на этой строке
+            pEndsOnContinuation = vLastCodeChar == '+' || vLastCodeChar == ',';
+        }
+
+        /// <summary>
+        /// Чтение файла с автоматическим определением кодировки (UTF-8 с BOM, либо Windows-1251
+        /// без BOM) - часть исходных файлов проекта исторически сохранена в Windows-1251, и попытка
+        /// прочитать их как UTF-8 приводила к искажённым символам ('кракозябрам') в готовой документации
+        /// </summary>
+        /// <param name="pFilePath">Путь читаемого файла</param>
+        /// <returns>Массив строк файла в исходной кодировке</returns>
+        private string[] mReadAllLinesAutoEncoding(string pFilePath)
+        {
+            byte[] vBytes = File.ReadAllBytes(pFilePath);
+
+            /// 1 Файл начинается с BOM UTF-8 - однозначно UTF-8
+            if (vBytes.Length >= 3 && vBytes[0] == 0xEF && vBytes[1] == 0xBB && vBytes[2] == 0xBF)
+                return Encoding.UTF8.GetString(vBytes).Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+
+            /// 2 BOM отсутствует - проверка, является ли содержимое корректным UTF-8 без искажений
+            string vAsUtf8 = Encoding.UTF8.GetString(vBytes);
+            bool vHasReplacementChar = vAsUtf8.IndexOf('\uFFFD') >= 0;
+
+            /// 2 При наличии символов замены ('\uFFFD') содержимое не является валидным UTF-8 -
+            /// файл читается как Windows-1251 (исторический формат части файлов проекта)
+            string vResult = vHasReplacementChar ? Encoding.GetEncoding(1251).GetString(vBytes) : vAsUtf8;
+
+            return vResult.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
         }
 
         #endregion Процедуры
@@ -186,7 +366,14 @@ namespace nlcsManual
         /// <summary>
         /// Попытка разобрать строку как объявление члена типа (конструктор/метод/свойство/поле)
         /// </summary>
-        private void mTryParseMember(string pLine, int pLineNumber, cmlUnitType pType, List<string> pPendingDoc, List<string> pProtocolS)
+        /// <param name="pLine">Разбираемая строка исходного файла</param>
+        /// <param name="pLineNumber">Номер строки в исходном файле (для протокольных сообщений)</param>
+        /// <param name="pType">Тип, которому принадлежит разбираемый член</param>
+        /// <param name="pPendingDoc">Накопленный блок строк XML-документации, предшествующий члену</param>
+        /// <param name="pProtocolS">Список протокольных сообщений, пополняемый при обнаружении недоработок документирования</param>
+        /// <param name="pRegionPath">Путь вложенных '#region' на текущей строке (см. 'cmlUnitMember.__fRegionPath')</param>
+        /// <returns>Разобранный член типа, [null] - строка не распознана как объявление члена</returns>
+        private cmlUnitMember mTryParseMember(string pLine, int pLineNumber, cmlUnitType pType, List<string> pPendingDoc, List<string> pProtocolS, List<string> pRegionPath)
         {
             string vTrim = pLine.Trim();
 
@@ -201,35 +388,43 @@ namespace nlcsManual
                 vMember.__fName = pType.__fName;
                 vMember.__fType = "";
                 vMember.__fLineNumber = pLineNumber;
+                vMember.__fRegionPath = new List<string>(pRegionPath);
                 mFillModifiersAndAccess(vCtorMatch.Groups["mods"].Value, vMember.__fModifiers, ref vMember.__fAccess);
                 mParseParams(vCtorMatch.Groups["params"].Value, vMember.__fParamS);
 
                 string vAuthorUnused, vVersionUnused;
                 Dictionary<string, string> vParamDescS;
                 mApplyDoc(pPendingDoc, out vMember.__fSummary, out vMember.__fRemarks, out vAuthorUnused, out vVersionUnused, out vMember.__fExample, out vParamDescS);
+                vMember.__fFixed = mExtractTag(pPendingDoc, "fixed");
+                vMember.__fExceptionS = mExtractExceptions(pPendingDoc);
                 mApplyParamDescriptions(vMember.__fParamS, vParamDescS);
 
                 pType.__fConstructorS.Add(vMember);
-                return;
+                return vMember;
             }
 
             /// 2. Поле (в т.ч. по соглашению проекта - имена вида '__fИмя' или '_fИмя')
             Match vFieldMatch = rField.Match(pLine);
-            if (vFieldMatch.Success && !vTrim.Contains("("))
+
+
+            if (vFieldMatch.Success)
             {
                 cmlUnitMember vMember = new cmlUnitMember();
                 vMember.__fKind = MEMBERKINDS.Field;
                 vMember.__fType = vFieldMatch.Groups["type"].Value.Trim();
                 vMember.__fName = vFieldMatch.Groups["name"].Value.Trim();
                 vMember.__fLineNumber = pLineNumber;
+                vMember.__fRegionPath = new List<string>(pRegionPath);
                 mFillModifiersAndAccess(vFieldMatch.Groups["mods"].Value, vMember.__fModifiers, ref vMember.__fAccess);
 
                 string vFieldAuthorUnused, vFieldVersionUnused;
                 Dictionary<string, string> vFieldParamDescSUnused;
                 mApplyDoc(pPendingDoc, out vMember.__fSummary, out vMember.__fRemarks, out vFieldAuthorUnused, out vFieldVersionUnused, out vMember.__fExample, out vFieldParamDescSUnused);
+                vMember.__fFixed = mExtractTag(pPendingDoc, "fixed");
+                vMember.__fExceptionS = mExtractExceptions(pPendingDoc);
 
                 pType.__fFieldS.Add(vMember);
-                return;
+                return vMember;
             }
 
             /// 3. Метод или свойство: общий шаблон 'модификаторы Тип Имя(...)' либо 'модификаторы Тип Имя'
@@ -242,6 +437,7 @@ namespace nlcsManual
                 vMember.__fType = vMemberMatch.Groups["type"].Value.Trim();
                 vMember.__fName = vMemberMatch.Groups["name"].Value.Trim();
                 vMember.__fLineNumber = pLineNumber;
+                vMember.__fRegionPath = new List<string>(pRegionPath);
                 mFillModifiersAndAccess(vMemberMatch.Groups["mods"].Value, vMember.__fModifiers, ref vMember.__fAccess);
 
                 if (vIsMethod)
@@ -252,6 +448,8 @@ namespace nlcsManual
                 mApplyDoc(pPendingDoc, out vMember.__fSummary, out vMember.__fRemarks, out vMemberAuthorUnused, out vMemberVersionUnused, out vMember.__fExample, out vParamDescS);
                 string vReturnsDesc = mExtractTag(pPendingDoc, "returns");
                 vMember.__fReturns = vReturnsDesc;
+                vMember.__fFixed = mExtractTag(pPendingDoc, "fixed");
+                vMember.__fExceptionS = mExtractExceptions(pPendingDoc);
                 if (vIsMethod) mApplyParamDescriptions(vMember.__fParamS, vParamDescS);
 
                 /// Проверка на недокументированный публичный член - протоколируется как недоработка
@@ -261,8 +459,10 @@ namespace nlcsManual
 
                 if (vIsMethod) pType.__fMethodS.Add(vMember);
                 else pType.__fPropertyS.Add(vMember);
-                return;
+                return vMember;
             }
+
+            return null;
         }
 
         /// <summary>
@@ -360,13 +560,41 @@ namespace nlcsManual
             return vReturn;
         }
 
+
+        /// <summary>
+        /// Склейка накопленных строк документации в одну строку, с сохранением абзацев (пустая ///-строка
+        /// внутри блока - разделитель абзацев, помечается символом '\u2029')
+        /// </summary>
+        private string mJoinDocLines(List<string> pDocLineS)
+        {
+            StringBuilder vBuilder = new StringBuilder();
+            bool vLastWasBlank = true; // Подавляет пустые строки в самом начале блока
+            foreach (string vLine in pDocLineS)
+            {
+                if (vLine.Length == 0)
+                {
+                    if (vLastWasBlank == false)
+                        vBuilder.Append('\u2029');
+                    vLastWasBlank = true;
+                }
+                else
+                {
+                    if (vBuilder.Length > 0 && vLastWasBlank == false)
+                        vBuilder.Append(' ');
+                    vBuilder.Append(vLine);
+                    vLastWasBlank = false;
+                }
+            }
+            return vBuilder.ToString().Trim('\u2029');
+        }
+
         /// <summary>
         /// Разбор накопленного блока строк XML-документации ('///') на составляющие теги
         /// </summary>
         private void mApplyDoc(List<string> pDocLineS, out string pSummary, out string pRemarks,
             out string pAuthor, out string pVersion, out string pExample, out Dictionary<string, string> pParamDescS)
         {
-            string vJoined = string.Join(" ", pDocLineS);
+            string vJoined = mJoinDocLines(pDocLineS);
 
             pSummary = mExtractTag(pDocLineS, "summary");
             pRemarks = mExtractTag(pDocLineS, "remarks");
@@ -389,9 +617,26 @@ namespace nlcsManual
         /// </summary>
         private string mExtractTag(List<string> pDocLineS, string pTagName)
         {
-            string vJoined = string.Join(" ", pDocLineS);
+            string vJoined = mJoinDocLines(pDocLineS);
             Match vMatch = Regex.Match(vJoined, "<" + pTagName + @"[^>]*>(.*?)</" + pTagName + ">", RegexOptions.Singleline);
             return vMatch.Success ? vMatch.Groups[1].Value.Trim() : "";
+        }
+
+
+        /// <summary>
+        /// Извлечение ВСЕХ тегов &lt;exception&gt; из накопленного блока документации (у одного члена их
+        /// может быть несколько - на каждый вид исключения свой тег)
+        /// </summary>
+        private List<KeyValuePair<string, string>> mExtractExceptions(List<string> pDocLineS)
+        {
+            List<KeyValuePair<string, string>> vReturn = new List<KeyValuePair<string, string>>();
+            string vJoined = mJoinDocLines(pDocLineS);
+            foreach (Match vMatch in Regex.Matches(vJoined, @"<exception\s+cref=""([^""]+)""\s*>(.*?)</exception>", RegexOptions.Singleline))
+            {
+                string vType = vMatch.Groups[1].Value.Trim().TrimStart('T', ':'); // 'cref="T:System.ArgumentException"' или просто 'System.ArgumentException'
+                vReturn.Add(new KeyValuePair<string, string>(vType, vMatch.Groups[2].Value.Trim()));
+            }
+            return vReturn;
         }
 
         /// <summary>
