@@ -3,6 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace naCsProtocols
 {
@@ -10,33 +13,13 @@ namespace naCsProtocols
     /// Файл ProtocolSqliteImporter.cs
     /// </summary>
     /// <remarks>Импортирует легаси файлы протоколов ('.pcl', написанные файловым 'appProtocols' других
-    /// приложений - Administration.exe, csManual.exe и т.д.) в SQLite базу данных 'dsqProtocols'.
-    /// Формат файлов проверен напрямую по 'appProtocols.cs': заголовок протокола - CHG,GID,App,AppDpn,Pfx,Hst,
-    /// HstAnt,lnkCpu,lnkPclTyp,lnkUsr,Prc,Fil (12 колонок); запись протокола (файл с суффиксом 'rrd' перед
-    /// расширением) - CHG,GID,lnkPcl,lnkPclRrdTyp,Msg,Tck (6 колонок). Дедупликация - по 'GID' через таблицу
-    /// 'ImportedGid' в самой базе данных, что позволяет безопасно запускать импорт повторно (новые дозаписи
-    /// в тот же файл в течение дня не приведут к дублям).
-    ///
-    /// ВАЖНО (см. историю правок): изначально дедупликация и поиск CLU выполнялись отдельным SQL-запросом
-    /// НА КАЖДУЮ СТРОКУ файла, без транзакции - для файла с несколькими тысячами строк это означало
-    /// десятки тысяч отдельных открытий соединения с базой данных. Легаси-файлы протоколов, повреждённые
-    /// более ранней ошибкой (когда сбой протоколирования сам порождал протокол о себе), разрастались до
-    /// сотен тысяч строк, и попытка импортировать такой файл построчно приводила к "malloc() failed / out
-    /// of memory" в самом SQLite. Теперь: (1) соответствие GID -&gt; CLU загружается ОДНИМ запросом перед
-    /// циклом (см. 'dsqProtocols.__mImportedGidCluMapGet'), (2) весь файл импортируется в ОДНОЙ транзакции,
-    /// (3) файлы с аномально большим числом строк пропускаются с предупреждением, а не импортируются целиком
+    /// приложений - Administration.exe, csManual.exe и т.д.) в SQLite базу данных 'dsqProtocols'
     /// </remarks>
-    /// <conception>Lucasin V.</conception>
     public class ProtocolSqliteImporter
     {
         #region = ПОЛЯ
 
-        /// <summary>
-        /// Максимальное количество строк в одном файле, которое считается допустимым для импорта.
-        /// Легаси-файлы такого размера (сотни тысяч строк) практически никогда не бывают настоящими данными -
-        /// это след ранее исправленной ошибки (см. примечание к классу). Такие файлы пропускаются, а не
-        /// импортируются целиком, чтобы не подвесить импорт и не исчерпать память
-        /// </summary>
+
         private const int cMaxLinesPerFile = 20000;
 
         #endregion ПОЛЯ
@@ -50,35 +33,49 @@ namespace naCsProtocols
         /// </summary>
         /// <param name="pProtocols">Экземпляр 'dsqProtocols', в базу данных которого выполняется импорт</param>
         /// <param name="pFolderPath">Папка для сканирования (обычно 'appApplication.__oPathes.__fDirectoryProtocols_')</param>
+        /// <param name="pLog">
+        /// Необязательный обратный вызов для подробной построчной диагностики (какая папка проверяется,
+        /// сколько файлов найдено, что получилось для каждого файла). [null] - без диагностики, как раньше.
+        /// </param>
         /// <returns>Количество импортированных строк (протоколов + записей)</returns>
-        public int __mImportFromFolder(dsqProtocols pProtocols, string pFolderPath)
+        public int __mImportFromFolder(dsqProtocols pProtocols, string pFolderPath, Action<string> pLog = null)
         {
             int vImportedCount = 0;
 
             if (Directory.Exists(pFolderPath) == false)
+            {
+                pLog?.Invoke("  папка не существует - пропущена");
                 return 0;
+            }
 
             List<string> vHeaderFiles = Directory.GetFiles(pFolderPath, "*.pcl", SearchOption.AllDirectories)
                 .Where(pFile => Path.GetFileNameWithoutExtension(pFile).EndsWith("rrd") == false)
                 .ToList();
 
+            pLog?.Invoke("  найдено файлов-заголовков ('*.pcl', без 'rrd'): " + vHeaderFiles.Count.ToString());
+
             if (vHeaderFiles.Count == 0)
                 return 0;
 
-            /// Соответствие GID -> CLU загружается ОДИН раз для всего запуска импорта (а не на каждую строку
-            /// каждого файла - см. примечание к классу), и пополняется по мере импорта новых строк
             Dictionary<string, int> vImportedGidMap = pProtocols.__mImportedGidCluMapGet();
+            pLog?.Invoke("  уже импортировано ранее (всего по базе, GID): " + vImportedGidMap.Count.ToString());
 
             foreach (string vHeaderFilePath in vHeaderFiles)
             {
-                vImportedCount += mImportHeaderFile(pProtocols, vHeaderFilePath, vImportedGidMap);
+                int vFromHeader = mImportHeaderFile(pProtocols, vHeaderFilePath, vImportedGidMap);
 
                 string vRecordFilePath = Path.Combine(
                     Path.GetDirectoryName(vHeaderFilePath),
                     Path.GetFileNameWithoutExtension(vHeaderFilePath) + "rrd" + Path.GetExtension(vHeaderFilePath));
 
+                int vFromRecords = 0;
                 if (File.Exists(vRecordFilePath) == true)
-                    vImportedCount += mImportRecordFile(pProtocols, vRecordFilePath, vImportedGidMap);
+                    vFromRecords = mImportRecordFile(pProtocols, vRecordFilePath, vImportedGidMap);
+
+                pLog?.Invoke("    " + Path.GetFileName(vHeaderFilePath) + " -> строк: " + vFromHeader.ToString()
+                    + (File.Exists(vRecordFilePath) == true ? " (+ записи: " + vFromRecords.ToString() + ")" : " (файла записей нет)"));
+
+                vImportedCount += vFromHeader + vFromRecords;
             }
 
             return vImportedCount;
@@ -86,19 +83,8 @@ namespace naCsProtocols
         /// <summary>
         /// Поиск папок 'PROTOCOLs' всех приложений решения, а не только текущего запущенного.
         /// </summary>
-        /// <remarks>Каждое приложение решения пишет легаси файлы протоколов в СВОЮ СОБСТВЕННУЮ папку
-        /// '&lt;приложение&gt;\PROTOCOLs\' (см. 'appPathes.__fDirectoryProtocols_': путь строится от
-        /// 'Environment.CurrentDirectory' - то есть от папки, откуда запущен КОНКРЕТНЫЙ .exe, а не от
-        /// общей папки решения). Поэтому 'cspApplication.__oPathes.__fDirectoryProtocols_' в 'cspBegin.cs'
-        /// даёт только папку самого 'CsProtocols' - протоколы Administration.exe, csManual.exe и т.д.
-        /// в неё не попадают. Этот метод поднимается от папки запуска текущего приложения на 3 уровня
-        /// вверх ('bin\Debug' -&gt; '&lt;Приложение&gt;' -&gt; 'APPLICATIONs\Administration'), затем
-        /// проверяет 'bin\Debug\PROTOCOLs' и 'bin\Release\PROTOCOLs' у каждого соседнего проекта
-        /// приложения (пропуская папки, название которых начинается с '_' - это библиотеки, они
-        /// самостоятельно не запускаются и протоколов не пишут)</remarks>
-        /// <param name="pStartDirectory">Папка запуска текущего приложения (обычно 'Environment.CurrentDirectory' / 'bin\Debug')</param>
-        /// <returns>Список найденных папок с файлами легаси протоколов (включая папку текущего приложения, если она существует)</returns>
-        public static List<string> __mProtocolsFoldersDiscover(string pStartDirectory)
+        /// <param name="pStartDirectory">Папка, где лежит исполняемый файл текущего приложения</param>
+      public static List<string> __mProtocolsFoldersDiscover(string pStartDirectory)
         {
             List<string> vReturn = new List<string>();
 
@@ -135,9 +121,7 @@ namespace naCsProtocols
                     }
                 }
 
-                /// <fixed>ДОБАВЛЕНО: 'RELEASE\' - папка выложенных сборок ('Administration\RELEASE\<Приложение>\...') -
-                /// находится на 2 уровня ВЫШЕ 'APPLICATIONs\Administration' (корень решения), куда цикл выше не
-                /// поднимался вообще - ни один опубликованный '.pcl' из 'RELEASE' раньше не попадал в импорт</fixed>
+               
                 DirectoryInfo vSolutionRoot = vDirectory;
                 for (int i = 0; i < 2 && vSolutionRoot != null && vSolutionRoot.Parent != null; i++)
                     vSolutionRoot = vSolutionRoot.Parent;
@@ -165,9 +149,7 @@ namespace naCsProtocols
             }
             catch
             {
-                /// Обнаружение папок - вспомогательная операция при запуске; ошибка (например нет прав
-                /// доступа к какой-то из папок) не должна мешать запуску приложения - возвращается то,
-                /// что успело быть найдено до возникновения ошибки
+               
             }
 
             return vReturn;
@@ -182,7 +164,8 @@ namespace naCsProtocols
 
             try
             {
-                vLines = File.ReadAllLines(pFilePath);
+         
+                vLines = File.ReadAllLines(pFilePath, Encoding.GetEncoding(1251));
             }
             catch
             {
@@ -192,11 +175,11 @@ namespace naCsProtocols
             if (vLines.Length > cMaxLinesPerFile)
             {
                 mOversizedFileLog(pFilePath, vLines.Length);
-                return 0; // Похоже на повреждённый/раздутый легаси-файл - не импортируется целиком (см. примечание к классу)
+                return 0; 
             }
 
-            Dictionary<string, int> vAppCache = new Dictionary<string, int>(); // Кэш 'Имя приложения -> CLU' на время импорта этого файла
-            int vRecognizedLines = 0; // Строк, структурно похожих на заголовок протокола (>=12 полей через запятую) - см. примечание ниже
+            Dictionary<string, int> vAppCache = new Dictionary<string, int>(); 
+            int vRecognizedLines = 0;
 
             if (pProtocols.__mTransactionBegin() == false)
                 return 0;
@@ -210,7 +193,7 @@ namespace naCsProtocols
 
                     string[] vParts = vLine.Split(',');
                     if (vParts.Length < 12)
-                        continue; // Не строка заголовка протокола (либо заголовок CSV, либо повреждённая строка, либо не тот формат файла целиком - см. 'mUnrecognizedFormatLog')
+                        continue;
 
                     vRecognizedLines++;
 
@@ -249,15 +232,238 @@ namespace naCsProtocols
                 throw;
             }
 
-            /// Ни одна строка не распознана как заголовок протокола, хотя файл не пуст - вероятно, это
-            /// файл в другом, устаревшем формате (например обнаруженный на практике легаси-формат
-            /// '[тики][дата][приложение][...]' вместо ожидаемого CSV - от более старой версии логгера,
-            /// без соответствующего писателя в текущей кодовой базе). Раньше такой файл молча давал 0
-            /// импортированных строк, неотличимо от файла, для которого просто нечего было импортировать
+          
             if (vRecognizedLines == 0 && vLines.Any(pLine => string.IsNullOrWhiteSpace(pLine) == false))
-                mUnrecognizedFormatLog(pFilePath);
+            {
+                int vLegacyImported = mImportLegacyBracketFile(pProtocols, vLines, pImportedGidMap);
+                if (vLegacyImported > 0)
+                    return vImportedCount + vLegacyImported;
+
+                bool vLooksBracket = vLines.Any(pLine =>
+                {
+                    string t = (pLine ?? "").Trim();
+                    return t.Length > 2 && t[0] == '[' && t.IndexOf(']') > 0;
+                });
+                if (vLooksBracket == true)
+                    return vImportedCount; 
+
+                return vImportedCount + mImportRawFallback(pProtocols, pFilePath, vLines, pImportedGidMap);
+            }
 
             return vImportedCount;
+        }
+
+        private int mImportLegacyBracketFile(dsqProtocols pProtocols, string[] pLines, Dictionary<string, int> pImportedGidMap)
+        {
+           
+            int vImportedCount = 0;
+
+            if (pProtocols.__mTransactionBegin() == false)
+                return 0;
+
+            try
+            {
+                string vCurrentHeaderGid = null;
+                int vCurrentPclClue = -1;
+                int vRecordIndex = 0;
+
+                foreach (string vRawLine in pLines)
+                {
+                    string vLine = (vRawLine ?? "").Trim();
+                    if (vLine.Length == 0)
+                        continue;
+
+                    List<string> vBrackets = mSplitBrackets(vLine);
+                    if (vBrackets == null || vBrackets.Count == 0)
+                        continue;
+
+                   
+                    int vRecType;
+                    if (vBrackets.Count >= 1
+                        && int.TryParse(vBrackets[0], out vRecType)
+                        && vRecType >= 0 && vRecType <= 20
+                        && vBrackets[0].Length <= 3
+                        && vLine.IndexOf(" - ") >= 0)
+                    {
+                        if (vCurrentHeaderGid == null || vCurrentPclClue <= 0)
+                            continue;
+
+                        vRecordIndex++;
+                        string vRecordGid = vCurrentHeaderGid + "_R" + vRecordIndex.ToString();
+                        if (pImportedGidMap.ContainsKey(vRecordGid) == true)
+                            continue;
+
+                        long vTick = -1;
+                        if (vBrackets.Count >= 2)
+                            long.TryParse(vBrackets[1], out vTick);
+
+                        int vDash = vLine.IndexOf(" - ");
+                        string vMessage = vDash >= 0 ? vLine.Substring(vDash + 3).Trim() : vLine;
+
+ 
+                        pProtocols.__mProtocolRecordImport(vRecordGid, vCurrentPclClue, vRecType, vMessage, vTick);
+                        pProtocols.__mProtocolMarkImported(vRecordGid, -1);
+                        pImportedGidMap[vRecordGid] = -1;
+                        vImportedCount++;
+                        continue;
+                    }
+
+        
+                    long vChgTicks;
+                    if (vBrackets.Count >= 8
+                        && long.TryParse(vBrackets[0], out vChgTicks)
+                        && vBrackets[0].Length >= 10)
+                    {
+                        string vGid = "LEGACY_" + vBrackets[0];
+                        vCurrentHeaderGid = vGid;
+                        vRecordIndex = 0;
+
+                        int vExistingClue;
+                        if (pImportedGidMap.TryGetValue(vGid, out vExistingClue) == true)
+                        {
+                            vCurrentPclClue = vExistingClue;
+                            continue;
+                        }
+
+                        string vApp = vBrackets.Count > 2 ? vBrackets[2] : "";
+                        string vPfx = vBrackets.Count > 3 ? vBrackets[3] : "";
+                        string vHost = vBrackets.Count > 5 ? vBrackets[5] : "";
+                        string vUser = vBrackets.Count > 6 ? vBrackets[6] : "";
+                        int vProtocolTypeRaw = 12;
+                        if (vBrackets.Count > 7)
+                            int.TryParse(vBrackets[7], out vProtocolTypeRaw);
+                
+                        string vPrc = vBrackets.Count > 9 ? vBrackets[9] : "";
+
+                        vCurrentPclClue = pProtocols.__mProtocolImport(
+                            vGid, vChgTicks,
+                            vApp, "", vPfx,
+                            vProtocolTypeRaw,
+                            vHost, vPrc, vUser);
+
+                        pProtocols.__mProtocolMarkImported(vGid, vCurrentPclClue);
+                        pImportedGidMap[vGid] = vCurrentPclClue;
+                        vImportedCount++;
+                        continue;
+                    }
+                }
+
+                pProtocols.__mTransactionCommit();
+            }
+            catch
+            {
+                pProtocols.__mTransactionRollback();
+                throw;
+            }
+
+            return vImportedCount;
+        }
+
+        /// <summary>
+        /// Разбивка строки вида [a][b][c] на список значений скобок (без самих скобок).
+        /// </summary>
+        private List<string> mSplitBrackets(string pLine)
+        {
+            List<string> vResult = new List<string>();
+            if (string.IsNullOrEmpty(pLine) || pLine[0] != '[')
+                return vResult;
+
+            int vStart = -1;
+            for (int i = 0; i < pLine.Length; i++)
+            {
+                if (pLine[i] == '[')
+                    vStart = i + 1;
+                else if (pLine[i] == ']' && vStart >= 0)
+                {
+                    vResult.Add(pLine.Substring(vStart, i - vStart));
+                    vStart = -1;
+                    // после ] может идти " - message" — дальше скобок заголовка нет
+                    if (i + 1 < pLine.Length && pLine[i + 1] != '[')
+                        break;
+                }
+            }
+            return vResult;
+        }
+
+        private int mImportRawFallback(dsqProtocols pProtocols, string pFilePath, string[] pLines, Dictionary<string, int> pImportedGidMap)
+        {
+            int vImportedCount = 0;
+
+            /// Один заголовок на файл, с детерминированным GID (от пути файла) - повторный импорт того
+            /// же файла не создаст второй заголовок, а лишь пропустит уже сохранённые строки (обычная
+            /// дедупликация по GID, как и во всех остальных путях импорта)
+            string vHeaderGid = "RAWFILE_" + mStableHash(pFilePath);
+
+            int vHeaderClue;
+            bool vHeaderIsNew = pImportedGidMap.TryGetValue(vHeaderGid, out vHeaderClue) == false;
+
+            if (pProtocols.__mTransactionBegin() == false)
+            {
+                mUnrecognizedFormatLog(pFilePath); 
+                return 0;
+            }
+
+            try
+            {
+                if (vHeaderIsNew == true)
+                {
+                    vHeaderClue = pProtocols.__mProtocolImport(
+                        vHeaderGid,
+                        DateTime.Now.Ticks, // Точное время создания файла для нераспознанного формата не определить - используется момент импорта
+                        Path.GetFileNameWithoutExtension(pFilePath), // App - имя файла, чтобы можно было отличить источник в списке протоколов
+                        "", "",
+                        12,
+                        Environment.MachineName,
+                        "Импорт нераспознанного файла: " + Path.GetFileName(pFilePath),
+                        "");
+
+                    pProtocols.__mProtocolMarkImported(vHeaderGid, vHeaderClue);
+                    pImportedGidMap[vHeaderGid] = vHeaderClue;
+                    vImportedCount++;
+                }
+
+                int vLineIndex = 0;
+                foreach (string vLine in pLines)
+                {
+                    vLineIndex++;
+                    if (string.IsNullOrWhiteSpace(vLine) == true)
+                        continue;
+
+                    
+                    string vLineGid = vHeaderGid + "_L" + vLineIndex.ToString() + "_" + mStableHash(vLine);
+                    if (pImportedGidMap.ContainsKey(vLineGid) == true)
+                        continue;
+
+                    pProtocols.__mProtocolRecordImport(vLineGid, vHeaderClue, 5 /* PclRrdTyp.CLU 5 = 'Сообщение' */, vLine, -1);
+                    pProtocols.__mProtocolMarkImported(vLineGid, -1);
+                    pImportedGidMap[vLineGid] = -1;
+                    vImportedCount++;
+                }
+
+                pProtocols.__mTransactionCommit();
+            }
+            catch
+            {
+                pProtocols.__mTransactionRollback();
+                throw;
+            }
+
+            mUnrecognizedFormatLog(pFilePath); // Информационная запись: формат не распознан автоматически, но содержимое всё равно полностью сохранено выше
+
+            return vImportedCount;
+        }
+        /// <summary>
+        /// Детерминированный, стабильный между запусками короткий хеш строки - используется для построения
+        /// GID у строк без собственного идентификатора (нераспознанный формат), чтобы дедупликация по GID
+        /// работала одинаково при повторном импорте одного и того же файла
+        /// </summary>
+        private string mStableHash(string pText)
+        {
+            using (SHA1 vSha = SHA1.Create())
+            {
+                byte[] vHash = vSha.ComputeHash(Encoding.UTF8.GetBytes(pText ?? ""));
+                return BitConverter.ToString(vHash).Replace("-", "").Substring(0, 16);
+            }
         }
         /// <summary>
         /// Импорт записей протоколов из одного 'rrd.pcl' файла (одной транзакцией)
@@ -269,7 +475,7 @@ namespace naCsProtocols
 
             try
             {
-                vLines = File.ReadAllLines(pFilePath);
+                vLines = File.ReadAllLines(pFilePath, Encoding.GetEncoding(1251));
             }
             catch
             {
@@ -279,7 +485,7 @@ namespace naCsProtocols
             if (vLines.Length > cMaxLinesPerFile)
             {
                 mOversizedFileLog(pFilePath, vLines.Length);
-                return 0; // См. примечание в 'mImportHeaderFile'
+                return 0;
             }
 
             if (pProtocols.__mTransactionBegin() == false)
@@ -312,10 +518,13 @@ namespace naCsProtocols
                     int vRecordTypeRaw;
                     int.TryParse(vParts[3].Trim(), out vRecordTypeRaw);
 
+                  
+                    int vRecordTypeClu = vRecordTypeRaw + 1;
+
                     long vTick;
                     long.TryParse(vParts.Length > 5 ? vParts[5].Trim() : "-1", out vTick);
 
-                    pProtocols.__mProtocolRecordImport(vGid, vLnkPcl, vRecordTypeRaw, vParts[4].Trim(), vTick);
+                    pProtocols.__mProtocolRecordImport(vGid, vLnkPcl, vRecordTypeClu, vParts[4].Trim(), vTick);
                     pProtocols.__mProtocolMarkImported(vGid, -1); // -1: маркер "это запись, а не протокол" (для протоколов здесь настоящий CLU)
                     pImportedGidMap[vGid] = -1;
                     vImportedCount++;
@@ -330,7 +539,7 @@ namespace naCsProtocols
             }
 
             if (vRecognizedLines == 0 && vLines.Any(pLine => string.IsNullOrWhiteSpace(pLine) == false))
-                mUnrecognizedFormatLog(pFilePath);
+                return vImportedCount + mImportRawFallback(pProtocols, pFilePath, vLines, pImportedGidMap);
 
             return vImportedCount;
         }
@@ -355,10 +564,7 @@ namespace naCsProtocols
         }
         /// <summary>
         /// Регистрация файла, содержимое которого не удалось разобрать ни в одной строке - непустой файл,
-        /// но ни одна строка не совпала с ожидаемым CSV-форматом ('CHG,GID,...' с запятыми). На практике
-        /// в проекте встречались файлы в другом, устаревшем формате (без соответствующего писателя в
-        /// текущей кодовой базе - см. примечание к классу) - такие файлы раньше молча давали 0 импортированных
-        /// строк, неотличимо от файла, для которого действительно нечего было импортировать
+        /// но ни одна строка не совпала с ожидаемым CSV-форматом ('CHG,GID,...' с запятыми).
         /// </summary>
         private void mUnrecognizedFormatLog(string pFilePath)
         {

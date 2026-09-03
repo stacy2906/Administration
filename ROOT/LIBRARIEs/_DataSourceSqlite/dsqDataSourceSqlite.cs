@@ -200,7 +200,6 @@ namespace nlDataSourceSqlite
         /// <summary>
         /// Печать структуры базы данных в источнике
         /// </summary>
-        /// https://www.codeproject.com/Questions/1213783/Restore-sqlite-database-in-Csharp
         /// <returns>Путь созданного файла копии базы данных</returns>
         public override string __mDatabaseBackUp()
         {

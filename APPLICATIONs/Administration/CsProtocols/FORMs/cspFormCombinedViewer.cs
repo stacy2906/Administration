@@ -1,4 +1,5 @@
-﻿using nlCsProtocols;
+﻿using nlApplication;
+using nlCsProtocols;
 using nlDataSourceSqlite;
 using nlElements;
 using System;
@@ -14,13 +15,7 @@ namespace naCsProtocols
     /// </summary>
     /// <remarks>Форма 3 - совмещённый просмотр: слева список записей протоколов ('PclRrd', с учётом фильтров),
     /// справа - заголовок протокола ('Pcl'), которому принадлежит выбранная слева запись.</remarks>
-    /// <fixed>Первая версия размещала панель фильтров через 'Dock = Top' на обычной 'Panel' поверх сетки
-    /// с 'Dock = Fill' и вручную дёргала 'Controls.SetChildIndex' - тот же антипаттерн, что уже был один раз
-    /// найден и исправлен в рабочей 'cspFormMain.cs' (см. её комментарий: "Dock Top+Fill на обычной Panel с
-    /// cspAreaGrid (сам SplitContainer) давал перекрытие и «серую» сетку"). Переписано на тот же проверенный
-    /// приём: 'elmBlockFormMain' + 'TableLayoutPanel' с явными строками (фильтры - Absolute высота, сетка -
-    /// Percent 100%), без ручного докинга и без ручной перестановки Z-order.</fixed>
-    /// <conception>Lucasin V.</conception>
+
     public class cspFormCombinedViewer : elmForm
     {
         #region = МЕТОДЫ
@@ -34,20 +29,8 @@ namespace naCsProtocols
             __fCaption_ = "Совмещённый просмотр протоколов";
             ClientSize = new Size(1200, 700);
 
-            /// ИСПРАВЛЕНО: раньше здесь стояло 'dsqProtocols.__oActive_' - самовосстанавливающийся указатель
-            /// на "родную" базу приложения ('Databases\protocols.db'), НЕ связанный с тем, что пользователь
-            /// открывает через "Файл / Открыть протокол" в 'cspFormMain'. Из-за этого эта форма всегда
-            /// показывала одну и ту же (часто постороннюю/загрязнённую) базу, независимо от того, какую
-            /// базу пользователь только что открыл в главном окне. 'dsqProtocols.__oViewing_' - это как раз
-            /// то поле, которое 'cspFormMain' обновляет при "Файл / Открыть" и "Файл / Закрыть" (см.
-            /// примечания к обоим полям в 'dsqProtocols.cs') - оно и должно читаться здесь. Тип - общий
-            /// 'datUnitDataSource', а не 'dsqProtocols' (вручную открытый файл - это 'dsqDataSourceSqliteWithProtocol'),
-            /// поэтому запросы и определение схемы ниже используют соответствующую перегрузку
             _oDataSource = dsqProtocols.__oViewing_;
 
-            /// [null] означает "в главном окне ничего не открыто" - показываем пустые таблицы и понятную
-            /// подсказку, а не подставляем родную базу приложения по умолчанию (тот же принцип, что и в
-            /// 'cspFormMain.mMenuFileClose_Click' - закрытие означает по-настоящему "ничего не открыто")
             __cPanelStatus.__fCaption_ = _oDataSource != null
                 ? "База данных: " + System.IO.Path.Combine(_oDataSource.__fDatabasePath, _oDataSource.__fDatabaseName)
                 : "База данных не открыта. Откройте протокол через \"Файл / Открыть протокол\" в главном окне.";
@@ -61,118 +44,190 @@ namespace naCsProtocols
 
             mFiltersPopulate();
             mProtocolsLoad();
+            mFilterPanelInheritFormColor();
         }
+
         /// <summary>
         /// Панель фильтров - TableLayoutPanel (не абсолютные координаты), несколько строк
         /// </summary>
         private void mFilterPanelBuild()
         {
+            // Та же сетка, что в cspFormMain: подпись | поле | подпись | поле, строки по 30 px
             _cPanelFilters.Dock = DockStyle.Fill;
             _cPanelFilters.Margin = new Padding(0);
-            _cPanelFilters.ColumnCount = 6;
-            _cPanelFilters.RowCount = 4;
+            _cPanelFilters.Padding = new Padding(4);
+            // BackColor не задаём явно — наследует цвет формы (elmForm), как соседние области
+            _cPanelFilters.ColumnCount = 4;
+            _cPanelFilters.RowCount = 8;
             _cPanelFilters.ColumnStyles.Clear();
-            for (int i = 0; i < 6; i++)
-                _cPanelFilters.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F / 6F));
             _cPanelFilters.RowStyles.Clear();
-            _cPanelFilters.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));  // Заголовок "Вид протокола"
-            _cPanelFilters.RowStyles.Add(new RowStyle(SizeType.Absolute, 46F));  // Список видов протокола
-            _cPanelFilters.RowStyles.Add(new RowStyle(SizeType.Absolute, 44F));  // App/Host/User/Procedure/Message
-            _cPanelFilters.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));  // UserSolution/дата/очистить
+            _cPanelFilters.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 130F));
+            _cPanelFilters.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            _cPanelFilters.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 130F));
+            _cPanelFilters.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            for (int i = 0; i < 7; i++)
+                _cPanelFilters.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
+            _cPanelFilters.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F)); // виды протокола (чекбоксы)
 
-            _cLabelType.Text = "Вид протокола (отметьте нужные; пусто = все)";
+            // Строка 0: процедура / сообщение
+            mAddFilterLabel("Процедура:", 0, 0);
+            _cFilterProcedure.Dock = DockStyle.Fill;
+            _cFilterProcedure.TextChanged += mFilter_Changed;
+            _cPanelFilters.Controls.Add(_cFilterProcedure, 1, 0);
+
+            mAddFilterLabel("Сообщение:", 2, 0);
+            _cFilterMessage.Dock = DockStyle.Fill;
+            _cFilterMessage.TextChanged += mFilter_Changed;
+            _cPanelFilters.Controls.Add(_cFilterMessage, 3, 0);
+
+            // Строка 1: решение пользователя (чекбокс на всю ширину полей)
+            mAddFilterLabel("Решение:", 0, 1);
+            _cFilterUserSolution.Text = "Только решения пользователя (Ответ)";
+            _cFilterUserSolution.Dock = DockStyle.Fill;
+            _cFilterUserSolution.CheckedChanged += mFilter_Changed;
+            _cPanelFilters.Controls.Add(_cFilterUserSolution, 1, 1);
+            _cPanelFilters.SetColumnSpan(_cFilterUserSolution, 3);
+
+            // Строка 2: приложение / пользователь
+            mAddFilterLabel("Приложение:", 0, 2);
+            _cFilterApp.Dock = DockStyle.Fill;
+            _cFilterApp.DropDownStyle = ComboBoxStyle.DropDownList;
+            _cFilterApp.SelectedIndexChanged += mFilter_Changed;
+            _cPanelFilters.Controls.Add(_cFilterApp, 1, 2);
+
+            mAddFilterLabel("Пользователь:", 2, 2);
+            _cFilterUser.Dock = DockStyle.Fill;
+            _cFilterUser.DropDownStyle = ComboBoxStyle.DropDownList;
+            _cFilterUser.SelectedIndexChanged += mFilter_Changed;
+            _cPanelFilters.Controls.Add(_cFilterUser, 3, 2);
+
+            // Строка 3: компьютер
+            mAddFilterLabel("Компьютер (хост):", 0, 3);
+            _cFilterHost.Dock = DockStyle.Fill;
+            _cFilterHost.DropDownStyle = ComboBoxStyle.DropDownList;
+            _cFilterHost.SelectedIndexChanged += mFilter_Changed;
+            _cPanelFilters.Controls.Add(_cFilterHost, 1, 3);
+            _cPanelFilters.SetColumnSpan(_cFilterHost, 3);
+
+            // Строка 4: период с / по (как в главной форме)
+            mAddFilterLabel("Период с:", 0, 4);
+            Panel vDateFromPanel = new Panel();
+            vDateFromPanel.Dock = DockStyle.Fill;
+            _cFilterDateEnabled.Text = "";
+            _cFilterDateEnabled.Dock = DockStyle.Left;
+            _cFilterDateEnabled.Width = 20;
+            _cFilterDateEnabled.Checked = false;
+            _cFilterDateEnabled.CheckedChanged += mFilterDateEnabled_Changed;
+            _cFilterDateFrom.Dock = DockStyle.Fill;
+            _cFilterDateFrom.Format = DateTimePickerFormat.Short;
+            _cFilterDateFrom.Value = DateTime.Today.AddDays(-30);
+            _cFilterDateFrom.Enabled = false;
+            _cFilterDateFrom.ValueChanged += mFilter_Changed;
+            vDateFromPanel.Controls.Add(_cFilterDateFrom);
+            vDateFromPanel.Controls.Add(_cFilterDateEnabled);
+            _cPanelFilters.Controls.Add(vDateFromPanel, 1, 4);
+
+            mAddFilterLabel("по:", 2, 4);
+            _cFilterDateTo.Dock = DockStyle.Fill;
+            _cFilterDateTo.Format = DateTimePickerFormat.Short;
+            _cFilterDateTo.Value = DateTime.Today;
+            _cFilterDateTo.Enabled = false;
+            _cFilterDateTo.ValueChanged += mFilter_Changed;
+            _cPanelFilters.Controls.Add(_cFilterDateTo, 3, 4);
+
+            // Строка 5: сброс
+            _cButtonClear.Text = "Сбросить фильтры";
+            _cButtonClear.Dock = DockStyle.Fill;
+            _cButtonClear.Click += mButtonClear_Click;
+            _cPanelFilters.Controls.Add(_cButtonClear, 0, 5);
+            _cPanelFilters.SetColumnSpan(_cButtonClear, 4);
+
+            // Строка 6–7: виды протокола (мультивыбор, как раньше, но в той же сетке)
+            mAddFilterLabel("Вид протокола:", 0, 6);
+            _cLabelType.Text = "(пусто = все)";
             _cLabelType.Dock = DockStyle.Fill;
-            _cPanelFilters.Controls.Add(_cLabelType, 0, 0);
-            _cPanelFilters.SetColumnSpan(_cLabelType, 6);
+            _cLabelType.TextAlign = ContentAlignment.MiddleLeft;
+            _cPanelFilters.Controls.Add(_cLabelType, 1, 6);
+            _cPanelFilters.SetColumnSpan(_cLabelType, 3);
 
             _cFilterType.Dock = DockStyle.Fill;
             _cFilterType.CheckOnClick = true;
             _cFilterType.MultiColumn = true;
             _cFilterType.ItemCheck += mFilterType_ItemCheck;
-            _cPanelFilters.Controls.Add(_cFilterType, 0, 1);
-            _cPanelFilters.SetColumnSpan(_cFilterType, 6);
+            _cPanelFilters.Controls.Add(_cFilterType, 0, 7);
+            _cPanelFilters.SetColumnSpan(_cFilterType, 4);
 
-            mAddFilterLabelAndCombo("Приложение", _cFilterApp, 0);
-            mAddFilterLabelAndCombo("Компьютер", _cFilterHost, 1);
-            mAddFilterLabelAndCombo("Пользователь", _cFilterUser, 2);
-            mAddFilterLabelAndText("Процедура содержит", _cFilterProcedure, 3);
-            mAddFilterLabelAndText("Сообщение содержит", _cFilterMessage, 4);
-
-            _cFilterUserSolution.Text = "Только решения пользователя (Ответ)";
-            _cFilterUserSolution.Dock = DockStyle.Fill;
-            _cFilterUserSolution.CheckedChanged += mFilter_Changed;
-            _cPanelFilters.Controls.Add(_cFilterUserSolution, 0,3);
-            _cPanelFilters.SetColumnSpan(_cFilterUserSolution, 2);
-
-            _cFilterDateEnabled.Text = "Период:";
-            _cFilterDateEnabled.Dock = DockStyle.Fill;
-            _cFilterDateEnabled.CheckedChanged += mFilter_Changed;
-            _cPanelFilters.Controls.Add(_cFilterDateEnabled, 2, 3);
-
-            _cFilterDateFrom.Dock = DockStyle.Fill;
-            _cFilterDateFrom.Format = DateTimePickerFormat.Short;
-            _cFilterDateFrom.Value = DateTime.Now.AddDays(-30);
-            _cFilterDateFrom.ValueChanged += mFilter_Changed;
-            _cPanelFilters.Controls.Add(_cFilterDateFrom, 3, 3);
-
-            _cFilterDateTo.Dock = DockStyle.Fill;
-            _cFilterDateTo.Format = DateTimePickerFormat.Short;
-            _cFilterDateTo.Value = DateTime.Now;
-            _cFilterDateTo.ValueChanged += mFilter_Changed;
-            _cPanelFilters.Controls.Add(_cFilterDateTo, 4, 3);
-
-            _cButtonClear.Text = "Очистить фильтры";
-            _cButtonClear.Dock = DockStyle.Fill;
-            _cButtonClear.Click += mButtonClear_Click;
-            _cPanelFilters.Controls.Add(_cButtonClear, 5, 2);
+            // Подгонка цвета под форму: без перекраски сеток в белый
+            mFilterPanelInheritFormColor();
         }
+
         /// <summary>
-        /// Добавление пары "подпись сверху / выпадающий список" в строку 2 (индекс 2) панели фильтров
+        /// Цвета из темы интерфейса (elmApplication.__oInterface / COLORS) —
+        /// тот же источник, что у elmForm, elmComponentCombo, elmInput*.
+        /// FormActive = фон формы/панелей; DataBack = фон полей ввода.
         /// </summary>
-        private void mAddFilterLabelAndCombo(string pLabel, ComboBox pCombo, int pColumn)
+        private void mFilterPanelInheritFormColor()
         {
-            TableLayoutPanel vCell = new TableLayoutPanel();
-            vCell.Dock = DockStyle.Fill;
-            vCell.ColumnCount = 1;
-            vCell.RowCount = 2;
-            vCell.RowStyles.Add(new RowStyle(SizeType.Absolute, 16F));
-            vCell.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            Color vForm = elmApplication.__oInterface.__mColor(COLORS.FormActive);
+            Color vDataBack = elmApplication.__oInterface.__mColor(COLORS.DataBack);
+            Color vText = elmApplication.__oInterface.__mColor(COLORS.Text);
 
-            Label vLabel = new Label();
-            vLabel.Text = pLabel;
-            vLabel.Dock = DockStyle.Fill;
-            vCell.Controls.Add(vLabel, 0, 0);
+            _cPanelFilters.BackColor = vForm;
+            _cLeftHost.BackColor = vForm;
+            _cFilterType.BackColor = vForm;
+            _cFilterUserSolution.BackColor = vForm;
+            _cFilterDateEnabled.BackColor = vForm;
+            _cLabelType.BackColor = vForm;
+            _cLabelType.ForeColor = vText;
+            _cButtonClear.BackColor = vForm;
+            _cButtonClear.UseVisualStyleBackColor = false;
 
-            pCombo.DropDownStyle = ComboBoxStyle.DropDownList;
-            pCombo.Dock = DockStyle.Fill;
-            pCombo.SelectedIndexChanged += mFilter_Changed;
-            vCell.Controls.Add(pCombo, 0, 1);
+            foreach (Control vCtrl in _cPanelFilters.Controls)
+            {
+                if (vCtrl is Label)
+                {
+                    vCtrl.BackColor = vForm;
+                    vCtrl.ForeColor = vText;
+                }
+                else if (vCtrl is CheckBox || vCtrl is Panel)
+                {
+                    vCtrl.BackColor = vForm;
+                }
+                else if (vCtrl is TextBox || vCtrl is ComboBox || vCtrl is DateTimePicker)
+                {
+                    vCtrl.BackColor = vDataBack;
+                }
+            }
 
-            _cPanelFilters.Controls.Add(vCell, pColumn, 2);
+            // Явно поля фильтров
+            _cFilterProcedure.BackColor = vDataBack;
+            _cFilterMessage.BackColor = vDataBack;
+            _cFilterApp.BackColor = vDataBack;
+            _cFilterHost.BackColor = vDataBack;
+            _cFilterUser.BackColor = vDataBack;
+            _cFilterDateFrom.BackColor = vDataBack;
+            _cFilterDateTo.BackColor = vDataBack;
+            _cFilterUserSolution.ForeColor = vText;
         }
-        /// <summary>
-        /// Добавление пары "подпись сверху / текстовое поле" в строку 2 (индекс 2) панели фильтров
-        /// </summary>
-        private void mAddFilterLabelAndText(string pLabel, TextBox pTextBox, int pColumn)
+
+        private void mAddFilterLabel(string pText, int pColumn, int pRow)
         {
-            TableLayoutPanel vCell = new TableLayoutPanel();
-            vCell.Dock = DockStyle.Fill;
-            vCell.ColumnCount = 1;
-            vCell.RowCount = 2;
-            vCell.RowStyles.Add(new RowStyle(SizeType.Absolute, 16F));
-            vCell.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-
             Label vLabel = new Label();
-            vLabel.Text = pLabel;
+            vLabel.Text = pText;
             vLabel.Dock = DockStyle.Fill;
-            vCell.Controls.Add(vLabel, 0, 0);
-
-            pTextBox.Dock = DockStyle.Fill;
-            pTextBox.TextChanged += mFilter_Changed;
-            vCell.Controls.Add(pTextBox, 0, 1);
-
-            _cPanelFilters.Controls.Add(vCell, pColumn, 2);
+            vLabel.TextAlign = ContentAlignment.MiddleLeft;
+            vLabel.Padding = new Padding(2, 0, 0, 0);
+            _cPanelFilters.Controls.Add(vLabel, pColumn, pRow);
         }
+
+        private void mFilterDateEnabled_Changed(object sender, EventArgs e)
+        {
+            bool vOn = _cFilterDateEnabled.Checked;
+            _cFilterDateFrom.Enabled = vOn;
+            _cFilterDateTo.Enabled = vOn;
+            mFilter_Changed(sender, e);
+        }
+
         /// <summary>
         /// Две таблицы: слева записи протоколов (под панелью фильтров, тот же приём TableLayoutPanel,
         /// что и в рабочей 'cspFormMain'), справа - заголовок выбранного протокола
@@ -188,7 +243,7 @@ namespace naCsProtocols
             _cLeftHost.ColumnStyles.Clear();
             _cLeftHost.RowStyles.Clear();
             _cLeftHost.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            _cLeftHost.RowStyles.Add(new RowStyle(SizeType.Absolute, 260F)); // Фильтры + виды протокола
+            _cLeftHost.RowStyles.Add(new RowStyle(SizeType.Absolute, 290F)); // Фильтры + виды протокола
             _cLeftHost.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));  // Сетка записей
             _cLeftHost.Padding = new Padding(0);
             _cLeftHost.Margin = new Padding(0);
@@ -221,7 +276,7 @@ namespace naCsProtocols
             _cAreaRecords.__eGridCellEnter += mAreaRecords_GridCellEnter;
 
             _cAreaProtocolHeader.Dock = DockStyle.Fill;
-            _cAreaProtocolHeader.__fHeaderCaption_ = "Заголовок протокола (выбранной записи)";
+            _cAreaProtocolHeader.__fHeaderCaption_ = "Заголовки протоколов";
             _cAreaProtocolHeader.__fHeaderVisible_ = true;
             _cSplitter.Panel2.Controls.Add(_cAreaProtocolHeader);
 
@@ -238,7 +293,11 @@ namespace naCsProtocols
                 _cAreaProtocolHeader.__fGrid_.AutoGenerateColumns = false;
                 _cAreaProtocolHeader.__fGrid_.ReadOnly = true;
                 _cAreaProtocolHeader.__fGrid_.AllowUserToAddRows = false;
+                _cAreaProtocolHeader.__fGrid_.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+                _cAreaProtocolHeader.__fGrid_.MultiSelect = false;
+                _cAreaProtocolHeader.__fGrid_.SelectionChanged += mAreaProtocolHeader_SelectionChanged;
             }
+            _cAreaProtocolHeader.__eGridCellEnter += mAreaProtocolHeader_GridCellEnter;
         }
 
         #endregion Объект
@@ -331,7 +390,11 @@ namespace naCsProtocols
             pCombo.SelectedIndex = 0;
         }
         /// <summary>
-        /// Построение списка записей протоколов с учётом активных фильтров
+        /// Построение ОБЕИХ таблиц целиком с учётом активных фильтров: слева - все подходящие записи
+        /// ('PclRrd'), справа - все подходящие заголовки протоколов ('Pcl'), одновременно, а не только
+        /// заголовок текущей выбранной записи (было раньше - см. историю правок класса). Позволяет
+        /// сравнивать протоколы за одну и ту же дату/период от разных приложений, компьютеров и
+        /// пользователей одним взглядом, без выбора по одной записи.
         /// </summary>
         private void mProtocolsLoad()
         {
@@ -340,29 +403,23 @@ namespace naCsProtocols
 
             ProtocolsSchemaInfo vSchema = ProtocolsSchemaDetector.DetectFor(_oDataSource);
 
-            List<string> vConditions = new List<string>();
+            /// Условия, применимые к заголовку протокола ('Pcl' и его связанные 'App'/'PclTyp'/'Cpu'/'Usr') -
+            /// общие для ОБОИХ запросов: и для списка заголовков справа, и (через JOIN на Pcl) для списка
+            /// записей слева. Именно эти условия дают "несколько протоколов за одну дату от разных
+            /// приложений/компьютеров/пользователей" - см. запрос пользователя.
+            List<string> vHeaderConditions = new List<string>();
 
             if (_cFilterApp.SelectedIndex > 0)
-                vConditions.Add("A." + vSchema.AppNameColumn + " = '" + mEscape(_cFilterApp.Text) + "'");
+                vHeaderConditions.Add("A." + vSchema.AppNameColumn + " = '" + mEscape(_cFilterApp.Text) + "'");
 
             if (_cFilterHost.Enabled == true && _cFilterHost.SelectedIndex > 0)
-                vConditions.Add((vSchema.HasCpuUsrTables == true ? "C.dsiCpu" : "P.Hst") + " = '" + mEscape(_cFilterHost.Text) + "'");
+                vHeaderConditions.Add((vSchema.HasCpuUsrTables == true ? "C.dsiCpu" : "P.Hst") + " = '" + mEscape(_cFilterHost.Text) + "'");
 
             if (_cFilterUser.Enabled == true && _cFilterUser.SelectedIndex > 0)
-                vConditions.Add((vSchema.HasCpuUsrTables == true ? "U.dsiUsr" : "P.Usr") + " = '" + mEscape(_cFilterUser.Text) + "'");
+                vHeaderConditions.Add((vSchema.HasCpuUsrTables == true ? "U.dsiUsr" : "P.Usr") + " = '" + mEscape(_cFilterUser.Text) + "'");
 
             if (_cFilterProcedure.Text.Trim().Length > 0)
-                vConditions.Add("P.Prc LIKE '%" + mEscape(_cFilterProcedure.Text.Trim()) + "%'");
-
-            if (_cFilterMessage.Text.Trim().Length > 0)
-                vConditions.Add("PR." + vSchema.MessageColumn + " LIKE '%" + mEscape(_cFilterMessage.Text.Trim()) + "%'");
-
-            if (_cFilterUserSolution.Checked == true)
-            {
-                /// "Решение пользователя" - вид записи 'Answer' (CLU 1 при штатном сидинге, см. dsqProtocols.mRecordTypeClue);
-                /// подпись используется как более надёжный резервный признак, если сидинг когда-либо изменится
-                vConditions.Add("(PRT." + vSchema.RrdTypNameColumn + " LIKE '%Решение%' OR PR." + vSchema.RrdLinkColumn + " = 1)");
-            }
+                vHeaderConditions.Add("P.Prc LIKE '%" + mEscape(_cFilterProcedure.Text.Trim()) + "%'");
 
             List<int> vCheckedTypeClueS = new List<int>();
             foreach (object vCheckedItem in _cFilterType.CheckedItems)
@@ -375,55 +432,152 @@ namespace naCsProtocols
             {
                 List<string> vClueStrings = new List<string>();
                 foreach (int vClu in vCheckedTypeClueS) vClueStrings.Add(vClu.ToString());
-                vConditions.Add("P." + vSchema.PclTypLinkColumn + " IN (" + string.Join(",", vClueStrings) + ")");
+                vHeaderConditions.Add("P." + vSchema.PclTypLinkColumn + " IN (" + string.Join(",", vClueStrings) + ")");
             }
 
             if (_cFilterDateEnabled.Checked == true)
             {
                 if (vSchema.ChgIsTicks == true)
                 {
-                    vConditions.Add("P.CHG >= " + _cFilterDateFrom.Value.Date.Ticks.ToString());
-                    vConditions.Add("P.CHG <= " + _cFilterDateTo.Value.Date.AddDays(1).AddTicks(-1).Ticks.ToString());
+                    vHeaderConditions.Add("P.CHG >= " + _cFilterDateFrom.Value.Date.Ticks.ToString());
+                    vHeaderConditions.Add("P.CHG <= " + _cFilterDateTo.Value.Date.AddDays(1).AddTicks(-1).Ticks.ToString());
                 }
                 else
                 {
-                    vConditions.Add("P.CHG >= '" + _cFilterDateFrom.Value.Date.ToString("yyyy-MM-dd 00:00:00") + "'");
-                    vConditions.Add("P.CHG <= '" + _cFilterDateTo.Value.Date.ToString("yyyy-MM-dd 23:59:59") + "'");
+                    vHeaderConditions.Add("P.CHG >= '" + _cFilterDateFrom.Value.Date.ToString("yyyy-MM-dd 00:00:00") + "'");
+                    vHeaderConditions.Add("P.CHG <= '" + _cFilterDateTo.Value.Date.ToString("yyyy-MM-dd 23:59:59") + "'");
                 }
             }
 
-            string vWhere = vConditions.Count > 0 ? "WHERE " + string.Join(" AND ", vConditions) + " " : "";
+            /// Условия, применимые ТОЛЬКО к записи ('PclRrd') - у заголовка ('Pcl') нет ни текста
+            /// сообщения, ни вида записи напрямую
+            List<string> vRecordOnlyConditions = new List<string>();
+            if (_cFilterMessage.Text.Trim().Length > 0)
+                vRecordOnlyConditions.Add("PR." + vSchema.MessageColumn + " LIKE '%" + mEscape(_cFilterMessage.Text.Trim()) + "%'");
+            if (_cFilterUserSolution.Checked == true)
+                vRecordOnlyConditions.Add("(PRT." + vSchema.RrdTypNameColumn + " LIKE '%Решение%' OR PR." + vSchema.RrdLinkColumn + " = 1)");
 
-            string vQuery = "SELECT PR.CLU, PR." + vSchema.PclLinkColumn + " AS lnkPcl, PRT." + vSchema.RrdTypNameColumn + " AS Type, "
+            string vJoins = "LEFT JOIN App A ON A.CLU = P." + vSchema.AppLinkColumn + " "
+                + "LEFT JOIN PclTyp PT ON PT.CLU = P." + vSchema.PclTypLinkColumn + " "
+                + (vSchema.HasCpuUsrTables == true ? "LEFT JOIN Cpu C ON C.CLU = P.lnkCpu LEFT JOIN Usr U ON U.CLU = P.lnkUsr " : "");
+
+            /// Запрос слева: записи, с учётом ОБЩИХ условий (через JOIN на Pcl) И условий, специфичных для записи
+            List<string> vLeftConditions = new List<string>(vHeaderConditions);
+            vLeftConditions.AddRange(vRecordOnlyConditions);
+            string vLeftWhere = vLeftConditions.Count > 0 ? "WHERE " + string.Join(" AND ", vLeftConditions) + " " : "";
+
+            string vLeftQuery = "SELECT PR.CLU, PR." + vSchema.PclLinkColumn + " AS lnkPcl, PRT." + vSchema.RrdTypNameColumn + " AS Type, "
                 + "PR." + vSchema.MessageColumn + " AS Message, A." + vSchema.AppNameColumn + " AS App, PT." + vSchema.PclTypNameColumn + " AS PclTyp, P.Prc AS Prc "
                 + "FROM PclRrd PR "
                 + "LEFT JOIN Pcl P ON P.CLU = PR." + vSchema.PclLinkColumn + " "
-                + "LEFT JOIN App A ON A.CLU = P." + vSchema.AppLinkColumn + " "
-                + "LEFT JOIN PclTyp PT ON PT.CLU = P." + vSchema.PclTypLinkColumn + " "
+                + vJoins
                 + "LEFT JOIN " + vSchema.RrdTypTable + " PRT ON PRT.CLU = PR." + vSchema.RrdLinkColumn + " "
-                + (vSchema.HasCpuUsrTables == true ? "LEFT JOIN Cpu C ON C.CLU = P.lnkCpu LEFT JOIN Usr U ON U.CLU = P.lnkUsr " : "")
-                + vWhere
-                + "ORDER BY PR.CLU DESC"; 
+                + vLeftWhere
+                + "ORDER BY PR.CLU DESC";
 
-            DataTable vDataTable = mQuery(vQuery);
-            if (_cAreaRecords.__fGrid_ != null)
+            /// Запрос справа: ВСЕ подходящие заголовки, а не только владелец выбранной записи. Если задан
+            /// фильтр, специфичный для записи (сообщение/решение), заголовок включается, только если у него
+            /// ЕСТЬ хотя бы одна подходящая запись (иначе список заголовков и список записей рассинхронизировались бы)
+            string vRightWhere = vHeaderConditions.Count > 0 ? "WHERE " + string.Join(" AND ", vHeaderConditions) + " " : "";
+            if (vRecordOnlyConditions.Count > 0)
             {
-                _cAreaRecords.__fGrid_.DataSource = null;
-                _cAreaRecords.__fGrid_.DataSource = vDataTable;
+                string vExistsWhere = string.Join(" AND ", vRecordOnlyConditions);
+                string vExists = "EXISTS (SELECT 1 FROM PclRrd PR "
+                    + "LEFT JOIN " + vSchema.RrdTypTable + " PRT ON PRT.CLU = PR." + vSchema.RrdLinkColumn + " "
+                    + "WHERE PR." + vSchema.PclLinkColumn + " = P.CLU AND " + vExistsWhere + ")";
+                vRightWhere = vRightWhere.Length > 0 ? vRightWhere + "AND " + vExists + " " : "WHERE " + vExists + " ";
+            }
+
+            string vHostColumn = vSchema.HostUserDirectText == true ? "P.Hst AS Hst" : (vSchema.HasCpuUsrTables == true ? "C.dsiCpu AS Hst" : "'' AS Hst");
+            string vUserColumn = vSchema.HostUserDirectText == true ? "P.Usr AS Usr" : (vSchema.HasCpuUsrTables == true ? "U.dsiUsr AS Usr" : "'' AS Usr");
+
+            string vRightQuery = "SELECT P.CLU, P.CHG, A." + vSchema.AppNameColumn + " AS App, PT." + vSchema.PclTypNameColumn + " AS PclTyp, P.Prc, "
+                + vHostColumn + ", " + vUserColumn + " "
+                + "FROM Pcl P "
+                + vJoins
+                + vRightWhere
+                + "ORDER BY P.CHG DESC";
+
+            DataTable vLeftTable = mQuery(vLeftQuery);
+            DataTable vRightTable = mQuery(vRightQuery);
+
+            // Всегда приводим CHG к читаемой дате: в базе часто лежат .NET-тики (Int64/TEXT),
+            // а детектор ChgIsTicks иногда ошибается — из-за этого в сетке оставались числа вроде 6392315...
+            if (vRightTable != null && vRightTable.Columns.Contains("CHG") == true)
+                mFormatChgColumn(vRightTable);
+
+            mGridSet(_cAreaRecords, vLeftTable);
+            mGridSet(_cAreaProtocolHeader, vRightTable);
+        }
+
+        /// <summary>
+        /// Преобразует столбец CHG в строку "dd.MM.yyyy HH:mm:ss".
+        /// Поддерживает: .NET ticks (число &gt; 600000000000000000), DateTime, ISO/обычные строки дат.
+        /// Столбец пересоздаётся как string, чтобы не было ArgumentException при записи в Int64.
+        /// </summary>
+        private void mFormatChgColumn(DataTable pTable)
+        {
+            if (pTable == null || pTable.Columns.Contains("CHG") == false)
+                return;
+
+            List<object> vRawValues = new List<object>();
+            foreach (DataRow vRow in pTable.Rows)
+                vRawValues.Add(vRow["CHG"]);
+
+            int vOrdinal = pTable.Columns["CHG"].Ordinal;
+            pTable.Columns.Remove("CHG");
+            DataColumn vCol = pTable.Columns.Add("CHG", typeof(string));
+            vCol.SetOrdinal(vOrdinal);
+
+            for (int i = 0; i < pTable.Rows.Count; i++)
+            {
+                object vRaw = vRawValues[i];
+                pTable.Rows[i]["CHG"] = mChgToDisplay(vRaw);
+            }
+        }
+
+        private static string mChgToDisplay(object pRaw)
+        {
+            if (pRaw == null || pRaw == DBNull.Value)
+                return "";
+
+            if (pRaw is DateTime)
+                return ((DateTime)pRaw).ToString("dd.MM.yyyy HH:mm:ss");
+
+            string vText = pRaw.ToString().Trim();
+            if (vText.Length == 0)
+                return "";
+
+            long vTicks;
+            // .NET ticks: 18-значное число (DateTime.MinValue.Ticks = 0, 2000-01-01 ≈ 630822816000000000)
+            if (long.TryParse(vText, out vTicks) == true && vTicks > 600000000000000000L)
+            {
+                try { return new DateTime(vTicks).ToString("dd.MM.yyyy HH:mm:ss"); }
+                catch { return vText; }
+            }
+
+            DateTime vDt;
+            if (DateTime.TryParse(vText, out vDt) == true)
+                return vDt.ToString("dd.MM.yyyy HH:mm:ss");
+
+            return vText;
+        }
+
+        /// <summary>
+        /// Переустановка источника данных сетки (со сбросом, как требует 'DataGridView' при повторной привязке)
+        /// </summary>
+        private void mGridSet(cspAreaGrid pArea, DataTable pDataTable)
+        {
+            if (pArea.__fGrid_ != null)
+            {
+                pArea.__fGrid_.DataSource = null;
+                pArea.__fGrid_.DataSource = pDataTable;
             }
             else
             {
-                _cAreaRecords.__fDataSource_ = vDataTable;
+                pArea.__fDataSource_ = pDataTable;
             }
-            _cAreaRecords.__mGridRefresh();
-
-            /// ИСПРАВЛЕНО: раньше здесь безусловно очищалась правая таблица ('_cAreaProtocolHeader.DataSource
-            /// = new DataTable()') - если назначение 'DataSource' слева синхронно вызывало 'SelectionChanged'
-            /// и правая таблица успевала заполниться, эта строка тут же стирала результат. Теперь вместо
-            /// слепой очистки - явный вызов той же функции, что и обработчик выбора строки: она сама покажет
-            /// заголовок текущей выделенной записи, либо (если после смены фильтров строк не осталось и
-            /// выделения нет) сама корректно очистит таблицу через свой ранний return
-            mProtocolHeaderLoadFromCurrentRow();
+            pArea.__mGridRefresh();
         }
         /// <summary>
         /// Экранирование одинарных кавычек для безопасной вставки текста в SQL-запрос
@@ -434,16 +588,78 @@ namespace naCsProtocols
         }
 
         /// <summary>
-        /// Очистка правой таблицы (заголовка протокола) - когда слева нет выделенной строки, либо после
-        /// смены фильтров список записей стал пустым
+        /// Очистка подсветки в указанной сетке (возврат к обычным цветам по умолчанию)
         /// </summary>
-        private void mProtocolHeaderClear()
+        private void mHighlightClear(cspAreaGrid pArea)
         {
-            if (_cAreaProtocolHeader.__fGrid_ != null)
-                _cAreaProtocolHeader.__fGrid_.DataSource = new DataTable();
-            else
-                _cAreaProtocolHeader.__fDataSource_ = new DataTable();
-            _cAreaProtocolHeader.__mGridRefresh();
+            if (pArea.__fGrid_ == null)
+                return;
+
+            foreach (DataGridViewRow vRow in pArea.__fGrid_.Rows)
+                vRow.DefaultCellStyle.BackColor = Color.Empty;
+        }
+        /// <summary>
+        /// Нормализация ключа протокола для сравнения (CLU / lnkPcl могут быть int или string).
+        /// </summary>
+        private static string mKeyNormalize(object pValue)
+        {
+            if (pValue == null || pValue == DBNull.Value)
+                return "";
+            string vText = pValue.ToString().Trim();
+            int vNum;
+            if (int.TryParse(vText, out vNum))
+                return vNum.ToString();
+            return vText;
+        }
+        /// <summary>
+        /// Подсветка всех строк с совпадающим ключом + переход на первую совпавшую строку
+        /// (Select + ScrollIntoView), чтобы связанный протокол/запись сразу был виден.
+        /// </summary>
+        private void mHighlightMatching(cspAreaGrid pArea, string pColumnName, string pValue)
+        {
+            if (pArea.__fGrid_ == null)
+                return;
+
+            DataGridView vGrid = pArea.__fGrid_;
+            string vWanted = mKeyNormalize(pValue);
+            DataGridViewRow vFirstMatch = null;
+
+            foreach (DataGridViewRow vRow in vGrid.Rows)
+            {
+                if (vRow.IsNewRow)
+                    continue;
+
+                object vCellValue = null;
+                try { vCellValue = vRow.Cells[pColumnName].Value; }
+                catch { continue; }
+
+                bool vMatch = mKeyNormalize(vCellValue) == vWanted && vWanted.Length > 0;
+                vRow.DefaultCellStyle.BackColor = vMatch ? Color.FromArgb(255, 245, 190) : Color.Empty;
+                if (vMatch && vFirstMatch == null)
+                    vFirstMatch = vRow;
+            }
+
+            if (vFirstMatch == null)
+                return;
+
+            // Переход к связанной строке без рекурсии SelectionChanged
+            _fSyncingSelection = true;
+            try
+            {
+                vGrid.ClearSelection();
+                vFirstMatch.Selected = true;
+                if (vFirstMatch.Cells.Count > 0)
+                {
+                    try { vGrid.CurrentCell = vFirstMatch.Cells[0]; }
+                    catch { }
+                }
+                try { vGrid.FirstDisplayedScrollingRowIndex = vFirstMatch.Index; }
+                catch { }
+            }
+            finally
+            {
+                _fSyncingSelection = false;
+            }
         }
 
         #endregion Процедуры
@@ -460,7 +676,7 @@ namespace naCsProtocols
         {
             if (_fPopulating == true)
                 return;
-            /// 'ItemCheck' срабатывает ДО фактического изменения состояния - откладываем обновление на "после клика"
+
             BeginInvoke(new Action(mProtocolsLoad));
         }
         private void mButtonClear_Click(object sender, EventArgs pEventArgs)
@@ -475,6 +691,8 @@ namespace naCsProtocols
                 _cFilterMessage.Text = "";
                 _cFilterUserSolution.Checked = false;
                 _cFilterDateEnabled.Checked = false;
+                _cFilterDateFrom.Enabled = false;
+                _cFilterDateTo.Enabled = false;
                 for (int i = 0; i < _cFilterType.Items.Count; i++)
                     _cFilterType.SetItemChecked(i, false);
             }
@@ -485,69 +703,75 @@ namespace naCsProtocols
             mProtocolsLoad();
         }
         /// <summary>
-        /// Выбор записи слева - справа показывается заголовок её протокола-владельца
+        /// Выбор записи слева ('PclRrd') - подсветка её протокола-владельца справа ('Pcl') по 'lnkPcl' = 'CLU'.
+        /// Обе таблицы уже полностью загружены (см. 'mProtocolsLoad') - здесь только подсветка, без запроса к базе
         /// </summary>
         private void mAreaRecords_SelectionChanged(object sender, EventArgs pEventArgs)
         {
-            mProtocolHeaderLoadFromCurrentRow();
+            if (_fSyncingSelection)
+                return;
+            mHighlightFromRecordsSelection();
         }
         private void mAreaRecords_GridCellEnter(object sender, EventArgs pEventArgs)
         {
-            mProtocolHeaderLoadFromCurrentRow();
+            if (_fSyncingSelection)
+                return;
+            mHighlightFromRecordsSelection();
         }
-        private void mProtocolHeaderLoadFromCurrentRow()
+        private void mHighlightFromRecordsSelection()
         {
             DataGridViewRow vRow = _cAreaRecords.__fCurrentRow_;
-            if (vRow == null)
+            object vLnk = null;
+            try
             {
-                mProtocolHeaderClear();
+                if (vRow != null)
+                    vLnk = vRow.Cells["lnkPcl"].Value;
+            }
+            catch { vLnk = null; }
+
+            if (vRow == null || vLnk == null || vLnk == DBNull.Value || mKeyNormalize(vLnk).Length == 0)
+            {
+                mHighlightClear(_cAreaProtocolHeader);
                 return;
             }
 
-            object vLnkPclValue;
-            try { vLnkPclValue = vRow.Cells["lnkPcl"].Value; }
-            catch { mProtocolHeaderClear(); return; }
-
-            int vLnkPcl;
-            if (vLnkPclValue == null || int.TryParse(vLnkPclValue.ToString(), out vLnkPcl) == false)
+            // Слева выбрана запись → справа подсветка + переход к заголовку этого протокола
+            mHighlightMatching(_cAreaProtocolHeader, "CLU", mKeyNormalize(vLnk));
+        }
+        /// <summary>
+        /// Выбор заголовка справа ('Pcl') - подсветка всех его записей слева + переход к первой записи
+        /// </summary>
+        private void mAreaProtocolHeader_SelectionChanged(object sender, EventArgs pEventArgs)
+        {
+            if (_fSyncingSelection)
+                return;
+            mHighlightFromHeaderSelection();
+        }
+        private void mAreaProtocolHeader_GridCellEnter(object sender, EventArgs pEventArgs)
+        {
+            if (_fSyncingSelection)
+                return;
+            mHighlightFromHeaderSelection();
+        }
+        private void mHighlightFromHeaderSelection()
+        {
+            DataGridViewRow vRow = _cAreaProtocolHeader.__fCurrentRow_;
+            object vClu = null;
+            try
             {
-                mProtocolHeaderClear();
+                if (vRow != null)
+                    vClu = vRow.Cells["CLU"].Value;
+            }
+            catch { vClu = null; }
+
+            if (vRow == null || vClu == null || vClu == DBNull.Value || mKeyNormalize(vClu).Length == 0)
+            {
+                mHighlightClear(_cAreaRecords);
                 return;
             }
 
-            ProtocolsSchemaInfo vSchema = ProtocolsSchemaDetector.DetectFor(_oDataSource);
-            string vHostColumn = vSchema.HostUserDirectText == true ? "P.Hst AS Hst" : (vSchema.HasCpuUsrTables == true ? "C.dsiCpu AS Hst" : "'' AS Hst");
-            string vUserColumn = vSchema.HostUserDirectText == true ? "P.Usr AS Usr" : (vSchema.HasCpuUsrTables == true ? "U.dsiUsr AS Usr" : "'' AS Usr");
-
-            string vQuery = "SELECT P.CLU, P.CHG, A." + vSchema.AppNameColumn + " AS App, PT." + vSchema.PclTypNameColumn + " AS PclTyp, P.Prc, "
-                + vHostColumn + ", " + vUserColumn + " "
-                + "FROM Pcl P "
-                + "LEFT JOIN App A ON A.CLU = P." + vSchema.AppLinkColumn + " "
-                + "LEFT JOIN PclTyp PT ON PT.CLU = P." + vSchema.PclTypLinkColumn + " "
-                + (vSchema.HasCpuUsrTables == true ? "LEFT JOIN Cpu C ON C.CLU = P.lnkCpu LEFT JOIN Usr U ON U.CLU = P.lnkUsr " : "")
-                + "WHERE P.CLU = " + vLnkPcl.ToString();
-
-            DataTable vHeader = mQuery(vQuery);
-            foreach (DataRow vHeaderRow in vHeader.Rows)
-            {
-                if (vSchema.ChgIsTicks == true && vHeaderRow["CHG"] != DBNull.Value)
-                {
-                    long vTicks;
-                    if (long.TryParse(vHeaderRow["CHG"].ToString(), out vTicks) == true)
-                        vHeaderRow["CHG"] = new DateTime(vTicks).ToString("dd.MM.yyyy HH:mm:ss");
-                }
-            }
-
-            if (_cAreaProtocolHeader.__fGrid_ != null)
-            {
-                _cAreaProtocolHeader.__fGrid_.DataSource = null;
-                _cAreaProtocolHeader.__fGrid_.DataSource = vHeader;
-            }
-            else
-            {
-                _cAreaProtocolHeader.__fDataSource_ = vHeader;
-            }
-            _cAreaProtocolHeader.__mGridRefresh();
+            // Справа выбран заголовок → слева подсветка + переход к первой записи этого протокола
+            mHighlightMatching(_cAreaRecords, "lnkPcl", mKeyNormalize(vClu));
         }
 
         #endregion События
@@ -585,6 +809,7 @@ namespace naCsProtocols
 
         private nlData.datUnitDataSource _oDataSource;
         private bool _fPopulating = false;
+        private bool _fSyncingSelection = false;
         private Dictionary<string, int> _fTypeClueByCaption = new Dictionary<string, int>();
 
         #endregion Служебные

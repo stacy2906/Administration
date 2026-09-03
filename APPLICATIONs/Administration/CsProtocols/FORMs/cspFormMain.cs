@@ -17,23 +17,7 @@ namespace naCsProtocols
     /// Файл cspFormMain.cs
     /// </summary>
     /// <remarks>Класс главной формы приложения 'CsProtocols'</remarks>
-    /// <fixed>
-    /// Восстановлено относительно присланной версии - без этого форма НЕ показывала протоколы вообще:
-    /// 1) Не было автозагрузки: конструктор/презентация нигде не вызывали чтение из 'cspApplication.__oProtocols' -
-    ///    таблица слева заполнялась ТОЛЬКО через ручное меню 'Файл / Открыть протокол'. Возвращён вызов
-    ///    'mProtocolsAutoLoad()' и сам метод.
-    /// 2) Имена таблиц/столбцов в SQL не совпадали с реальной схемой, которую создаёт 'dsqProtocols.__mTablesFill'
-    ///    ('desApp' -> 'dsiApp', 'desPclTyp' -> 'dsiPclTyp', 'desRrdTyp'/'RrdTyp'/'lnkRrdTyp' -> 'dsiPclRrdTyp'/
-    ///    'PclRrdTyp'/'lnkPclRrdTyp', хост/пользователь читаются через JOIN на 'Cpu'/'Usr', а не как текстовые
-    ///    столбцы 'Hst'/'Usr' прямо в 'Pcl') - при реальном подключении такие запросы упали бы с "no such column".
-    /// 3) В 'mMenuFileOpen_Click' обратно стоял 'dsqDataSourceSqlite' - тот самый источник крэша
-    ///    NullReferenceException-ом на устаревшей/битой базе (подробности - в 'README_corrections.md' из
-    ///    предыдущей правки). Возвращён 'dsqDataSourceSqliteWithProtocol'.
-    /// 4) Блок "Чтение приложений" в 'mMenuFileOpen_Click' был нерабочим (перебирал ПУСТУЮ '_oDataTaleApplications'
-    ///    вместо только что прочитанной 'vDataTableApp', и результат тут же затирался следующим блоком) - удалён.
-    /// Добавлено по заданию: панель фильтров (поиск, вид протокола, приложение, пользователь, хост, период дат).
-    /// Сортировка по клику на заголовок столбца уже работает "из коробки" в 'elmComponentGrid' - код не добавлялся.
-    /// </fixed>
+
     public class cspFormMain : elmForm
     {
         #region = МЕТОДЫ
@@ -105,9 +89,7 @@ namespace naCsProtocols
                     _cMenuFileClose.Click += mMenuFileClose_Click;
                 }
             }
-            // _cMenuView - Form 3 (совмещённый просмотр) не была доступна ниоткуда в приложении: класс
-            // существовал и был зарегистрирован в проекте, но ничто его не показывало (ни пункт меню, ни
-            // кнопка) - форма фактически была недостижима для пользователя
+          
             {
                 _cMenuView.__fCaption_ = "Вид";
                 _cMenuView.DropDownItems.Add(_cMenuViewCombined);
@@ -172,7 +154,7 @@ namespace naCsProtocols
                 _cPanelFilters.Enabled = true;
                 _cPanelFilters.Visible = true;
                 _cPanelFilters.TabStop = true;
-                _cPanelFilters.BackColor = SystemColors.Control;
+                _cPanelFilters.BackColor = elmApplication.__oInterface.__mColor(COLORS.FormActive);
                 _cPanelFilters.ColumnStyles.Clear();
                 _cPanelFilters.RowStyles.Clear();
                 // подпись | поле | подпись | поле
@@ -280,6 +262,8 @@ namespace naCsProtocols
                 _cPanelFilters.Controls.Add(_cFilterClear, 0, 6);
                 _cPanelFilters.SetColumnSpan(_cFilterClear, 4);
                 _cFilterClear.Click += mFilterClear_Click;
+
+                mFilterPanelApplyTheme();
             }
             // _cLabelStatus
             {
@@ -307,24 +291,12 @@ namespace naCsProtocols
         /// <summary>
         /// Презентация объекта
         /// </summary>
-        /// <remarks>
-        /// ИСПРАВЛЕНО: раньше здесь (и в отдельном явном конструкторе 'cspFormMain()') повторно вызывался
-        /// '_mObjectAssembly()' - но базовый 'elmForm()' УЖЕ вызывает его сам (см. 'elmForm.cs', строка 25),
-        /// а виртуальный вызов из БАЗОВОГО конструктора уходит именно в этот, переопределённый метод. Второй
-        /// явный вызов приводил к повторному "_oDataTableProtocols.Columns.Add("CLU", ...)" -
-        /// 'System.Data.DuplicateNameException: Столбец с именем "CLU" уже принадлежит этому DataTable'.
-        /// Явный конструктор удалён целиком; загрузка протоколов перенесена сюда, поскольку '_mObjectPresentation()'
-        /// и так вызывается ОДИН раз - из 'elmForm.OnCreateControl()', уже после того как все контролы собраны.
-        /// </remarks>
+      
         protected override void _mObjectPresentation()
         {
             base._mObjectPresentation();
 
-            /// ИСПРАВЛЕНО (по запросу пользователя): раньше здесь стоял 'mProtocolsAutoLoad()', который
-            /// сразу показывал "родную" базу приложения ('dsqProtocols.__oActive_') при каждом открытии
-            /// формы - даже если пользователь ничего не открывал. Импорт легаси '.pcl' файлов по-прежнему
-            /// нужен (иначе база не пополняется), но ПОКАЗ данных теперь строго по запросу: пусто, пока
-            /// не выполнено "Файл / Открыть протокол"
+            
             mProtocolsImportSilently();
             mClearProtocolsView();
             _cLabelStatus.Text = "База данных не открыта. Файл / Открыть протокол...";
@@ -400,7 +372,8 @@ namespace naCsProtocols
             {
                 dsqProtocols vProtocols = dsqProtocols.__oActive_;
                 int vImported = 0;
-                List<string> vFolders = ProtocolSqliteImporter.__mProtocolsFoldersDiscover(System.Environment.CurrentDirectory);
+               
+                List<string> vFolders = ProtocolSqliteImporter.__mProtocolsFoldersDiscover(AppDomain.CurrentDomain.BaseDirectory);
                 ProtocolSqliteImporter vImporter = new ProtocolSqliteImporter();
                 foreach (string vFolder in vFolders)
                     vImported += vImporter.__mImportFromFolder(vProtocols, vFolder);
@@ -415,8 +388,7 @@ namespace naCsProtocols
             }
             catch
             {
-                /// Молчаливый импорт - ошибка не должна мешать открытию пустой формы; пользователь
-                /// всё равно может открыть любую базу вручную через "Файл / Открыть протокол"
+                
             }
         }
 
@@ -554,9 +526,7 @@ namespace naCsProtocols
         }
         /// <summary>
         /// Описание фактической схемы открытой базы протоколов - разные реальные копии 'protocols.db',
-        /// встреченные в проекте, используют разные варианты именования (см. 'mSchemaDetect'):
-        /// 'dsiApp'/'desApp', 'PclRrdTyp'/'RrdTyp', 'Msg'/'Err', хост/пользователь текстом в 'Pcl.Hst'/'Pcl.Usr'
-        /// или через связи 'lnkCpu'/'lnkUsr' на таблицы 'Cpu'/'Usr' (которых может не быть вообще).
+      
         /// </summary>
         private class ProtocolsSchemaInfo
         {
@@ -581,10 +551,8 @@ namespace naCsProtocols
         }
         /// <summary>
         /// Определение варианта схемы открытой базы протоколов по фактически существующим таблицам/столбцам
-        /// (а не по предположению) - разные реальные копии 'protocols.db' в проекте создавались разными
-        /// версиями логики записи и отличаются именованием. Без этой проверки запросы вьювера падали с
-        /// "no such table"/"no such column" (см. 'protocols_db_errors.log') и список протоколов оставался
-        /// пустым, даже если данные в базе есть.
+        /// - разные реальные копии 'protocols.db' в проекте создавались разными
+        /// версиями логики записи и отличаются именованием.
         /// </summary>
         /// <param name="pTableExists">Проверка существования таблицы по имени</param>
         /// <param name="pColumnExists">Проверка существования столбца в таблице по именам таблицы/столбца</param>
@@ -595,9 +563,7 @@ namespace naCsProtocols
             vSchema.AppNameColumn = pColumnExists("App", "dsiApp") == true ? "dsiApp" : "desApp";
             vSchema.PclTypNameColumn = pColumnExists("PclTyp", "dsiPclTyp") == true ? "dsiPclTyp" : "desPclTyp";
 
-            /// 'InkApp'/'InkPclTyp'/'InkPcl' - опечатка ('I' вместо 'l') в более старой версии 'dsqProtocols',
-            /// встречается в файлах, не пересозданных/не мигрированных этой версией (например скопированных
-            /// на другую машину или открытых вручную из другой папки - см. 'protocols_db_errors.log')
+           
             vSchema.AppLinkColumn = pColumnExists("Pcl", "lnkApp") == true ? "lnkApp" : (pColumnExists("Pcl", "InkApp") == true ? "InkApp" : "lnkApp");
             vSchema.PclTypLinkColumn = pColumnExists("Pcl", "lnkPclTyp") == true ? "lnkPclTyp" : (pColumnExists("Pcl", "InkPclTyp") == true ? "InkPclTyp" : "lnkPclTyp");
             vSchema.PclLinkColumn = pColumnExists("PclRrd", "lnkPcl") == true ? "lnkPcl" : (pColumnExists("PclRrd", "InkPcl") == true ? "InkPcl" : "lnkPcl");
@@ -621,7 +587,7 @@ namespace naCsProtocols
             vSchema.RrdLinkColumn = pColumnExists("PclRrd", "lnkPclRrdTyp") == true ? "lnkPclRrdTyp" : (pColumnExists("PclRrd", "InkPclRrdTyp") == true ? "InkPclRrdTyp" : "lnkRrdTyp");
             vSchema.MessageColumn = pColumnExists("PclRrd", "Msg") == true ? "Msg" : "Err";
 
-            // CHG как .NET ticks (длинное целое) vs дата-строка — определяем по образцу первой строки
+           
             vSchema.ChgIsTicks = false;
             try
             {
@@ -711,8 +677,7 @@ namespace naCsProtocols
                 }
                 else
                 {
-                    /// Ни текстовых 'Pcl.Hst'/'Pcl.Usr', ни таблиц 'Cpu'/'Usr' - взять значения неоткуда,
-                    /// список остаётся с одним пунктом "(все)"
+                   
                     _cFilterUser.Items.Clear();
                     _cFilterUser.Items.Add(FILTERITEMALL);
                     _cFilterUser.SelectedIndex = 0;
@@ -765,7 +730,7 @@ namespace naCsProtocols
             }
             catch
             {
-                /// Справочник мог ещё не заполниться (пустая база) - выпадающий список просто останется с "(все)"
+                
             }
 
             pCombo.SelectedIndex = 0;
@@ -792,7 +757,7 @@ namespace naCsProtocols
                 + "LEFT JOIN PclTyp PT ON PT.CLU = P." + vSchema.PclTypLinkColumn + " "
                 + (vSchema.HasCpuUsrTables == true ? "LEFT JOIN Cpu C ON C.CLU = P.lnkCpu LEFT JOIN Usr U ON U.CLU = P.lnkUsr " : "")
                 + (vWhere.Length > 0 ? "WHERE " + vWhere + " " : "")
-                + "ORDER BY P.CHG DESC"; // По умолчанию - сначала новые (клик по заголовку столбца сортирует иначе)
+                + "ORDER BY P.CHG DESC";
 
             DataTable vDataTable;
             try
@@ -898,13 +863,60 @@ namespace naCsProtocols
                 return "";
             return vText;
         }
+      
         /// <summary>
-        /// Установка серого placeholder для текстового поля фильтра
+        /// Цвета панели фильтров из темы elmApplication.__oInterface (COLORS.FormActive / DataBack),
+        /// как у elmForm и elmComponent* — без SystemColors.Control (белый/серый фон).
         /// </summary>
+        private void mFilterPanelApplyTheme()
+        {
+            Color vForm = elmApplication.__oInterface.__mColor(COLORS.FormActive);
+            Color vDataBack = elmApplication.__oInterface.__mColor(COLORS.DataBack);
+            Color vText = elmApplication.__oInterface.__mColor(COLORS.Text);
 
-        /// <summary>
-        /// Подпись к полю фильтра (выравнивание по центру по вертикали)
-        /// </summary>
+            _cPanelFilters.BackColor = vForm;
+            if (_cLeftHost != null)
+                _cLeftHost.BackColor = vForm;
+
+            foreach (Control vCtrl in _cPanelFilters.Controls)
+            {
+                if (vCtrl is Label)
+                {
+                    vCtrl.BackColor = vForm;
+                    vCtrl.ForeColor = vText;
+                }
+                else if (vCtrl is CheckBox || vCtrl is Panel)
+                {
+                    vCtrl.BackColor = vForm;
+                }
+                else if (vCtrl is TextBox || vCtrl is ComboBox || vCtrl is DateTimePicker || vCtrl is Button)
+                {
+                    if (vCtrl is Button)
+                    {
+                        vCtrl.BackColor = vForm;
+                        (vCtrl as Button).UseVisualStyleBackColor = false;
+                    }
+                    else
+                        vCtrl.BackColor = vDataBack;
+                }
+            }
+
+            _cFilterProcedure.BackColor = vDataBack;
+            _cFilterErrorDesc.BackColor = vDataBack;
+            _cFilterSolution.BackColor = vDataBack;
+            _cFilterType.BackColor = vDataBack;
+            _cFilterErrorType.BackColor = vDataBack;
+            _cFilterApp.BackColor = vDataBack;
+            _cFilterUser.BackColor = vDataBack;
+            _cFilterHost.BackColor = vDataBack;
+            _cFilterDateFrom.BackColor = vDataBack;
+            _cFilterDateTo.BackColor = vDataBack;
+            _cFilterDateFromOn.BackColor = vForm;
+            _cFilterDateToOn.BackColor = vForm;
+            _cFilterClear.BackColor = vForm;
+            _cFilterClear.UseVisualStyleBackColor = false;
+        }
+
         private void mAddFilterLabel(TableLayoutPanel pPanel, string pText, int pColumn, int pRow)
         {
             Label vLabel = new Label();
@@ -1122,13 +1134,10 @@ namespace naCsProtocols
             vDataSource.__fDatabasePath = Path.GetDirectoryName(vFilePath);
             vDataSource.__fDatabaseName = Path.GetFileName(vFilePath);
 
-            // Переключаемся в режим ручной базы — фильтры ОСТАЮТСЯ включёнными и работают через mQuery()
+            
             _manualDbMode = true;
             _oManualDataSource = vDataSource;
 
-            /// ДОБАВЛЕНО: делает эту же базу видимой и для 'cspFormCombinedViewer' (Form 3) - см.
-            /// примечание к 'dsqProtocols.__oViewing_'. Раньше "Вид / Совмещённый" всегда показывал
-            /// "родную" базу приложения, никак не связанную с тем, что открыто здесь
             dsqProtocols.__oViewing_ = vDataSource;
 
             mFiltersEnable(true);
@@ -1144,10 +1153,6 @@ namespace naCsProtocols
             _oManualDataSource = null;
             _oProtocols = null;
 
-            /// ИСПРАВЛЕНО (по запросу пользователя): раньше здесь стояло 'dsqProtocols.__oActive_' -
-            /// закрытие вручную открытого файла тут же показывало "родную" базу приложения вместо
-            /// пустой формы. Теперь закрытие означает по-настоящему "ничего не открыто", как и при
-            /// первом запуске - см. '_mObjectPresentation'
             dsqProtocols.__oViewing_ = null;
 
             mFilterClear_Click(sender, e);

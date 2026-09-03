@@ -2,20 +2,19 @@
 using nlDataSourceSqlite;
 using System;
 using System.Data;
+using System.Runtime.InteropServices;
 
 namespace naCsProtocols
 {
     /// <summary>
     /// Файл ProtocolsSchemaDetector.cs
     /// </summary>
-    /// <remarks>Разные реальные копии 'protocols.db', встреченные в проекте, используют разные варианты
-    /// именования ('dsiApp'/'desApp', 'PclRrdTyp'/'RrdTyp', 'Msg'/'Err', опечатка 'Ink*' вместо 'lnk*' и т.д.).
+    /// <remarks>
     /// Этот класс определяет фактическую схему по реально существующим таблицам/столбцам, а не по предположению.
-    /// Вынесен как самостоятельный, не привязанный к конкретной форме класс, чтобы новые формы (например
-    /// 'cspFormCombinedViewer') могли переиспользовать ту же логику, что уже проверена в 'cspFormMain', не
+    /// Вынесен как самостоятельный, не привязанный к конкретной форме класс, чтобы новые формы  могли переиспользовать ту же логику, что уже проверена в 'cspFormMain', не
     /// дублируя и не расходясь с ней. 'cspFormMain' при этом НЕ переведён на этот класс намеренно - его
-    /// собственная (уже проверенная и работающая) копия логики не тронута, чтобы не рисковать регрессией.</remarks>
-    /// <conception>Lucasin V.</conception>
+    /// собственная  копия логики не тронута, чтобы не рисковать регрессией.</remarks>
+
     public class ProtocolsSchemaInfo
     {
         public string AppNameColumn = "dsiApp";
@@ -41,8 +40,7 @@ namespace naCsProtocols
     /// <summary>
     /// Файл ProtocolsSchemaDetector.cs
     /// </summary>
-    /// <remarks>См. примечание к 'ProtocolsSchemaInfo'</remarks>
-    /// <conception>Lucasin V.</conception>
+
     public static class ProtocolsSchemaDetector
     {
         #region = МЕТОДЫ
@@ -150,6 +148,8 @@ namespace naCsProtocols
 
             return false;
         }
+
+     
 
         #endregion Процедуры
 

@@ -192,12 +192,7 @@ namespace nlApplication
                     }
                 }
 
-                //// Дополнительная проверка: Попытка получить полный путь.
-                //// Это может отловить некоторые некорректные форматы,
-                //// но не гарантирует существования.
-                // string fullPath = Path.GetFullPath(pPath);
-                //// Если сюда дошли, значит, синтаксически путь корректен.
-                //goto LabelReturn; // Переход к метке LabelReturn
+           
             }
             catch (ArgumentException vArgumentException) // Отлавливаем исключения, которые могут возникнуть при некорректном пути
             {
@@ -241,7 +236,8 @@ namespace nlApplication
         /// <summary>
         /// Путь и имя папки из которой запущено приложение
         /// </summary>
-        public string __fDirectoryStart = Environment.CurrentDirectory;
+       
+        public string __fDirectoryStart = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
 
         #endregion Атрибуты
 
@@ -602,7 +598,7 @@ namespace nlApplication
         }
 
         #endregion Файлы
-
+   
         #endregion СВОЙСТВА
     }
 }

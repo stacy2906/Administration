@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><title>csManual - Документация</title><style>
+﻿<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><title>cmlUnitBodyNote - Документация проекта</title><style>
 :root{
   --bg:#0f1115; --panel:#161923; --panel2:#1c2030; --border:#2a2f42;
   --text:#e6e8ef; --muted:#9aa1b5; --accent:#6ea8fe; --accent2:#8b7bff;
@@ -21,6 +21,7 @@ header.top .spacer{flex:1}
 .badge.kind{color:var(--accent2);border-color:var(--accent2);margin-left:6px}
 h1{font-size:22px;margin:0 0 4px}
 h2{font-size:17px;border-bottom:1px solid var(--border);padding-bottom:6px;margin-top:36px}
+h3.region{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:22px 0 4px;padding-bottom:4px;border-bottom:1px dashed var(--border)}
 h3.member{font-size:14px;background:var(--panel2);border:1px solid var(--border);border-left:3px solid var(--accent);padding:8px 12px;border-radius:4px;margin:14px 0 6px;font-family:Consolas,monospace}
 .panel{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:16px}
 .namespace{color:var(--muted);font-family:Consolas,monospace;font-size:13px}
@@ -32,6 +33,15 @@ table th,table td{text-align:left;padding:6px 10px;border-bottom:1px solid var(-
 table th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.03em}
 code, .code{font-family:Consolas,monospace;background:var(--code);border:1px solid var(--border);border-radius:4px;padding:1px 6px}
 pre.example{background:var(--code);border:1px solid var(--border);border-radius:6px;padding:12px;overflow:auto;font-family:Consolas,monospace}
+.body-notes{background:var(--panel2);border:1px solid var(--border);border-left:3px solid var(--accent2);border-radius:6px;padding:8px 14px;margin:8px 0;font-size:13px;color:var(--text)}
+.body-notes ul{margin:6px 0 2px 0;padding-left:0;list-style:none}
+.body-notes li{margin:6px 0;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.body-notes li:last-child{border-bottom:none;padding-bottom:0}
+.body-notes .note-text{color:var(--text)}
+.fixed-note{background:var(--panel2);border:1px solid var(--border);border-left:3px solid var(--warn, #d9822b);border-radius:6px;padding:8px 14px;margin:8px 0;font-size:13px;color:var(--text)}
+.exception-note{background:var(--panel2);border:1px solid var(--border);border-left:3px solid #c0392b;border-radius:6px;padding:6px 12px;margin:6px 0;font-size:12.5px;color:var(--text)}
+.exception-note ul{margin:4px 0 0 0;padding-left:16px}
+.exception-note li{margin:2px 0}
 .sig{font-family:Consolas,monospace;color:var(--text)}
 .type-list{list-style:none;padding:0;margin:0}
 .type-list li{padding:6px 0;border-bottom:1px solid var(--border)}
@@ -45,30 +55,4 @@ textarea#notes{width:100%;min-height:110px;background:var(--panel2);border:1px s
 .notes-hint{color:var(--muted);font-size:11px;margin-top:4px}
 .empty{color:var(--muted);font-style:italic}
 footer{color:var(--muted);font-size:11px;text-align:center;padding:30px 0 10px}
-</style></head><body><header class="top"><div class="title">csManual &mdash; Документация проекта</div></header><div class="container"><div class="panel"><h2 style="margin-top:0;border:none">Описание проекта</h2><textarea id="notes" placeholder="Введите произвольное описание проекта, заметки для команды и т.п. Текст сохраняется локально в браузере."></textarea><div class="notes-hint">Текст сохраняется автоматически в этом браузере (localStorage) и не пересоздаётся при повторной генерации документации.</div></div><div class="stat">Всего типов: <b style="color:var(--text)">2</b> &middot; пространств имён: <b style="color:var(--text)">1</b></div><input id="search" type="text" placeholder="Поиск по названию класса, пространству имён или описанию..." oninput="filterClasses()"><div class="nsgroup" data-ns="nacsmanual"><span class="nsname">naCsManual (2)</span><ul class="type-list"><li class="class-item" data-search="cmlbegin nacsmanual файл cmlbegin.cs"><span class="badge kind">Class</span> <a href="naCsManual.cmlBegin.html">cmlBegin</a> &mdash; Файл cmlBegin.cs<div class="path">cmlBegin.cs</div></li><li class="class-item" data-search="cmlformmain nacsmanual файл cmlformmain.cs"><span class="badge kind">Class</span> <a href="naCsManual.cmlFormMain.html">cmlFormMain</a> &mdash; Файл cmlFormMain.cs<div class="path">FORMs\cmlFormMain.cs</div></li></ul></div><p id="noResults" class="empty" style="display:none">Ничего не найдено.</p><footer>Сгенерировано движком документирования 'cmlEngine' &middot; 2026-08-06 12:10</footer></div><script>
-function filterClasses(){
-  var q = document.getElementById('search').value.toLowerCase().trim();
-  var groups = document.querySelectorAll('.nsgroup');
-  var anyVisible = false;
-  groups.forEach(function(g){
-    var items = g.querySelectorAll('.class-item');
-    var groupHasVisible = false;
-    items.forEach(function(it){
-      var match = q === '' || it.getAttribute('data-search').indexOf(q) !== -1;
-      it.style.display = match ? '' : 'none';
-      if (match) groupHasVisible = true;
-    });
-    g.style.display = groupHasVisible ? '' : 'none';
-    if (groupHasVisible) anyVisible = true;
-  });
-  document.getElementById('noResults').style.display = anyVisible ? 'none' : '';
-}
-(function(){
-  var notes = document.getElementById('notes');
-  var saved = localStorage.getItem('cmlManualNotes');
-  if (saved) notes.value = saved;
-  notes.addEventListener('input', function(){
-    localStorage.setItem('cmlManualNotes', notes.value);
-  });
-})();
-</script></body></html>
+</style></head><body><header class="top"><div><div class="title">cmlUnitBodyNote</div><div class="sub">nlcsManual</div></div><div class="spacer"></div><a href="index.html">&larr; К списку классов</a></header><div class="container"><div class="panel"><span class="badge public">public</span> <span class="badge kind">Class</span><h1 style="margin-top:10px">cmlUnitBodyNote</h1><div class="namespace">namespace nlcsManual</div><p class="summary">Класс-единица построчной пометки хода выполнения ('///'-комментарий внутри тела члена, например '1.T ...') вместе со строкой кода, к которой она относится - без кода сама пометка мало что объясняет читателю документации (видно только &quot;что&quot; по замыслу, но не &quot;как&quot; реализовано)</p><div class="meta-row"><div><b>Файл:</b> <span class="code">cmlModels.cs</span></div></div></div><h2>Поля</h2><h3 class="region">ЧЛЕН ТИПА (метод / свойство / поле / конструктор)</h3><h3 class="member">string __fCode</h3><span class="badge public">public</span><p class="summary">Строка кода, следующая сразу за пометкой в исходном файле - пусто, если пометка стоит последней перед закрытием тела</p><h3 class="member">string __fNote</h3><span class="badge public">public</span><p class="summary">Текст пометки (без ведущих '///')</p><footer>Сгенерировано движком документирования 'cmlEngine' &middot; 2026-08-28 09:35</footer></div></body></html>

@@ -12,14 +12,10 @@ namespace naCsProtocols
     /// <summary>
     /// Файл cspFormLoad.cs
     /// </summary>
-    /// <remarks>Form 1 (по заданию) - отдельная форма загрузки протоколов: сканирует папки 'PROTOCOLs'
-    /// всех приложений решения (см. 'ProtocolSqliteImporter.__mProtocolsFoldersDiscover') и импортирует
-    /// найденные '.pcl' файлы в базу данных ('DATABASEs\protocols.db') через 'ProtocolSqliteImporter' -
-    /// тот же самый код, что 'cspFormMain.mProtocolsAutoLoad' уже использует для автозагрузки при показе
-    /// главной формы. Прогресс отображается через встроенную панель статуса базового класса 'elmForm'
-    /// ('__cPanelStatus.__fPercent_'/'__fCaption_') - отдельный ProgressBar не добавлялся, чтобы не
-    /// дублировать уже существующий механизм</remarks>
-    /// <conception>Lucasin V.</conception>
+    /// <remarks>Form 1  - отдельная форма загрузки протоколов: сканирует папки 'PROTOCOLs'
+    /// всех приложений решения и импортирует
+    /// найденные '.pcl' файлы в базу данных ('DATABASEs\protocols.db') через 'ProtocolSqliteImporter' </remarks>
+
     public class cspFormLoader : elmForm
     {
         #region = МЕТОДЫ
@@ -35,8 +31,9 @@ namespace naCsProtocols
             Controls.Add(_cPanelMain);
             _cPanelMain.Controls.Add(_cLabelInfo, 0, 0);
             _cPanelMain.Controls.Add(_cButtonLoad, 0, 1);
-            _cPanelMain.Controls.Add(_cListLog, 0, 2);
-            _cPanelMain.Controls.Add(_cButtonContinue, 0, 3);
+            //_cPanelMain.Controls.Add(_cButtonCleanup, 0, 2);
+            _cPanelMain.Controls.Add(_cListLog, 0, 3);
+            _cPanelMain.Controls.Add(_cButtonContinue, 0, 4);
 
             #endregion Размещение компонентов
 
@@ -53,12 +50,13 @@ namespace naCsProtocols
             _cPanelMain.Dock = DockStyle.Fill;
             _cPanelMain.Padding = new Padding(16);
             _cPanelMain.ColumnCount = 1;
-            _cPanelMain.RowCount = 4;
+            _cPanelMain.RowCount = 5;
             _cPanelMain.ColumnStyles.Clear();
             _cPanelMain.RowStyles.Clear();
             _cPanelMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             _cPanelMain.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));  // подпись
             _cPanelMain.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));  // кнопка загрузки
+            _cPanelMain.RowStyles.Add(new RowStyle(SizeType.Absolute, 28F));  // кнопка очистки мусора
             _cPanelMain.RowStyles.Add(new RowStyle(SizeType.Percent, 100F)); // журнал - остальное место
             _cPanelMain.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));  // кнопка продолжить
 
@@ -71,6 +69,11 @@ namespace naCsProtocols
             _cButtonLoad.Margin = new Padding(0, 4, 0, 8);
             _cButtonLoad.Click += mButtonLoad_Click;
 
+            //_cButtonCleanup.Dock = DockStyle.Fill;
+            //_cButtonCleanup.Text = "Удалить мусор от старых нераспознанных импортов";
+            //_cButtonCleanup.Margin = new Padding(0, 0, 0, 8);
+            //_cButtonCleanup.Click += mButtonCleanup_Click;
+
             _cListLog.Dock = DockStyle.Fill;
             _cListLog.Font = new Font("Consolas", 9);
             _cListLog.IntegralHeight = false;
@@ -82,7 +85,7 @@ namespace naCsProtocols
 
             __cPanelStatus.__fCaption_ = "Готово к загрузке";
             __cPanelStatus.__fPercent_ = 0;
-            __cPanelStatus.BringToFront(); // Гарантирует, что нижняя панель статуса (из elmForm) не перекрывается Fill-панелью, добавленной после неё - независимо от порядка Controls.Add
+            __cPanelStatus.BringToFront(); 
 
             #endregion Настройки компонентов
 
@@ -101,6 +104,12 @@ namespace naCsProtocols
         /// <summary>
         /// Загрузка протоколов по нажатию кнопки - сканирование папок всех приложений и импорт '.pcl' файлов
         /// </summary>
+        //private void mButtonCleanup_Click(object sender, EventArgs e)
+        //{
+        //    dsqProtocols vProtocols = dsqProtocols.__oActive_;
+        //    int vDeleted = vProtocols.__mPurgeUnrecognizedImports();
+        //    _cListLog.Items.Add("Удалено мусорных протоколов (старые нераспознанные импорты): " + vDeleted.ToString());
+        //}
         private void mButtonLoad_Click(object sender, EventArgs e)
         {
             _cButtonLoad.Enabled = false;
@@ -108,11 +117,19 @@ namespace naCsProtocols
 
             dsqProtocols vProtocols = dsqProtocols.__oActive_;
 
-            List<string> vFolders = ProtocolSqliteImporter.__mProtocolsFoldersDiscover(Environment.CurrentDirectory);
+            int vPurged = vProtocols.__mPurgeUnrecognizedImports();
+            if (vPurged > 0)
+                _cListLog.Items.Add("Удалено мусорных протоколов от старых нераспознанных импортов: " + vPurged.ToString());
 
-            /// Собственная папка приложения (могла не попасть в обнаружение, если 'CsProtocols' запущен
-            /// не из типового расположения 'APPLICATIONs\Administration\CsProtocols\bin\...') - см. тот же
-            /// приём в 'cspFormMain.mProtocolsAutoLoad'
+            string vStartDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            _cListLog.Items.Add("Папка запуска (AppDomain.BaseDirectory): " + vStartDirectory);
+            _cListLog.Items.Add("База данных: " + System.IO.Path.Combine(vProtocols.__fDatabasePath, "protocols.db"));
+            _cListLog.Items.Add("---");
+
+      
+            List<string> vFolders = ProtocolSqliteImporter.__mProtocolsFoldersDiscover(vStartDirectory);
+
+          
             try
             {
                 string vOwn = nlApplication.appApplication.__oPathes.__fDirectoryProtocols_;
@@ -130,6 +147,11 @@ namespace naCsProtocols
                 return;
             }
 
+            _cListLog.Items.Add("Найдено папок для проверки: " + vFolders.Count.ToString());
+            foreach (string vFoundFolder in vFolders)
+                _cListLog.Items.Add("  - " + vFoundFolder);
+            _cListLog.Items.Add("---");
+
             ProtocolSqliteImporter vImporter = new ProtocolSqliteImporter();
             int vImportedTotal = 0;
 
@@ -138,21 +160,24 @@ namespace naCsProtocols
                 string vFolder = vFolders[i];
                 __cPanelStatus.__fCaption_ = "Импорт: " + vFolder;
                 __cPanelStatus.__fPercent_ = (int)((i / (double)vFolders.Count) * 100);
-                Application.DoEvents(); // Обновление интерфейса между папками - синхронный импорт, отдельного потока не заводилось
+                Application.DoEvents(); 
+
+                _cListLog.Items.Add(vFolder + ":");
 
                 int vImportedFromFolder = 0;
                 try
                 {
-                    vImportedFromFolder = vImporter.__mImportFromFolder(vProtocols, vFolder);
+                   
+                    vImportedFromFolder = vImporter.__mImportFromFolder(vProtocols, vFolder, pLine => _cListLog.Items.Add("  " + pLine));
                 }
                 catch (Exception vException)
                 {
-                    _cListLog.Items.Add(vFolder + " - ошибка: " + vException.Message);
+                    _cListLog.Items.Add("  ошибка: " + vException.Message);
                     continue;
                 }
 
                 vImportedTotal += vImportedFromFolder;
-                _cListLog.Items.Add(vFolder + " - импортировано строк: " + vImportedFromFolder.ToString());
+                _cListLog.Items.Add("  итого из этой папки: " + vImportedFromFolder.ToString());
             }
 
             __cPanelStatus.__fPercent_ = 100;
@@ -182,6 +207,7 @@ namespace naCsProtocols
         private TableLayoutPanel _cPanelMain = new TableLayoutPanel();
         private Label _cLabelInfo = new Label();
         private Button _cButtonLoad = new Button();
+        private Button _cButtonCleanup = new Button();
         private Button _cButtonContinue = new Button();
         private ListBox _cListLog = new ListBox();
 

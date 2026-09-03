@@ -7,7 +7,7 @@ namespace nlcsManual
     /// </summary>
     /// <remarks>Модели данных, используемые движком документирования ('cmlEngine') для описания
     /// разобранной структуры C# проекта: типы, члены типов, параметры и XML-комментарии</remarks>
-    /// <conception>Lucasin V.</conception>
+
 
     #region = ПАРАМЕТР ЧЛЕНА ТИПА
 
@@ -48,6 +48,19 @@ namespace nlcsManual
     }
 
     /// <summary>
+    /// Класс-единица построчной пометки хода выполнения ('///'-комментарий внутри тела члена, например
+    /// '1.T ...') вместе со строкой кода, к которой она относится - без кода сама пометка мало что
+    /// объясняет читателю документации (видно только "что" по замыслу, но не "как" реализовано)
+    /// </summary>
+    public class cmlUnitBodyNote
+    {
+        /// <summary>Текст пометки (без ведущих '///')</summary>
+        public string __fNote = "";
+        /// <summary>Строка кода, следующая сразу за пометкой в исходном файле - пусто, если пометка стоит последней перед закрытием тела</summary>
+        public string __fCode = "";
+    }
+
+    /// <summary>
     /// Класс-единица описания члена типа (метода, свойства, поля, конструктора или события)
     /// </summary>
     public class cmlUnitMember
@@ -72,10 +85,31 @@ namespace nlcsManual
         public string __fReturns = "";
         /// <summary>Пример использования (тег &lt;example&gt;)</summary>
         public string __fExample = "";
+      
+        /// <summary>Пояснение причины исправления (собственный тег проекта &lt;fixed&gt;)</summary>
+        public string __fFixed = "";
+        /// <summary>Исключения, которые может выбросить член (теги &lt;exception cref="..."&gt;описание&lt;/exception&gt;,
+        /// может быть несколько на один член) - каждая строка: "Тип исключения" -&gt; описание</summary>
+        public List<KeyValuePair<string, string>> __fExceptionS = new List<KeyValuePair<string, string>>();
         /// <summary>Номер строки исходного файла, с которой начинается объявление члена</summary>
         public int __fLineNumber = 0;
         /// <summary>Признак принадлежности члена интерфейсу (реализация метода интерфейса)</summary>
         public bool __fIsGetOnlyProperty = false;
+        /// <summary>Построчные пояснительные комментарии ('///'), обнаруженные внутри тела члена (например
+        /// нумерованные пометки хода выполнения вида '1.T ...'/'2.Y ...' - устоявшееся в проекте соглашение),
+        /// каждая - вместе со строкой кода, которую она поясняет</summary>
+        public List<cmlUnitBodyNote> __fBodyNoteS = new List<cmlUnitBodyNote>();
+        /// <summary>Путь вложенных '#region' в исходном файле, внутри которых объявлен член (например
+        /// ['МЕТОДЫ', 'Процедуры'] для метода, лежащего внутри '#region = МЕТОДЫ' -&gt; '#region - Процедуры').
+        /// Пусто, если член объявлен вне какого-либо '#region'</summary>
+        public List<string> __fRegionPath = new List<string>();
+
+        /// <summary>Путь '#region', в виде готовой для показа строки ('МЕТОДЫ &rarr; Процедуры'), либо
+        /// пустая строка, если член объявлен вне какого-либо '#region'</summary>
+        public string __mRegionLabel()
+        {
+            return string.Join(" ; ", __fRegionPath);
+        }
     }
 
     #endregion ЧЛЕН ТИПА
@@ -126,6 +160,8 @@ namespace nlcsManual
         public string __fVersion = "";
         /// <summary>Пример использования типа (тег &lt;example&gt;)</summary>
         public string __fExample = "";
+        /// <summary>Пояснение причины исправления на уровне типа (собственный тег проекта &lt;fixed&gt;)</summary>
+        public string __fFixed = "";
         /// <summary>Полный путь файла, в котором объявлен тип</summary>
         public string __fFilePath = "";
         /// <summary>Путь файла относительно корня документируемого проекта</summary>

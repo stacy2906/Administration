@@ -21,6 +21,7 @@ header.top .spacer{flex:1}
 .badge.kind{color:var(--accent2);border-color:var(--accent2);margin-left:6px}
 h1{font-size:22px;margin:0 0 4px}
 h2{font-size:17px;border-bottom:1px solid var(--border);padding-bottom:6px;margin-top:36px}
+h3.region{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:22px 0 4px;padding-bottom:4px;border-bottom:1px dashed var(--border)}
 h3.member{font-size:14px;background:var(--panel2);border:1px solid var(--border);border-left:3px solid var(--accent);padding:8px 12px;border-radius:4px;margin:14px 0 6px;font-family:Consolas,monospace}
 .panel{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:16px}
 .namespace{color:var(--muted);font-family:Consolas,monospace;font-size:13px}
@@ -32,6 +33,15 @@ table th,table td{text-align:left;padding:6px 10px;border-bottom:1px solid var(-
 table th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.03em}
 code, .code{font-family:Consolas,monospace;background:var(--code);border:1px solid var(--border);border-radius:4px;padding:1px 6px}
 pre.example{background:var(--code);border:1px solid var(--border);border-radius:6px;padding:12px;overflow:auto;font-family:Consolas,monospace}
+.body-notes{background:var(--panel2);border:1px solid var(--border);border-left:3px solid var(--accent2);border-radius:6px;padding:8px 14px;margin:8px 0;font-size:13px;color:var(--text)}
+.body-notes ul{margin:6px 0 2px 0;padding-left:0;list-style:none}
+.body-notes li{margin:6px 0;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.body-notes li:last-child{border-bottom:none;padding-bottom:0}
+.body-notes .note-text{color:var(--text)}
+.fixed-note{background:var(--panel2);border:1px solid var(--border);border-left:3px solid var(--warn, #d9822b);border-radius:6px;padding:8px 14px;margin:8px 0;font-size:13px;color:var(--text)}
+.exception-note{background:var(--panel2);border:1px solid var(--border);border-left:3px solid #c0392b;border-radius:6px;padding:6px 12px;margin:6px 0;font-size:12.5px;color:var(--text)}
+.exception-note ul{margin:4px 0 0 0;padding-left:16px}
+.exception-note li{margin:2px 0}
 .sig{font-family:Consolas,monospace;color:var(--text)}
 .type-list{list-style:none;padding:0;margin:0}
 .type-list li{padding:6px 0;border-bottom:1px solid var(--border)}
@@ -45,30 +55,39 @@ textarea#notes{width:100%;min-height:110px;background:var(--panel2);border:1px s
 .notes-hint{color:var(--muted);font-size:11px;margin-top:4px}
 .empty{color:var(--muted);font-style:italic}
 footer{color:var(--muted);font-size:11px;text-align:center;padding:30px 0 10px}
-</style></head><body><header class="top"><div class="title">_csManual &mdash; Документация проекта</div></header><div class="container"><div class="panel"><h2 style="margin-top:0;border:none">Описание проекта</h2><textarea id="notes" placeholder="Введите произвольное описание проекта, заметки для команды и т.п. Текст сохраняется локально в браузере."></textarea><div class="notes-hint">Текст сохраняется автоматически в этом браузере (localStorage) и не пересоздаётся при повторной генерации документации.</div></div><div class="stat">Всего типов: <b style="color:var(--text)">10</b> &middot; пространств имён: <b style="color:var(--text)">1</b> &middot; <span style="color:var(--warn)">незадокументированных членов: 1</span> (см. Protocols.txt)</div><input id="search" type="text" placeholder="Поиск по названию класса, пространству имён или описанию..." oninput="filterClasses()"><div class="nsgroup" data-ns="nlcsmanual"><span class="nsname">nlcsManual (10)</span><ul class="type-list"><li class="class-item" data-search="cmlapplication nlcsmanual "><span class="badge kind">Class</span> <a href="nlcsManual.cmlApplication.html">cmlApplication</a><div class="path">cmlApplication.cs</div></li><li class="class-item" data-search="cmlengine nlcsmanual файл cmlengine.cs"><span class="badge kind">Class</span> <a href="nlcsManual.cmlEngine.html">cmlEngine</a> &mdash; Файл cmlEngine.cs<div class="path">cmlEngine.cs</div></li><li class="class-item" data-search="cmlhtmlbuilder nlcsmanual файл cmlhtmlbuilder.cs"><span class="badge kind">Class</span> <a href="nlcsManual.cmlHtmlBuilder.html">cmlHtmlBuilder</a> &mdash; Файл cmlHtmlBuilder.cs<div class="path">cmlHtmlBuilder.cs</div></li><li class="class-item" data-search="cmlsourceparser nlcsmanual файл cmlsourceparser.cs"><span class="badge kind">Class</span> <a href="nlcsManual.cmlSourceParser.html">cmlSourceParser</a> &mdash; Файл cmlSourceParser.cs<div class="path">cmlSourceParser.cs</div></li><li class="class-item" data-search="cmlunitmember nlcsmanual класс-единица описания члена типа (метода, свойства, поля, конструктора или события)"><span class="badge kind">Class</span> <a href="nlcsManual.cmlUnitMember.html">cmlUnitMember</a> &mdash; Класс-единица описания члена типа (метода, свойства, поля, конструктора или события)<div class="path">cmlModels.cs</div></li><li class="class-item" data-search="cmlunitparam nlcsmanual файл cmlmodels.cs"><span class="badge kind">Class</span> <a href="nlcsManual.cmlUnitParam.html">cmlUnitParam</a> &mdash; Файл cmlModels.cs<div class="path">cmlModels.cs</div></li><li class="class-item" data-search="cmlunitparseresult nlcsmanual класс-единица результата разбора одного файла *.cs, включая обнаруженные несоответствия документирования"><span class="badge kind">Class</span> <a href="nlcsManual.cmlUnitParseResult.html">cmlUnitParseResult</a> &mdash; Класс-единица результата разбора одного файла *.cs, включая обнаруженные несоответствия документирования<div class="path">cmlModels.cs</div></li><li class="class-item" data-search="cmlunittype nlcsmanual класс-единица описания документируемого типа (класса, интерфейса, структуры или перечисления)"><span class="badge kind">Class</span> <a href="nlcsManual.cmlUnitType.html">cmlUnitType</a> &mdash; Класс-единица описания документируемого типа (класса, интерфейса, структуры или перечисления)<div class="path">cmlModels.cs</div></li><li class="class-item" data-search="memberkinds nlcsmanual перечисление видов членов типа, документируемых движком"><span class="badge kind">Enum</span> <a href="nlcsManual.MEMBERKINDS.html">MEMBERKINDS</a> &mdash; Перечисление видов членов типа, документируемых движком<div class="path">cmlModels.cs</div></li><li class="class-item" data-search="typekinds nlcsmanual перечисление видов документируемых типов"><span class="badge kind">Enum</span> <a href="nlcsManual.TYPEKINDS.html">TYPEKINDS</a> &mdash; Перечисление видов документируемых типов<div class="path">cmlModels.cs</div></li></ul></div><p id="noResults" class="empty" style="display:none">Ничего не найдено.</p><footer>Сгенерировано движком документирования 'cmlEngine' &middot; 2026-08-06 14:11</footer></div><script>
+</style></head><body><header class="top"><div class="title">_csManual &mdash; Документация проекта</div></header><div class="container"><div class="panel"><h2 style="margin-top:0;border:none">Описание проекта</h2><textarea id="notes" placeholder="Введите произвольное описание проекта, заметки для команды и т.п. Текст сохраняется локально в браузере."></textarea><div class="notes-hint">Текст сохраняется автоматически в этом браузере (localStorage) и не пересоздаётся при повторной генерации документации.</div></div><div class="stat">Всего типов: <b style="color:var(--text)">11</b> &middot; пространств имён: <b style="color:var(--text)">1</b> &middot; <span style="color:var(--warn)">незадокументированных членов: 1</span> (см. Protocols.txt)</div><input id="search" type="text" placeholder="Поиск по названию класса, пространству имён или описанию..." oninput="filterClasses()"><div class="nsgroup" data-ns="nlcsmanual"><span class="nsname">nlcsManual (11)</span><ul class="type-list"><li class="class-item" data-search="cmlapplication nlcsmanual "><span class="badge kind">Class</span> <a href="nlcsManual.cmlApplication.html">cmlApplication</a><div class="path">cmlApplication.cs</div></li><li class="class-item" data-search="cmlengine nlcsmanual файл cmlengine.cs"><span class="badge kind">Class</span> <a href="nlcsManual.cmlEngine.html">cmlEngine</a> &mdash; Файл cmlEngine.cs<div class="path">cmlEngine.cs</div></li><li class="class-item" data-search="cmlhtmlbuilder nlcsmanual файл cmlhtmlbuilder.cs"><span class="badge kind">Class</span> <a href="nlcsManual.cmlHtmlBuilder.html">cmlHtmlBuilder</a> &mdash; Файл cmlHtmlBuilder.cs<div class="path">cmlHtmlBuilder.cs</div></li><li class="class-item" data-search="cmlsourceparser nlcsmanual файл cmlsourceparser.cs"><span class="badge kind">Class</span> <a href="nlcsManual.cmlSourceParser.html">cmlSourceParser</a> &mdash; Файл cmlSourceParser.cs<div class="path">cmlSourceParser.cs</div></li><li class="class-item" data-search="cmlunitbodynote nlcsmanual класс-единица построчной пометки хода выполнения ('///'-комментарий внутри тела члена, например '1.t ...') вместе со строкой кода, к которой она относится - без кода сама пометка мало что объясняет читателю документации (видно только &quot;что&quot; по замыслу, но не &quot;как&quot; реализовано)"><span class="badge kind">Class</span> <a href="nlcsManual.cmlUnitBodyNote.html">cmlUnitBodyNote</a> &mdash; Класс-единица построчной пометки хода выполнения ('///'-комментарий внутри тела члена, например '1.T ...') вместе со строкой кода, к которой она относится - без кода сама пометка мало что объясняет читателю документации (видно только &quot;что&quot; по замыслу, но не &quot;как&quot; реализовано)<div class="path">cmlModels.cs</div></li><li class="class-item" data-search="cmlunitmember nlcsmanual класс-единица описания члена типа (метода, свойства, поля, конструктора или события)"><span class="badge kind">Class</span> <a href="nlcsManual.cmlUnitMember.html">cmlUnitMember</a> &mdash; Класс-единица описания члена типа (метода, свойства, поля, конструктора или события)<div class="path">cmlModels.cs</div></li><li class="class-item" data-search="cmlunitparam nlcsmanual файл cmlmodels.cs"><span class="badge kind">Class</span> <a href="nlcsManual.cmlUnitParam.html">cmlUnitParam</a> &mdash; Файл cmlModels.cs<div class="path">cmlModels.cs</div></li><li class="class-item" data-search="cmlunitparseresult nlcsmanual класс-единица результата разбора одного файла *.cs, включая обнаруженные несоответствия документирования"><span class="badge kind">Class</span> <a href="nlcsManual.cmlUnitParseResult.html">cmlUnitParseResult</a> &mdash; Класс-единица результата разбора одного файла *.cs, включая обнаруженные несоответствия документирования<div class="path">cmlModels.cs</div></li><li class="class-item" data-search="cmlunittype nlcsmanual класс-единица описания документируемого типа (класса, интерфейса, структуры или перечисления)"><span class="badge kind">Class</span> <a href="nlcsManual.cmlUnitType.html">cmlUnitType</a> &mdash; Класс-единица описания документируемого типа (класса, интерфейса, структуры или перечисления)<div class="path">cmlModels.cs</div></li><li class="class-item" data-search="memberkinds nlcsmanual перечисление видов членов типа, документируемых движком"><span class="badge kind">Enum</span> <a href="nlcsManual.MEMBERKINDS.html">MEMBERKINDS</a> &mdash; Перечисление видов членов типа, документируемых движком<div class="path">cmlModels.cs</div></li><li class="class-item" data-search="typekinds nlcsmanual перечисление видов документируемых типов"><span class="badge kind">Enum</span> <a href="nlcsManual.TYPEKINDS.html">TYPEKINDS</a> &mdash; Перечисление видов документируемых типов<div class="path">cmlModels.cs</div></li></ul></div><p id="noResults" class="empty" style="display:none">Ничего не найдено.</p><footer>Сгенерировано движком документирования 'cmlEngine' &middot; 2026-08-28 09:35</footer></div><script>
 function filterClasses(){
   var q = document.getElementById('search').value.toLowerCase().trim();
   var groups = document.querySelectorAll('.nsgroup');
   var anyVisible = false;
-  groups.forEach(function(g){
+  for (var gi = 0; gi < groups.length; gi++){
+    var g = groups[gi];
     var items = g.querySelectorAll('.class-item');
     var groupHasVisible = false;
-    items.forEach(function(it){
+    for (var ii = 0; ii < items.length; ii++){
+      var it = items[ii];
       var match = q === '' || it.getAttribute('data-search').indexOf(q) !== -1;
       it.style.display = match ? '' : 'none';
       if (match) groupHasVisible = true;
-    });
+    }
     g.style.display = groupHasVisible ? '' : 'none';
     if (groupHasVisible) anyVisible = true;
-  });
+  }
   document.getElementById('noResults').style.display = anyVisible ? 'none' : '';
 }
 (function(){
   var notes = document.getElementById('notes');
-  var saved = localStorage.getItem('cmlManualNotes');
-  if (saved) notes.value = saved;
-  notes.addEventListener('input', function(){
-    localStorage.setItem('cmlManualNotes', notes.value);
-  });
+  if (!notes) return;
+  var storage = null;
+  try { storage = window.localStorage; } catch (eStorage) { storage = null; }
+  if (storage){
+    try {
+      var saved = storage.getItem('cmlManualNotes');
+      if (saved) notes.value = saved;
+    } catch (eRead) { }
+    notes.addEventListener('input', function(){
+      try { storage.setItem('cmlManualNotes', notes.value); } catch (eWrite) { }
+    });
+  }
 })();
 </script></body></html>
